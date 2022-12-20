@@ -7,6 +7,7 @@ from .fnn import FNN
 from .base_module import LossNN
 from ..integrator.rungekutta import RK4, RK45
 from ..utils import lazy_property, dfx
+from ..criterion import L2_norm_loss
 
 
 class HNN(LossNN):
@@ -41,13 +42,15 @@ class HNN(LossNN):
         dy = self.J @ gradH.T  # dqq shape is (vector, batchsize)
         return dy.T
 
-    def criterion(self, X, y, criterion_method='MSELoss'):
+    def criterion(self, X, y, criterion_method='L2_norm_loss'):
         return self.__integrator_loss(X, y, criterion_method)
 
     def __integrator_loss(self, X, y, criterion_method):
+        y_hat = self.forward(X)
         if criterion_method == 'MSELoss':
-            y_hat = self.forward(X)
             return torch.nn.MSELoss()(y_hat, y)
+        elif criterion_method == 'L2_norm_loss':
+            return L2_norm_loss(y_hat, y)
         else:
             raise NotImplementedError
 
