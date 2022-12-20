@@ -136,8 +136,8 @@ class Brain:
                     + 'Test loss: %s' % (loss_test)
                     )
             f.close()
-
-            self.best_model = torch.load('training_file/' + self.taskname + '/model/model{}.pkl'.format(iteration))
+            # self.best_model = torch.load('training_file/' + self.taskname + '/model/model{}.pkl'.format(iteration))
+            self.best_model = torch.load('training_file/' + self.taskname + '/model/model{}.pkl'.format(self.iterations))
         else:
             raise RuntimeError('restore before running or without saved models')
         return self.best_model
@@ -153,8 +153,6 @@ class Brain:
             fig-pend_2_hnn.txt        
             info-pend_2_hnn.txt        
         '''
-        best_loss_index = np.argmin(self.loss_history[:, 1])
-        best_iteration = int(self.loss_history[best_loss_index, 0])
         if best_model:
             filename = '/model-{}.pkl'.format(self.taskname)
             torch.save(self.best_model.state_dict(), path + filename)
