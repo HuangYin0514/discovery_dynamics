@@ -79,7 +79,7 @@ def plot_traj(ax, net, net_name, plot_color_marker):
     if net_name == 'Ground truth':
         ln.utils.plot_pend_traj(ax, truth_pos, truth_pos, '_nolegend_', plot_color_marker='k-')
     else:
-        net_traj = net.predict(y0, h, t0, t_end, solver_method='RK45', circular_motion=True)
+        net_traj = net.predict(y0, h, t0, t_end, solver_method='RK4', circular_motion=True)
         net_pos = ln.utils.polar2xy(net_traj)
         ln.utils.plot_pend_traj(ax, truth_pos, net_pos, net_name, plot_color_marker=plot_color_marker)
 
