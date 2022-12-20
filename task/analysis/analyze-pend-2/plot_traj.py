@@ -65,7 +65,7 @@ def main():
 def plot_traj(ax, net, net_name, plot_color_marker):
     # task variable
     y0 = np.array([1., 2., 0., 0.]).reshape(-1)
-    t0, t_end, h = 0, 5, 0.01
+    t0, t_end, h = 0, 30, 0.01
     # ground truth
     pendulumData = PendulumData(obj=args.obj, dim=args.dim,
                                 train_num=args.train_num,
