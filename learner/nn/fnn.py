@@ -1,5 +1,6 @@
 from collections import OrderedDict
 
+import torch
 from torch import nn
 
 from .base_module import StructureNN
@@ -23,27 +24,42 @@ class FNN(StructureNN):
         self.__initialize()
 
     def forward(self, x):
-        x = self.input_layer(x)
-        for layer in self.hidden_layer:
-            x = layer(x)
-        x = self.output_layer(x)
-        return x
+        # x = self.input_layer(x)
+        # for layer in self.hidden_layer:
+        #     x = layer(x)
+        # x = self.output_layer(x)
+        # return x
+        h = self.baseline(x)
+        return h
 
     def __init_modules(self):
-        self.input_layer = nn.Sequential()
-        self.input_layer.add_module('input', nn.Linear(self.ind, self.width))
-        self.input_layer.add_module('act', nn.Tanh())
+        # self.input_layer = nn.Sequential()
+        # self.input_layer.add_module('input', nn.Linear(self.ind, self.width))
+        # self.input_layer.add_module('act', nn.Tanh())
+        #
+        # hidden_bock = nn.Sequential(OrderedDict([
+        #     ('hidden', nn.Linear(self.width, self.width)),
+        #     ('act', nn.Tanh()),
+        # ]))
+        # self.hidden_layer = nn.ModuleList([hidden_bock for _ in range(self.layers)])
+        #
+        # self.output_layer = nn.Sequential()
+        # self.output_layer.add_module('output', nn.Linear(self.width, self.outd, bias=False))
+        self.linear1 = torch.nn.Linear(4, 200)
+        self.linear2 = torch.nn.Linear(200, 200)
+        self.linear3 = torch.nn.Linear(200, 1, bias=False)
 
-        hidden_bock = nn.Sequential(OrderedDict([
-            ('hidden', nn.Linear(self.width, self.width)),
-            ('act', nn.Tanh()),
-        ]))
-        self.hidden_layer = nn.ModuleList([hidden_bock for _ in range(self.layers)])
+        self.nonlinearity = nn.Tanh()
 
-        self.output_layer = nn.Sequential()
-        self.output_layer.add_module('output', nn.Linear(self.width, self.outd, bias=False))
+        self.baseline = nn.Sequential(
+            self.linear1,
+            self.nonlinearity,
+            self.linear2,
+            self.nonlinearity,
+            self.linear3)
 
     def __initialize(self):
-        self.input_layer.apply(weights_init_xavier_normal)
-        self.hidden_layer.apply(weights_init_xavier_normal)
-        self.output_layer.apply(weights_init_xavier_normal)
+        # self.input_layer.apply(weights_init_xavier_normal)
+        # self.hidden_layer.apply(weights_init_xavier_normal)
+        # self.output_layer.apply(weights_init_xavier_normal)
+        self.baseline.apply(weights_init_xavier_normal)
