@@ -34,7 +34,8 @@ LEGENDSIZE = 12
 def main():
     # init state for system
     ln.utils.init_random_state(args.seed)
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    # device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    device = 'cpu'
     print('Using the device is:', device)
     path = './outputs/'
     save_path = path + '/analyze/analyze-pend-2/'

@@ -43,8 +43,7 @@ def run():
 
     # seed
     ln.utils.init_random_state(args.seed)
-    # device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    device = 'cpu'
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
     print('Using the device is:', device)
 
     # data
