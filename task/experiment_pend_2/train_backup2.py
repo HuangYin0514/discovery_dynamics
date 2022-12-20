@@ -6,10 +6,11 @@ import numpy as np
 import torch
 
 import learner as ln
-from data_pend_2 import PendulumData
+# from data_pend_2 import PendulumData
 
 sys.path.append('.')
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
+from data_pend_2 import MyDataset
 
 parser = argparse.ArgumentParser(description=None)
 # For general settings
@@ -61,11 +62,8 @@ def run():
         data = np.load(filename, allow_pickle=True).item()
     else:
         print('Start generating dataset.')
-        data = PendulumData(obj=args.obj, dim=args.dim,
-                            train_num=args.train_num,
-                            test_num=args.test_num,
-                            m=[1 for i in range(args.obj)],
-                            l=[1 for i in range(args.obj)])
+        data = MyDataset(obj=args.obj, m=[1 for i in range(args.obj)], l=[1 for i in range(args.obj)])
+        data.get_dataset(seed=args.seed, system='hnn', noise_std=0.0, samples=100)
         os.makedirs(data_path) if not os.path.exists(data_path) else None
         np.save(filename, data)
     print('Number of samples in train dataset : ', len(data.y_train))
