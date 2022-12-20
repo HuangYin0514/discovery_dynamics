@@ -30,7 +30,7 @@ def plot_pend_traj(ax, truth_pos, net_pos, net_name, plot_color_marker):
     for i in range(time - 3):
         ax.plot(truth_pos[i:i + 2, 2], truth_pos[i:i + 2, 3], 'k-', label='_nolegend_', linewidth=2,
                 alpha=0.2 + 0.8 * (i + 1) / time)
-        ax.plot(net_pos[i:i + 2, 2], net_pos[i:i + 2, 3],plot_color_marker, label='_nolegend_', linewidth=2,
+        ax.plot(net_pos[i:i + 2, 2], net_pos[i:i + 2, 3], plot_color_marker, label='_nolegend_', linewidth=2,
                 alpha=0.2 + 0.8 * (i + 1) / time)
         if i % (time // 2) == 0:
             ax.plot([0, net_pos[i, 0]], [0, net_pos[i, 1]], color='brown', linewidth=2, label='_nolegend_',

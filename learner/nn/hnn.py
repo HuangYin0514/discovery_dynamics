@@ -54,7 +54,10 @@ class HNN(LossNN):
     def __model_f(self, t, X, circular_motion=False):
         if circular_motion:  # Handle the case of circular motion
             position_dim = len(X) // 2
+            print(X[:position_dim])
             X[:position_dim] = X[:position_dim] % (2 * np.pi)
+            print(X[:position_dim])
+            print(" im 2pi position")
         x = torch.tensor(X, requires_grad=True, dtype=self.Dtype, device=self.Device).view(1, -1)
         dx = self.forward(x).cpu().detach().numpy().reshape(-1)
         return dx
