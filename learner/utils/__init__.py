@@ -5,6 +5,7 @@ from .common_utils import lazy_property, timing
 from .net_utils import load_network
 from .net_utils import weights_init_xavier_normal
 from .pend_utils import polar2xy, plot_pend_traj
+from .download_file import download_file_from_google_drive
 
 __all__ = [
     "count_parameters",
