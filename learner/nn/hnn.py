@@ -35,7 +35,7 @@ class HNN(LossNN):
         # d = int(self.dim / 2)
         # res = np.eye(self.dim, k=d) - np.eye(self.dim, k=-d)
         # return torch.tensor(res, dtype=self.Dtype, device=self.Device)
-        n = int(self.dim / 2)
+        n = int(self.dim )
         J = torch.eye(n)
         J = torch.cat([J[n // 2:], -J[:n // 2]])
         return torch.tensor(J, dtype=self.Dtype, device=self.Device)
