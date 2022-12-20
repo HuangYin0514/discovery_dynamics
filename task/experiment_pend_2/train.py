@@ -7,7 +7,7 @@ import torch
 
 import learner as ln
 # from data_pend_2 import PendulumData
-from task.experiment_pend_2.data_pend_2 import MyDataset
+from .data_pend_2 import MyDataset
 
 sys.path.append('.')
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
