@@ -193,7 +193,7 @@ class Brain:
         if self.optimizer == 'adam':
             self.__optimizer = torch.optim.Adam(self.net.parameters(),
                                                 lr=self.lr,
-                                                weight_decay=1e-8,  # 1e-8
+                                                weight_decay=1e-4,  # 1e-8
                                                 betas=(0.9, 0.999))
         else:
             raise NotImplementedError
