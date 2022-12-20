@@ -67,15 +67,27 @@ class PendulumData(ln.Data):
             (2 * m2 * (l1 ** 2) * (l2 ** 2) * (m1 + m2 * np.sin(q1 - q2) ** 2))
         return H
 
+    # def random_config(self, space, num):
+    #     qmin, qmax, pmin, pmax = space[0], space[1], space[2], space[3]
+    #     x0 = np.zeros((num, self.obj * 2))
+    #     for i in range(self.obj):
+    #         q = np.random.rand(num) * (qmax - qmin) + qmin
+    #         p = np.random.rand(num) * (pmax - pmin) + pmin
+    #         x0[..., i] = q
+    #         x0[..., i + self.obj] = p
+    #     return x0
     def random_config(self, space, num):
-        qmin, qmax, pmin, pmax = space[0], space[1], space[2], space[3]
-        x0 = np.zeros((num, self.obj * 2))
-        for i in range(self.obj):
-            q = np.random.rand(num) * (qmax - qmin) + qmin
-            p = np.random.rand(num) * (pmax - pmin) + pmin
-            x0[..., i] = q
-            x0[..., i + self.obj] = p
-        return x0
+        y0_list = []
+        for i in range(num):
+            max_momentum = 1.
+            y0 = np.zeros(self.obj * 2)
+            for i in range(self.obj):
+                theta = (2 * np.pi - 0) * np.random.rand() + 0
+                momentum = (2 * np.random.rand() - 1) * max_momentum
+                y0[i] = theta
+                y0[i + self.obj] = momentum
+            y0_list.append(y0.reshape(-1))
+        return y0_list
 
     def __init_data(self):
         self.X_train, self.y_train = self.__generate_random(self.space, self.train_num, self.h)
@@ -87,6 +99,7 @@ class PendulumData(ln.Data):
         X = np.concatenate(X)
         y = list(map(lambda x: self.hamilton_right_fn(None, x), X))
         y = np.asarray(y)
+        # E = np.array([self.hamilton_energy_fn(y) for y in X])
         return X, y
 
     def __generate(self, X, h):
