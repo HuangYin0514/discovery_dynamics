@@ -12,6 +12,7 @@
 # dir
 outputs/
 training_file/
+*.ipynb_checkpoints/
 
 # file
 *.txt
@@ -19,4 +20,4 @@ training_file/
 *.png
 *.pdf
 *.npy
-*.ipynb_checkpoints/
+*.ipynb
