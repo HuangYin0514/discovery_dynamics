@@ -7,10 +7,10 @@ import torch
 
 import learner as ln
 # from data_pend_2 import PendulumData
-from .data_pend_2 import MyDataset
 
 sys.path.append('.')
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
+from data_pend_2 import MyDataset
 
 parser = argparse.ArgumentParser(description=None)
 # For general settings
