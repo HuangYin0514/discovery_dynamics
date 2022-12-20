@@ -1,0 +1,22 @@
+
+# idea
+*.iml
+.idea/
+*.ipr
+*.iws
+
+
+# osx
+.DS_Store
+
+# dir
+baseline/outputs/
+baseline/training file/
+
+# file
+*.txt
+*.pkl
+*.png
+*.pdf
+*.npy
+*.ipynb_checkpoints/
