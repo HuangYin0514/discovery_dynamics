@@ -32,9 +32,14 @@ class HNN(LossNN):
     def J(self):
         # [ 0, 1]
         # [-1, 0]
-        d = int(self.dim / 2)
-        res = np.eye(self.dim, k=d) - np.eye(self.dim, k=-d)
-        return torch.tensor(res, dtype=self.Dtype, device=self.Device)
+        # d = int(self.dim / 2)
+        # res = np.eye(self.dim, k=d) - np.eye(self.dim, k=-d)
+        # return torch.tensor(res, dtype=self.Dtype, device=self.Device)
+        n = int(self.dim / 2)
+        J = torch.eye(n)
+        J = torch.cat([J[n // 2:], -J[:n // 2]])
+        return torch.tensor(J, dtype=self.Dtype, device=self.Device)
+
 
     def forward(self, x):
         h = self.baseline(x)
