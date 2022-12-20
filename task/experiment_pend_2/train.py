@@ -22,7 +22,6 @@ parser.add_argument('--obj', default=2, type=int, help='number of elements')
 parser.add_argument('--dim', default=1, type=int, help='degree of freedom')
 parser.add_argument('--train_num', default=3, type=int, help='the number of sampling trajectories')
 parser.add_argument('--test_num', default=2, type=int, help='the number of sampling trajectories')
-parser.add_argument('--data_dir', default=THIS_DIR + '/data', type=str, help='where to save the data')
 # For net
 parser.add_argument('--layers', default=1, type=int, help='number of layers')
 parser.add_argument('--width', default=200, type=int, help='number of width')
@@ -48,8 +47,9 @@ def run():
     print('Using the device is:', device)
 
     # data
-    # naming example: data/dataset_pend_2_hnn.npy
-    filename = '{}/dataset_{}_{}_hnn.npy'.format(args.data_dir, args.tasktype, args.obj)
+    # naming example: output/pend_2_hnn/dataset_pend_2_hnn.npy
+    data_path = './outputs/' + args.taskname
+    filename = data_path + '/dataset_{}_{}_hnn.npy'.format(args.tasktype, args.obj)
     if os.path.exists(filename):
         print('Start loading dataset.')
         data = np.load(filename, allow_pickle=True).item()
@@ -60,7 +60,7 @@ def run():
                             test_num=args.test_num,
                             m=[1 for i in range(args.obj)],
                             l=[1 for i in range(args.obj)])
-        os.makedirs(args.data_dir) if not os.path.exists(args.data_dir) else None
+        os.makedirs(data_path) if not os.path.exists(data_path) else None
         np.save(filename, data)
     print('Number of samples in train dataset : ', len(data.y_train))
     print('Number of samples in test dataset : ', len(data.y_test))

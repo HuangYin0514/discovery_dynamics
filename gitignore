@@ -10,8 +10,8 @@
 .DS_Store
 
 # dir
-baseline/outputs/
-baseline/training file/
+outputs/
+training file/
 
 # file
 *.txt
