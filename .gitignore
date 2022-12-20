@@ -11,7 +11,7 @@
 
 # dir
 outputs/
-training file/
+training_file/
 
 # file
 *.txt

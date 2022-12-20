@@ -73,8 +73,8 @@ class Brain:
         self.__init_brain()
         print('Training...', flush=True)
         loss_history = []
-        if not os.path.isdir('./' + 'training file/' + self.taskname + '/model'):
-            os.makedirs('./' + 'training file/' + self.taskname + '/model')
+        if not os.path.isdir('./' + 'training_file/' + self.taskname + '/model'):
+            os.makedirs('./' + 'training_file/' + self.taskname + '/model')
 
         pbar = tqdm(range(self.iterations + 1), desc='Processing')
         for i in pbar:
@@ -96,7 +96,7 @@ class Brain:
                     print('Encountering nan, stop training', flush=True)
                     return None
                 if self.save:
-                    torch.save(self.net, 'training file/' + self.taskname + '/model/model{}.pkl'.format(i))
+                    torch.save(self.net, 'training_file/' + self.taskname + '/model/model{}.pkl'.format(i))
             if i < self.iterations:
                 self.__optimizer.zero_grad()
                 loss.backward()
@@ -104,7 +104,7 @@ class Brain:
             if self.__scheduler is not None:
                 self.__scheduler.step()
             loss_record = np.array(loss_history)
-            np.savetxt('training file/' + self.taskname + '/loss.txt', loss_record)
+            np.savetxt('training_file/' + self.taskname + '/loss.txt', loss_record)
         self.loss_history = np.array(loss_history)
         print('Done!', flush=True)
         return self.loss_history
@@ -137,7 +137,7 @@ class Brain:
                     )
             f.close()
 
-            self.best_model = torch.load('training file/' + self.taskname + '/model/model{}.pkl'.format(iteration))
+            self.best_model = torch.load('training_file/' + self.taskname + '/model/model{}.pkl'.format(iteration))
         else:
             raise RuntimeError('restore before running or without saved models')
         return self.best_model
