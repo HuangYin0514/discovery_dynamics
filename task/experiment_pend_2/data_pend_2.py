@@ -97,8 +97,10 @@ class PendulumData(ln.Data):
         x0 = self.random_config(space, num)
         X = self.__generate(x0, h)
         X = np.concatenate(X)
-        y = list(map(lambda x: self.hamilton_right_fn(None, x), X))
-        y = np.asarray(y)
+        # y = list(map(lambda x: self.hamilton_right_fn(None, x), X))
+        # y = np.asarray(y)
+        dydt = [self.hamilton_right_fn(None, y) for y in X]
+        y = np.stack(dydt)
         # E = np.array([self.hamilton_energy_fn(y) for y in X])
         return X, y
 
