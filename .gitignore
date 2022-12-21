@@ -17,6 +17,7 @@ training_file/
 # file
 *.txt
 *.pkl
+*.tar
 *.png
 *.pdf
 *.npy
