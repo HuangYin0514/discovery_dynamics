@@ -94,7 +94,7 @@ class Brain:
                 postfix = {
                     'Train_loss': '{:.3e}'.format(loss.item()),
                     'Test_loss': '{:.3e}'.format(loss_test.item()),
-                    'lr': '{:}'.format(self.__optimizer.param_groups[0]['lr'])
+                    'lr': self.__optimizer.param_groups[0]['lr']
                 }
                 pbar.set_postfix(postfix)
                 if torch.any(torch.isnan(loss)):
