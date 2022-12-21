@@ -47,7 +47,7 @@ class HNN(LossNN):
         dy = self.J @ gradH.T  # dqq shape is (vector, batchsize)
         return dy.T
 
-    def criterion(self, X, y, criterion_method='L2_norm_loss'):
+    def criterion(self, X, y, criterion_method='MSELoss'):
         return self.__integrator_loss(X, y, criterion_method)
 
     def __integrator_loss(self, X, y, criterion_method):
