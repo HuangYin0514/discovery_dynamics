@@ -187,13 +187,14 @@ class Brain:
         self.loss_history = None
         self.encounter_nan = False
         self.best_model = None
+        self.net.device = self.device
+        self.net.dtype = self.dtype
+
         self.data.device = self.device
         self.data.dtype = self.dtype
         self.data.X_train.requires_grad = True
         self.data.X_test.requires_grad = True
 
-        self.net.device = self.device
-        self.net.dtype = self.dtype
         self.__init_optimizer()
         self.__init_scheduler()
         self.__init_criterion()
