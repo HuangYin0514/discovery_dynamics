@@ -1,9 +1,6 @@
 import torch
 
 
-# def L2_norm_loss(u, v):
-#     return (u - v).pow(2).mean()
-
 
 def L2_norm_loss(x, y):
     num_examples = x.size()[0]
