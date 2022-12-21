@@ -23,7 +23,7 @@ def polar2xy(x):
 
 
 def plot_pend_traj(ax, truth_pos, net_pos, net_name, plot_color_marker):
-    time = min(100, len(net_pos) - 1)
+    time = min(400, len(net_pos) - 1)
 
     ax.set_xlabel('$x$ ($m$)')
     ax.set_ylabel('$y$ ($m$)')
