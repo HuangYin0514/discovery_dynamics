@@ -58,7 +58,6 @@ class HNN(LossNN):
         h = self.baseline(x)
         gradH = dfx(h, x)
         dy = self.J @ gradH.T  # dqq shape is (vector, batchsize)
-        print(" I am forward")
         return dy.T
 
     def criterion(self, X, y, criterion_method='L2_norm_loss'):
