@@ -212,6 +212,7 @@ class Brain:
             raise NotImplementedError
 
 
+
     def __init_scheduler(self):
         if self.scheduler == 'no_scheduler':
             self.__scheduler = no_scheduler(self.__optimizer)
