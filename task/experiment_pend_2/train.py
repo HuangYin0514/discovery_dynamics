@@ -32,7 +32,7 @@ parser.add_argument('--load_net_path', default='', type=str, help='The path to l
 parser.add_argument('--lr', default=1e-2, type=float, help='learning rate')
 parser.add_argument('--optimizer', default='adam', type=str, help='Select optimizer to learn')
 parser.add_argument('--scheduler', default='MultiStepLR', type=str, help='Select scheduler to learn')
-parser.add_argument('--iterations', default=2000, type=int, help='end of training epoch')
+parser.add_argument('--iterations', default=20, type=int, help='end of training epoch')
 parser.add_argument('--print_every', default=2, type=int, help='number of gradient steps between prints')
 # For other settings
 parser.add_argument('--dtype', default='float', type=str, help='Types of data and models')
