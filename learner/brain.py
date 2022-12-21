@@ -6,6 +6,7 @@ import torch
 from matplotlib import pyplot as plt
 from tqdm import tqdm
 
+from .criterion import L2_norm_loss
 from .nn import LossNN
 from .utils import timing
 from .scheduler import lr_decay_scheduler, no_scheduler
@@ -80,7 +81,9 @@ class Brain:
         for i in pbar:
 
             self.__optimizer.zero_grad()
-            loss = self.__criterion(self.net(self.data.X_train), self.data.y_train)
+            pred = self.net(self.data.X_train)
+            loss = L2_norm_loss(pred, self.data.y_train)
+            # loss = self.__criterion(self.net(self.data.X_train), self.data.y_train)
             loss.backward()
             self.__optimizer.step()
             if i % self.print_every == 0 or i == self.iterations:
