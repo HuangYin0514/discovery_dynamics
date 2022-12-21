@@ -2,9 +2,10 @@ import os
 
 import numpy as np
 
-from .utils import download_file_from_google_drive
+from .utils import download_file_from_google_drive, timing
 
 
+@timing
 def get_dataset(args, data):
     data_path = './outputs/' + args.taskname
     filename = data_path + '/dataset_{}_{}_hnn.npy'.format(args.tasktype, args.obj)
