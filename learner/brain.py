@@ -82,10 +82,8 @@ class Brain:
                 mask = np.random.choice(self.data.X_train.size(0), self.batch_size, replace=False)
                 loss = self.__criterion(self.net(self.data.X_train[mask]), self.data.y_train[mask])
             else:
-                self.data.X_train.requires_grad = True
                 loss = self.__criterion(self.net(self.data.X_train), self.data.y_train)
             if i % self.print_every == 0 or i == self.iterations:
-                self.data.X_test.requires_grad = True
                 loss_test = self.__criterion(self.net(self.data.X_test), self.data.y_test)
                 loss_history.append([i, loss.item(), loss_test.item()])
                 # print('{:<25}Train loss: {:<25.4e}Test loss: {:<25.4e}'.format(i, loss.item(), loss_test.item()),
@@ -115,7 +113,6 @@ class Brain:
         self.loss_history = np.array(loss_history)
         print('Done!', flush=True)
         return self.loss_history
-
 
     def restore(self):
         if self.loss_history is not None and self.save == True:
@@ -150,7 +147,6 @@ class Brain:
         else:
             raise RuntimeError('restore before running or without saved models')
         return self.best_model
-
 
     def output(self, data, best_model, loss_history, info, path, **kwargs):
         if path is None:
@@ -187,19 +183,20 @@ class Brain:
         for key, arg in kwargs.items():
             np.savetxt(path + '/' + key + '.txt', arg)
 
-
     def __init_brain(self):
         self.loss_history = None
         self.encounter_nan = False
         self.best_model = None
         self.data.device = self.device
         self.data.dtype = self.dtype
+        self.data.X_train.requires_grad = True
+        self.data.X_test.requires_grad = True
+
         self.net.device = self.device
         self.net.dtype = self.dtype
         self.__init_optimizer()
         self.__init_scheduler()
         self.__init_criterion()
-
 
     def __init_optimizer(self):
         if self.optimizer == 'adam':
@@ -210,8 +207,6 @@ class Brain:
                                                 betas=(0.9, 0.999))
         else:
             raise NotImplementedError
-
-
 
     def __init_scheduler(self):
         if self.scheduler == 'no_scheduler':
@@ -226,7 +221,6 @@ class Brain:
             self.__scheduler = lr_scheduler.StepLR(self.__optimizer, step_size=700, gamma=0.7)
         else:
             raise NotImplementedError
-
 
     def __init_criterion(self):
         if isinstance(self.net, LossNN):
