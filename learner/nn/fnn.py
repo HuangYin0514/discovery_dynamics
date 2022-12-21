@@ -35,10 +35,14 @@ class FNN(StructureNN):
         self.input_layer.add_module('input', nn.Linear(self.ind, self.width))
         self.input_layer.add_module('act', nn.Tanh())
 
-        hidden_bock = nn.Sequential(OrderedDict([
-            ('hidden', nn.Linear(self.width, self.width)),
-            ('act', nn.Tanh()),
-        ]))
+        # hidden_bock = nn.Sequential(OrderedDict([
+        #     ('hidden', nn.Linear(self.width, self.width)),
+        #     ('act', nn.Tanh()),
+        # ]))
+        hidden_bock = nn.Sequential(
+            nn.Linear(self.width, self.width),
+            nn.Tanh()
+        )
         self.hidden_layer = nn.ModuleList([hidden_bock for _ in range(self.layers)])
 
         self.output_layer = nn.Sequential()
