@@ -6,7 +6,6 @@ import torch
 from matplotlib import pyplot as plt
 from tqdm import tqdm
 
-from .criterion import L2_norm_loss
 from .nn import LossNN
 from .utils import timing
 from .scheduler import lr_decay_scheduler, no_scheduler
@@ -79,13 +78,11 @@ class Brain:
 
         pbar = tqdm(range(self.iterations + 1), desc='Processing')
         for i in pbar:
-
-            self.__optimizer.zero_grad()
-            pred = self.net(self.data.X_train)
-            loss = L2_norm_loss(pred, self.data.y_train)
-            # loss = self.__criterion(self.net(self.data.X_train), self.data.y_train)
-            loss.backward()
-            self.__optimizer.step()
+            if self.batch_size is not None:
+                mask = np.random.choice(self.data.X_train.size(0), self.batch_size, replace=False)
+                loss = self.__criterion(self.net(self.data.X_train[mask]), self.data.y_train[mask])
+            else:
+                loss = self.__criterion(self.net(self.data.X_train), self.data.y_train)
             if i % self.print_every == 0 or i == self.iterations:
                 loss_test = self.__criterion(self.net(self.data.X_test), self.data.y_test)
                 loss_history.append([i, loss.item(), loss_test.item()])
@@ -101,10 +98,10 @@ class Brain:
                     return None
                 if self.save:
                     torch.save(self.net, 'training_file/' + self.taskname + '/model/model{}.pkl'.format(i))
-                # if i < self.iterations:
-                #     self.__optimizer.zero_grad()
-                #     loss.backward()
-                #     self.__optimizer.step()
+                if i < self.iterations:
+                    self.__optimizer.zero_grad()
+                    loss.backward()
+                    self.__optimizer.step()
                 if self.__scheduler is not None:
                     self.__scheduler.step()
         loss_record = np.array(loss_history)
@@ -187,21 +184,20 @@ class Brain:
         self.loss_history = None
         self.encounter_nan = False
         self.best_model = None
-
-        self.net.device = self.device
-        self.net.dtype = self.dtype
-
         self.data.device = self.device
         self.data.dtype = self.dtype
         self.data.X_train.requires_grad = True
         self.data.X_test.requires_grad = True
 
+        self.net.device = self.device
+        self.net.dtype = self.dtype
         self.__init_optimizer()
         self.__init_scheduler()
         self.__init_criterion()
 
     def __init_optimizer(self):
         if self.optimizer == 'adam':
+            print(self.net)
             self.__optimizer = torch.optim.Adam(self.net.parameters(),
                                                 lr=self.lr,
                                                 weight_decay=1e-4,  # 1e-8
