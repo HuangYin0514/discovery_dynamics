@@ -82,9 +82,6 @@ class Brain:
             if i % self.print_every == 0 or i == self.iterations:
                 loss_test = self.__criterion(self.net(self.data.X_test), self.data.y_test)
                 loss_history.append([i, loss.item(), loss_test.item()])
-                # print('{:<25}Train loss: {:<25.4e}Test loss: {:<25.4e}'.format(i, loss.item(), loss_test.item()),
-                #       flush=True)
-                # print('lr', self.__optimizer.param_groups[0]['lr'])
                 postfix = {
                     'Train_loss': '{:.3e}'.format(loss.item()),
                     'Test_loss': '{:.3e}'.format(loss_test.item()),
