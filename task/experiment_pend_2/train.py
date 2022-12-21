@@ -23,7 +23,6 @@ parser.add_argument('--dim', default=1, type=int, help='degree of freedom')
 parser.add_argument('--train_num', default=3, type=int, help='the number of sampling trajectories')
 parser.add_argument('--test_num', default=2, type=int, help='the number of sampling trajectories')
 parser.add_argument('--dataset_url', default='', type=str, help='Download dataset from Internet')
-
 # For net
 parser.add_argument('--layers', default=1, type=int, help='number of layers')
 parser.add_argument('--width', default=200, type=int, help='number of width')
