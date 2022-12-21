@@ -78,11 +78,7 @@ class Brain:
 
         pbar = tqdm(range(self.iterations + 1), desc='Processing')
         for i in pbar:
-            if self.batch_size is not None:
-                mask = np.random.choice(self.data.X_train.size(0), self.batch_size, replace=False)
-                loss = self.__criterion(self.net(self.data.X_train[mask]), self.data.y_train[mask])
-            else:
-                loss = self.__criterion(self.net(self.data.X_train), self.data.y_train)
+            loss = self.__criterion(self.net(self.data.X_train), self.data.y_train)
             if i % self.print_every == 0 or i == self.iterations:
                 loss_test = self.__criterion(self.net(self.data.X_test), self.data.y_test)
                 loss_history.append([i, loss.item(), loss_test.item()])
