@@ -40,7 +40,7 @@ class HNN(LossNN):
             self.nonlinearity,
             self.linear3)
 
-        baseline.apply(weights_init_xavier_normal)
+        # baseline.apply(weights_init_xavier_normal)
 
         return baseline
 
