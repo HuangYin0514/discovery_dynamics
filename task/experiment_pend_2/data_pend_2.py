@@ -25,16 +25,17 @@ class PendulumData(ln.Data):
         t0 = 0
         t_end = 10
         self.h = 0.01
-        self.solver = RK45(self.hamilton_right_fn, t0=t0, t_end=t_end)
+        self.solver = RK4(self.hamilton_right_fn, t0=t0, t_end=t_end)
 
         self.__init_data()
 
-    def hamilton_right_fn(self, t, coords):
-        #     grad_ham = autograd.grad(self.hamilton_energy_fn)
-        #     grad = grad_ham(coords)
-        #     q, p = grad[self.dof:], -grad[:self.dof]
-        #     return np.asarray([q, p]).reshape(-1)
+    # def hamilton_right_fn(self, t, coords):
+    #     grad_ham = autograd.grad(self.hamilton_energy_fn)
+    #     grad = grad_ham(coords)
+    #     q, p = grad[self.dof:], -grad[:self.dof]
+    #     return np.asarray([q, p]).reshape(-1)
 
+    def hamilton_right_fn(self, t, coords):
         """获取导数"""
         q1, q2, p1, p2 = coords
         l1, l2, m1, m2 = self.l[0], self.l[1], self.m[0], self.m[1]
@@ -81,31 +82,32 @@ class PendulumData(ln.Data):
             (2 * m2 * (l1 ** 2) * (l2 ** 2) * (m1 + m2 * np.sin(q1 - q2) ** 2))
         return H
 
-    def random_config(self, space, num):
-
-        # qmin, qmax, pmin, pmax = space[0], space[1], space[2], space[3]
-        #     x0 = np.zeros((num, self.obj * 2))
-        #     for i in range(self.obj):
-        #         q = np.random.rand(num) * (qmax - qmin) + qmin
-        #         p = np.random.rand(num) * (pmax - pmin) + pmin
-        #         x0[..., i] = q
-        #         x0[..., i + self.obj] = p
-        #     return x0
-        y0_list = []
-        for i in range(num):
-            max_momentum = 1.
-            y0 = np.zeros(self.obj * 2)
-            for i in range(self.obj):
-                theta = (2 * np.pi - 0) * np.random.rand() + 0
-                momentum = (2 * np.random.rand() - 1) * max_momentum
-                y0[i] = theta
-                y0[i + self.obj] = momentum
-            y0_list.append(y0.reshape(-1))
-        return y0_list
+    # def random_config(self, space, num):
+    #     qmin, qmax, pmin, pmax = space[0], space[1], space[2], space[3]
+    #     x0 = np.zeros((num, self.obj * 2))
+    #     for i in range(self.obj):
+    #         q = np.random.rand(num) * (qmax - qmin) + qmin
+    #         p = np.random.rand(num) * (pmax - pmin) + pmin
+    #         x0[..., i] = q
+    #         x0[..., i + self.obj] = p
+    #     return x0
+    def random_config(self, system='hnn'):
+        max_momentum = 1.
+        y0 = np.zeros(self.obj * 2)
+        for i in range(self.obj):
+            theta = (2 * np.pi - 0) * np.random.rand() + 0
+            momentum = (2 * np.random.rand() - 1) * max_momentum
+            y0[i] = theta
+            y0[i + self.obj] = momentum
+        return y0.reshape(-1)
 
     def __init_data(self):
-        self.X_train, self.y_train = self.__generate_random(self.space, self.train_num, self.h)
-        self.X_test, self.y_test = self.__generate_random(self.space, self.test_num, self.h)
+        # self.X_train, self.y_train = self.__generate_random(self.space, self.train_num, self.h)
+        # self.X_test, self.y_test = self.__generate_random(self.space, self.test_num, self.h)
+
+        data = self.get_dataset(seed=0, system='hnn', noise_std=0, samples=100)
+        self.X_train, self.y_train = data['x'], data['dx']
+        self.X_test, self.y_test = data['test_x'], data['test_dx']
 
     def __generate_random(self, space, num, h):
         x0 = self.random_config(space, num)
@@ -121,3 +123,100 @@ class PendulumData(ln.Data):
     def __generate(self, X, h):
         X = np.array(list(map(lambda x: self.solver.solve(x, h), X)))
         return X
+
+    def get_trajectory(self, t0=0, t_end=10, ode_stepsize=None, y0=None, noise_std=0., system="hnn", **kwargs):
+        # get initial state
+        self.m = kwargs['m'] if 'm' in kwargs else [1. for i in range(self.obj)]
+        self.l = kwargs['l'] if 'l' in kwargs else [1. for i in range(self.obj)]
+        self.g = kwargs['g'] if 'g' in kwargs else 9.8
+        if y0 is None:
+            y0 = self.random_config(system)
+
+        if system == "hnn":
+            dynamics_solution = self.solver.solve(y0, ode_stepsize)
+            # dynamics_t, dynamics_solution = self.runge_kutta_solver(self.hamilton_right_fn, t0, t_end, ode_stepsize, y0)
+            dydt = [self.hamilton_right_fn(None, y) for y in dynamics_solution]
+            dydt = np.stack(dydt)
+            E = np.array([self.hamilton_energy_fn(y) for y in dynamics_solution])
+
+            # add noise
+            x = dynamics_solution + np.random.randn(*dynamics_solution.shape) * noise_std
+            return x, dydt, dynamics_solution, E
+
+        elif system == "lnn":
+
+            dynamics_t, dynamics_solution = self.runge_kutta_solver(self.lagrangian_right_fn, t0, t_end, ode_stepsize,
+                                                                    y0)
+            dydt = [self.lagrangian_right_fn(None, y) for y in dynamics_solution]
+            dydt = np.stack(dydt)
+            E = np.array([self.lagrangian_energy_fn(y) for y in dynamics_solution])
+
+            x = dynamics_solution[:, :self.dof]
+            v = dydt[:, :self.dof]
+            a = dydt[:, self.dof:]
+
+            # add noise
+            x += np.random.randn(*x.shape) * noise_std
+            v += np.random.randn(*v.shape) * noise_std
+
+            return x, v, a, dynamics_t, E
+
+        else:
+            raise ValueError('Unsupported system system, choose'
+                             ' system = \'hnn\' or \'modlanet\' instead.')
+
+    def get_dataset(self, seed=0, samples=100, ode_stepsize=0.1, test_split=0.9, system='hnn', **kwargs):
+        data = {'meta': locals()}
+        self.samples = samples
+
+        if system == 'hnn':
+            # randomly sample inputs
+            np.random.seed(seed)
+            xs, dxs, ts, Es = [], [], [], []
+            for s in range(self.samples):
+                x, dx, t, E = self.get_trajectory(system=system, ode_stepsize=ode_stepsize, **kwargs)
+                xs.append(x)
+                dxs.append(dx)
+                ts.append(t)
+                Es.append(E)
+
+            data['x'] = np.concatenate(xs)
+            data['dx'] = np.concatenate(dxs)
+            data['t'] = np.concatenate(ts).reshape(-1, 1)
+            data['E'] = np.concatenate(Es).reshape(-1, 1)
+
+            # make a train/test split
+            split_ix = int(len(data['x']) * test_split)
+            split_data = {}
+            for k in ['x', 'dx', 't', 'E']:
+                split_data[k], split_data['test_' + k] = data[k][:split_ix], data[k][split_ix:]
+            data = split_data
+
+        elif system == 'lnn':
+            # randomly sample inputs
+            xs, vs, acs, ts, Es = [], [], [], [], []
+            for s in range(samples):
+                x, v, ac, t, E = self.get_trajectory(system=system, ode_stepsize=ode_stepsize, **kwargs)
+                xs.append(x)
+                vs.append(v)
+                acs.append(ac)
+                ts.append(t)
+                Es.append(E)
+
+            data['x'] = np.concatenate(xs)
+            data['v'] = np.concatenate(vs)
+            data['ac'] = np.concatenate(acs)
+            data['t'] = np.concatenate(ts).reshape(-1, 1)
+            data['E'] = np.concatenate(Es).reshape(-1, 1)
+
+            # make a train/test split
+            split_ix = int((data['x'].shape[0]) * test_split)
+            split_data = {}
+            for k in ['x', 'v', 'ac', 't', 'E']:
+                split_data[k], split_data['test_' + k] = data[k][:split_ix], data[k][split_ix:]
+            data = split_data
+
+        else:
+            raise ValueError('Unsupported dynamic system, choose'
+                             'system = \'hnn\' or \'modlanet\' instead.')
+        return data
