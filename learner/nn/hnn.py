@@ -2,15 +2,12 @@ from functools import partial
 
 import numpy as np
 import torch
-from torch import nn
 
 from .fnn import FNN
 from .base_module import LossNN
 from ..integrator.rungekutta import RK4, RK45
 from ..utils import lazy_property, dfx
 from ..criterion import L2_norm_loss
-
-from ..utils import weights_init_xavier_normal
 
 
 class HNN(LossNN):
@@ -28,21 +25,7 @@ class HNN(LossNN):
         self.baseline = self.__init_modules()
 
     def __init_modules(self):
-        self.linear1 = torch.nn.Linear(4, 200)
-        self.linear2 = torch.nn.Linear(200, 200)
-        self.linear3 = torch.nn.Linear(200, 1, bias=False)
-
-        self.nonlinearity = nn.Tanh()
-
-        baseline = nn.Sequential(
-            self.linear1,
-            self.nonlinearity,
-            self.linear2,
-            self.nonlinearity,
-            self.linear3)
-
-        # baseline.apply(weights_init_xavier_normal)
-
+        baseline = FNN(self.dim, 1, self.layers, self.width)
         return baseline
 
     @lazy_property
@@ -53,16 +36,18 @@ class HNN(LossNN):
         res = np.eye(self.dim, k=d) - np.eye(self.dim, k=-d)
         return torch.tensor(res, dtype=self.Dtype, device=self.Device)
 
+
     def forward(self, x):
         h = self.baseline(x)
         gradH = dfx(h, x)
         dy = self.J @ gradH.T  # dqq shape is (vector, batchsize)
         return dy.T
 
-    def criterion(self, y_hat, y, criterion_method='L2_norm_loss'):
-        return self.__integrator_loss(y_hat, y, criterion_method)
+    def criterion(self, X, y, criterion_method='MSELoss'):
+        return self.__integrator_loss(X, y, criterion_method)
 
-    def __integrator_loss(self, y_hat, y, criterion_method):
+    def __integrator_loss(self, X, y, criterion_method):
+        y_hat = self.forward(X)
         if criterion_method == 'MSELoss':
             return torch.nn.MSELoss()(y_hat, y)
         elif criterion_method == 'L2_norm_loss':
