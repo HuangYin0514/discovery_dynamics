@@ -51,10 +51,7 @@ class HNN(LossNN):
         d = int(self.dim / 2)
         res = np.eye(self.dim, k=d) - np.eye(self.dim, k=-d)
         return torch.tensor(res, dtype=self.Dtype, device=self.Device)
-        # n = int(self.dim )
-        # J = torch.eye(n)
-        # J = torch.cat([J[n // 2:], -J[:n // 2]])
-        # return torch.tensor(J, dtype=self.Dtype, device=self.Device)
+
 
 
     def forward(self, x):
@@ -67,7 +64,7 @@ class HNN(LossNN):
         return self.__integrator_loss(X, y, criterion_method)
 
     def __integrator_loss(self, X, y, criterion_method):
-        y_hat = self.forward(X)
+        y_hat = self(X)
         if criterion_method == 'MSELoss':
             return torch.nn.MSELoss()(y_hat, y)
         elif criterion_method == 'L2_norm_loss':
