@@ -92,18 +92,18 @@ class Brain:
                     'lr': self.__optimizer.param_groups[0]['lr']
                 }
                 pbar.set_postfix(postfix)
-                if torch.any(torch.isnan(loss)):
+            if torch.any(torch.isnan(loss)):
                     self.encounter_nan = True
                     print('Encountering nan, stop training', flush=True)
                     return None
-                if self.save:
-                    torch.save(self.net, 'training_file/' + self.taskname + '/model/model{}.pkl'.format(i))
-                if i < self.iterations:
-                    self.__optimizer.zero_grad()
-                    loss.backward()
-                    self.__optimizer.step()
-                if self.__scheduler is not None:
-                    self.__scheduler.step()
+            if self.save:
+                torch.save(self.net, 'training_file/' + self.taskname + '/model/model{}.pkl'.format(i))
+            if i < self.iterations:
+                self.__optimizer.zero_grad()
+                loss.backward()
+                self.__optimizer.step()
+            if self.__scheduler is not None:
+                self.__scheduler.step()
         loss_record = np.array(loss_history)
         np.savetxt('training_file/' + self.taskname + '/loss.txt', loss_record)
 
