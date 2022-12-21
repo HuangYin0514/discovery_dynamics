@@ -91,6 +91,11 @@ class Brain:
                 # print('{:<25}Train loss: {:<25.4e}Test loss: {:<25.4e}'.format(i, loss.item(), loss_test.item()),
                 #       flush=True)
                 # print('lr', self.__optimizer.param_groups[0]['lr'])
+                pbar.set_postfix({'Train_loss:{:.3e} test_loss:{:.3e} lr:{:}'
+                                 .format(loss.item(),
+                                         loss_test.item(),
+                                         self.__optimizer.param_groups[0]['lr'])})
+
                 if torch.any(torch.isnan(loss)):
                     self.encounter_nan = True
                     print('Encountering nan, stop training', flush=True)
@@ -137,7 +142,8 @@ class Brain:
                     )
             f.close()
             # self.best_model = torch.load('training_file/' + self.taskname + '/model/model{}.pkl'.format(iteration))
-            self.best_model = torch.load('training_file/' + self.taskname + '/model/model{}.pkl'.format(self.iterations))
+            self.best_model = torch.load(
+                'training_file/' + self.taskname + '/model/model{}.pkl'.format(self.iterations))
         else:
             raise RuntimeError('restore before running or without saved models')
         return self.best_model
