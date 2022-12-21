@@ -78,7 +78,11 @@ class Brain:
 
         pbar = tqdm(range(self.iterations + 1), desc='Processing')
         for i in pbar:
+
+            self.__optimizer.zero_grad()
             loss = self.__criterion(self.net(self.data.X_train), self.data.y_train)
+            loss.backward()
+            self.__optimizer.step()
             if i % self.print_every == 0 or i == self.iterations:
                 loss_test = self.__criterion(self.net(self.data.X_test), self.data.y_test)
                 loss_history.append([i, loss.item(), loss_test.item()])
@@ -94,10 +98,10 @@ class Brain:
                     return None
                 if self.save:
                     torch.save(self.net, 'training_file/' + self.taskname + '/model/model{}.pkl'.format(i))
-                if i < self.iterations:
-                    self.__optimizer.zero_grad()
-                    loss.backward()
-                    self.__optimizer.step()
+                # if i < self.iterations:
+                #     self.__optimizer.zero_grad()
+                #     loss.backward()
+                #     self.__optimizer.step()
                 if self.__scheduler is not None:
                     self.__scheduler.step()
         loss_record = np.array(loss_history)
@@ -193,7 +197,6 @@ class Brain:
 
     def __init_optimizer(self):
         if self.optimizer == 'adam':
-            print(self.net)
             self.__optimizer = torch.optim.Adam(self.net.parameters(),
                                                 lr=self.lr,
                                                 weight_decay=1e-4,  # 1e-8
