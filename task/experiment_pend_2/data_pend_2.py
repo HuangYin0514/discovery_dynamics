@@ -2,7 +2,7 @@ import autograd
 import autograd.numpy as np
 
 import learner as ln
-from learner.integrator.rungekutta import RK45
+from learner.integrator.rungekutta import RK4,RK45
 
 
 class PendulumData(ln.Data):
@@ -24,8 +24,8 @@ class PendulumData(ln.Data):
 
         t0 = 0
         t_end = 10
-        self.h = 0.1
-        self.solver = RK45(self.hamilton_right_fn, t0=t0, t_end=t_end)
+        self.h = 0.01
+        self.solver = RK4(self.hamilton_right_fn, t0=t0, t_end=t_end)
 
         self.__init_data()
 
