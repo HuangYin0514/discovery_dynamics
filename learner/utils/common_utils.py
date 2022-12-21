@@ -50,11 +50,7 @@ def timing(func):
     def wrapper(*args, **kwargs):
         t = time.time()
         result = func(*args, **kwargs)
-        print('\'' + func.__name__ + '\'' + ' took {} s'.format(time.time() - t))
+        print('\'' + func.__name__ + '\'' + ' took {:.2f} minute '.format((time.time() - t) / 60))
         return result
 
     return wrapper
-
-
-###########################################################################################################
-

@@ -49,39 +49,15 @@ def run():
     print('Using the device is:', device)
 
     # data
-    # naming example: output/pend_2_hnn/dataset_pend_2_hnn.npy
-    data_path = './outputs/' + args.taskname
-    filename = data_path + '/dataset_{}_{}_hnn.npy'.format(args.tasktype, args.obj)
-    if len(args.dataset_url) != 0:
-        print('Start downloading dataset.')
-        os.makedirs(data_path) if not os.path.exists(data_path) else None
-        ln.utils.download_file_from_google_drive(args.dataset_url, filename)
-    if os.path.exists(filename):
-        print('Start loading dataset.')
-        data = np.load(filename, allow_pickle=True).item()
-    else:
-        print('Start generating dataset.')
-        data = PendulumData(obj=args.obj, dim=args.dim,
-                            train_num=args.train_num,
-                            test_num=args.test_num,
-                            m=[1 for i in range(args.obj)],
-                            l=[1 for i in range(args.obj)])
-        os.makedirs(data_path) if not os.path.exists(data_path) else None
-        np.save(filename, data)
-    print('Number of samples in train dataset : ', len(data.y_train))
-    print('Number of samples in test dataset : ', len(data.y_test))
+    data = PendulumData(obj=args.obj, dim=args.dim,
+                        train_num=args.train_num,
+                        test_num=args.test_num,
+                        m=[1 for i in range(args.obj)],
+                        l=[1 for i in range(args.obj)])
+    data = ln.get_dataset(args, data)
 
     # net
-    if args.net == 'hnn':
-        input_dim = args.obj * args.dim * 2
-        net = ln.nn.HNN(dim=input_dim, layers=args.layers, width=args.width)
-    else:
-        raise ValueError('Model \'{}\' is not implemented'.format(args.net))
-    print('Number of parameters in model: ', ln.utils.count_parameters(net))
-    if os.path.exists(args.load_net_path):
-        ln.utils.load_network(net, args.load_net_path, device)
-    elif len(args.load_net_path):
-        print('Cannot find pretrained network at \'{}\''.format(args.load_net_path), flush=True)
+    net = ln.get_model(args, device=device)
 
     arguments = {
         'taskname': args.taskname,
@@ -103,7 +79,7 @@ def run():
     ln.Brain.Run()
     ln.Brain.Restore()
     ln.Brain.Output(info=arguments)
-    # print(arguments)
+    print(arguments)
 
 
 def main():
@@ -112,4 +88,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-    print("done!")
