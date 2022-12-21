@@ -10,23 +10,19 @@ jt -t  solarizedl
 jt -t solarizedl -fs 11 -cellw 65% -ofs 11 -dfs 11 -T -N
 
 ########################################################
-# 单摆
-python .\experiment-pend-1\train.py --model=hnn --hidden_dim=200 --print_every=500 --plot  --overwrite
-python .\experiment-pend-1\train.py --model=hnn --hidden_dim=75  --print_every=500 --plot  --overwrite
-python .\experiment-pend-1\train.py --model=lnn --hidden_dim=200 --print_every=500 --plot  --overwrite
-python .\experiment-pend-1\train.py --model=lnn --hidden_dim=75 --print_every=500 --plot  --overwrite
 
 # 双摆
-%run  ./experiment_pend_2/train.py --model 'baseline' --learn_rate 1e-3 --end_epoch 3000 --print_every 500 --overwrite --verbose --plot
-%run  ./experiment_pend_2/train.py --model 'hnn' --hidden_dim 200 --end_epoch 10000 --print_every 500 --plot  --overwrite
-%run  ./experiment_pend_2/train.py --model 'hnn' --hidden_dim 75  --end_epoch 10000 --print_every 500 --plot  --overwrite
-%run  ./experiment_pend_2/train.py --model 'lnn' --hidden_dim 200 --end_epoch 10000 --print_every 500 --plot  --overwrite
-%run  ./experiment_pend_2/train.py --model 'lnn' --hidden_dim 75  --end_epoch 10000 --print_every 500 --plot  --overwrite
+%run  ./task/experiment_pend_2/train.py \
+    --taskname 'pend_2_hnn' \
+    --net 'hnn' \
+    --iterations 10000 \
+    --train_num 90 \
+    --test_num 10 \
+    --dataset_url 'https://drive.google.com/file/d/1R9PU4JhceGllcEYKSJd45KEXntMVzGIf/view?usp=sharing' \
+    --lr 1e-2 \
+    --scheduler 'MultiStepLR' \
+    --print_every 1
 
-%run analysis/analyze-pend-2.py --samples 100 --re_test
+ %run  ./task/analysis/analyze-pend-2/plot_traj.py
 
-
-# 三体
-python ./experiment-body-3/train.py --model 'baseline'  --learn_rate 1e-3 --end_epoch 3000 --overwrite --verbose --plot
-python ./experiment-body-3/train.py --model 'hnn'       --learn_rate 1e-3 --end_epoch 3000 --overwrite --verbose --plot
-
+ %rm -rf ./training_file
