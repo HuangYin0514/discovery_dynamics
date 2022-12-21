@@ -134,7 +134,6 @@ class Brain:
             f = open(path + '/output.txt', mode='a')
             f.write(contents)
             f.close()
-            print(contents)
             # self.best_model = torch.load('training_file/' + self.taskname + '/model/model{}.pkl'.format(iteration))
             self.best_model = torch.load(
                 'training_file/' + self.taskname + '/model/model{}.pkl'.format(self.iterations))
