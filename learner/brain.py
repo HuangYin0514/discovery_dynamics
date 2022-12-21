@@ -117,121 +117,121 @@ class Brain:
         return self.loss_history
 
 
-def restore(self):
-    if self.loss_history is not None and self.save == True:
-        best_loss_index = np.argmin(self.loss_history[:, 1])
-        iteration = int(self.loss_history[best_loss_index, 0])
-        loss_train = self.loss_history[best_loss_index, 1]
-        loss_test = self.loss_history[best_loss_index, 2]
-        print('Best model at iteration {}:'.format(iteration), flush=True)
-        print('Train loss:', loss_train, 'Test loss:', loss_test, flush=True)
+    def restore(self):
+        if self.loss_history is not None and self.save == True:
+            best_loss_index = np.argmin(self.loss_history[:, 1])
+            iteration = int(self.loss_history[best_loss_index, 0])
+            loss_train = self.loss_history[best_loss_index, 1]
+            loss_test = self.loss_history[best_loss_index, 2]
+            print('Best model at iteration {}:'.format(iteration), flush=True)
+            print('Train loss:', loss_train, 'Test loss:', loss_test, flush=True)
 
-        path = './outputs/' + self.taskname
-        if not os.path.isdir('./outputs/' + self.taskname): os.makedirs('./outputs/' + self.taskname)
-        f = open(path + '/output.txt', mode='a')
-        f.write('\n\n'
-                + 'Train completion time: '
-                + time.strftime('%Y-%m-%d-%H-%M-%S', time.localtime(time.time()))
-                + '\n'
-                + 'Task name: {}'.format(self.taskname)
-                + '\n'
-                + 'net name: {}'.format(self.net.name)
-                + '\n'
-                + 'Best model at iteration: {}'.format(iteration)
-                + '\n'
-                + 'Train loss: %s' % (loss_train)
-                + '\n'
-                + 'Test loss: %s' % (loss_test)
-                )
-        f.close()
-        # self.best_model = torch.load('training_file/' + self.taskname + '/model/model{}.pkl'.format(iteration))
-        self.best_model = torch.load(
-            'training_file/' + self.taskname + '/model/model{}.pkl'.format(self.iterations))
-    else:
-        raise RuntimeError('restore before running or without saved models')
-    return self.best_model
-
-
-def output(self, data, best_model, loss_history, info, path, **kwargs):
-    if path is None:
-        path = './outputs/' + self.taskname
-    if not os.path.isdir(path): os.makedirs(path)
-    '''
-    Example: 
-        model-pend_2_hnn.pkl
-        loss-pend_2_hnn.txt
-        fig-pend_2_hnn.txt        
-        info-pend_2_hnn.txt        
-    '''
-    if best_model:
-        filename = '/model-{}.pkl'.format(self.taskname)
-        torch.save(self.best_model.state_dict(), path + filename)
-    if loss_history:
-        # save loss history to txt
-        filename = '/loss-{}.txt'.format(self.taskname)
-        np.savetxt(path + filename, self.loss_history)
-        # save loss history to png
-        filename = '/fig-{}.png'.format(self.taskname)
-        plt.figure()
-        plt.semilogy(self.loss_history[:, 0], self.loss_history[:, 1], 'b', label='train loss')
-        plt.semilogy(self.loss_history[:, 0], self.loss_history[:, 2], 'r', label='test loss')
-        plt.legend()
-        plt.savefig(path + filename, format='png')
-        plt.show()
-
-    if info is not None:
-        filename = '/info-{}-{}.txt'.format(self.taskname, self.net.name)
-        with open(path + filename, 'w') as f:
-            for key, value in info.items():
-                f.write('{}: {}\n'.format(key, str(value)))
-    for key, arg in kwargs.items():
-        np.savetxt(path + '/' + key + '.txt', arg)
+            path = './outputs/' + self.taskname
+            if not os.path.isdir('./outputs/' + self.taskname): os.makedirs('./outputs/' + self.taskname)
+            f = open(path + '/output.txt', mode='a')
+            f.write('\n\n'
+                    + 'Train completion time: '
+                    + time.strftime('%Y-%m-%d-%H-%M-%S', time.localtime(time.time()))
+                    + '\n'
+                    + 'Task name: {}'.format(self.taskname)
+                    + '\n'
+                    + 'net name: {}'.format(self.net.name)
+                    + '\n'
+                    + 'Best model at iteration: {}'.format(iteration)
+                    + '\n'
+                    + 'Train loss: %s' % (loss_train)
+                    + '\n'
+                    + 'Test loss: %s' % (loss_test)
+                    )
+            f.close()
+            # self.best_model = torch.load('training_file/' + self.taskname + '/model/model{}.pkl'.format(iteration))
+            self.best_model = torch.load(
+                'training_file/' + self.taskname + '/model/model{}.pkl'.format(self.iterations))
+        else:
+            raise RuntimeError('restore before running or without saved models')
+        return self.best_model
 
 
-def __init_brain(self):
-    self.loss_history = None
-    self.encounter_nan = False
-    self.best_model = None
-    self.data.device = self.device
-    self.data.dtype = self.dtype
-    self.net.device = self.device
-    self.net.dtype = self.dtype
-    self.__init_optimizer()
-    self.__init_scheduler()
-    self.__init_criterion()
+    def output(self, data, best_model, loss_history, info, path, **kwargs):
+        if path is None:
+            path = './outputs/' + self.taskname
+        if not os.path.isdir(path): os.makedirs(path)
+        '''
+        Example: 
+            model-pend_2_hnn.pkl
+            loss-pend_2_hnn.txt
+            fig-pend_2_hnn.txt        
+            info-pend_2_hnn.txt        
+        '''
+        if best_model:
+            filename = '/model-{}.pkl'.format(self.taskname)
+            torch.save(self.best_model.state_dict(), path + filename)
+        if loss_history:
+            # save loss history to txt
+            filename = '/loss-{}.txt'.format(self.taskname)
+            np.savetxt(path + filename, self.loss_history)
+            # save loss history to png
+            filename = '/fig-{}.png'.format(self.taskname)
+            plt.figure()
+            plt.semilogy(self.loss_history[:, 0], self.loss_history[:, 1], 'b', label='train loss')
+            plt.semilogy(self.loss_history[:, 0], self.loss_history[:, 2], 'r', label='test loss')
+            plt.legend()
+            plt.savefig(path + filename, format='png')
+            plt.show()
+
+        if info is not None:
+            filename = '/info-{}-{}.txt'.format(self.taskname, self.net.name)
+            with open(path + filename, 'w') as f:
+                for key, value in info.items():
+                    f.write('{}: {}\n'.format(key, str(value)))
+        for key, arg in kwargs.items():
+            np.savetxt(path + '/' + key + '.txt', arg)
 
 
-def __init_optimizer(self):
-    if self.optimizer == 'adam':
-        self.__optimizer = torch.optim.Adam(self.net.parameters(),
-                                            lr=self.lr,
-                                            weight_decay=1e-4,  # 1e-8
-                                            betas=(0.9, 0.999))
-    else:
-        raise NotImplementedError
+    def __init_brain(self):
+        self.loss_history = None
+        self.encounter_nan = False
+        self.best_model = None
+        self.data.device = self.device
+        self.data.dtype = self.dtype
+        self.net.device = self.device
+        self.net.dtype = self.dtype
+        self.__init_optimizer()
+        self.__init_scheduler()
+        self.__init_criterion()
 
 
-def __init_scheduler(self):
-    if self.scheduler == 'no_scheduler':
-        self.__scheduler = no_scheduler(self.__optimizer)
-    elif self.scheduler == 'lr_decay':
-        self.__scheduler = lr_decay_scheduler(self.__optimizer, lr_decay=1000, iterations=self.iterations)
-    elif self.scheduler == 'MultiStepLR':
-        self.__scheduler = lr_scheduler.MultiStepLR(self.__optimizer,
-                                                    milestones=[3000, 9000, 15000],
-                                                    gamma=0.5)
-    elif self.scheduler == 'StepLR':
-        self.__scheduler = lr_scheduler.StepLR(self.__optimizer, step_size=700, gamma=0.7)
-    else:
-        raise NotImplementedError
+    def __init_optimizer(self):
+        if self.optimizer == 'adam':
+            self.__optimizer = torch.optim.Adam(self.net.parameters(),
+                                                lr=self.lr,
+                                                weight_decay=1e-4,  # 1e-8
+                                                betas=(0.9, 0.999))
+        else:
+            raise NotImplementedError
 
 
-def __init_criterion(self):
-    if isinstance(self.net, LossNN):
-        self.__criterion = self.net.criterion
-        if self.criterion is not None:
-            raise Warning('loss-oriented neural network has already implemented its loss function')
-    elif self.criterion == 'MSE':
-        self.__criterion = torch.nn.MSELoss()
-    else:
-        raise NotImplementedError
+    def __init_scheduler(self):
+        if self.scheduler == 'no_scheduler':
+            self.__scheduler = no_scheduler(self.__optimizer)
+        elif self.scheduler == 'lr_decay':
+            self.__scheduler = lr_decay_scheduler(self.__optimizer, lr_decay=1000, iterations=self.iterations)
+        elif self.scheduler == 'MultiStepLR':
+            self.__scheduler = lr_scheduler.MultiStepLR(self.__optimizer,
+                                                        milestones=[3000, 9000, 15000],
+                                                        gamma=0.5)
+        elif self.scheduler == 'StepLR':
+            self.__scheduler = lr_scheduler.StepLR(self.__optimizer, step_size=700, gamma=0.7)
+        else:
+            raise NotImplementedError
+
+
+    def __init_criterion(self):
+        if isinstance(self.net, LossNN):
+            self.__criterion = self.net.criterion
+            if self.criterion is not None:
+                raise Warning('loss-oriented neural network has already implemented its loss function')
+        elif self.criterion == 'MSE':
+            self.__criterion = torch.nn.MSELoss()
+        else:
+            raise NotImplementedError
