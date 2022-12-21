@@ -33,6 +33,11 @@ def dfx(f, x):
     return torch.autograd.grad(f, x, grad_outputs=torch.ones_like(f), retain_graph=True, create_graph=True)[0]
 
 
+def L2_loss(x, y):
+    num_examples = x.size()[0]
+    diff_norms = torch.norm(x.reshape(num_examples, -1) - y.reshape(num_examples, -1), 2, 1)
+    y_norms = torch.norm(y.reshape(num_examples, -1), 2, 1)
+    return torch.mean(diff_norms / y_norms)
 
 def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
