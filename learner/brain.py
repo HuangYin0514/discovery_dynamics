@@ -187,6 +187,7 @@ class Brain:
         self.loss_history = None
         self.encounter_nan = False
         self.best_model = None
+
         self.net.device = self.device
         self.net.dtype = self.dtype
 
