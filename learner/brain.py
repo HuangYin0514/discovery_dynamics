@@ -89,9 +89,9 @@ class Brain:
                 }
                 pbar.set_postfix(postfix)
             if torch.any(torch.isnan(loss)):
-                    self.encounter_nan = True
-                    print('Encountering nan, stop training', flush=True)
-                    return None
+                self.encounter_nan = True
+                print('Encountering nan, stop training', flush=True)
+                return None
             if self.save:
                 torch.save(self.net, 'training_file/' + self.taskname + '/model/model{}.pkl'.format(i))
             if i < self.iterations:
@@ -118,22 +118,23 @@ class Brain:
 
             path = './outputs/' + self.taskname
             if not os.path.isdir('./outputs/' + self.taskname): os.makedirs('./outputs/' + self.taskname)
+            contents = ('\n\n'
+                        + 'Train completion time: '
+                        + time.strftime('%Y-%m-%d-%H-%M-%S', time.localtime(time.time()))
+                        + '\n'
+                        + 'Task name: {}'.format(self.taskname)
+                        + '\n'
+                        + 'net name: {}'.format(self.net.name)
+                        + '\n'
+                        + 'Best model at iteration: {}'.format(iteration)
+                        + '\n'
+                        + 'Train loss: %s' % (loss_train)
+                        + '\n'
+                        + 'Test loss: %s' % (loss_test))
             f = open(path + '/output.txt', mode='a')
-            f.write('\n\n'
-                    + 'Train completion time: '
-                    + time.strftime('%Y-%m-%d-%H-%M-%S', time.localtime(time.time()))
-                    + '\n'
-                    + 'Task name: {}'.format(self.taskname)
-                    + '\n'
-                    + 'net name: {}'.format(self.net.name)
-                    + '\n'
-                    + 'Best model at iteration: {}'.format(iteration)
-                    + '\n'
-                    + 'Train loss: %s' % (loss_train)
-                    + '\n'
-                    + 'Test loss: %s' % (loss_test)
-                    )
+            f.write(contents)
             f.close()
+            print(contents)
             # self.best_model = torch.load('training_file/' + self.taskname + '/model/model{}.pkl'.format(iteration))
             self.best_model = torch.load(
                 'training_file/' + self.taskname + '/model/model{}.pkl'.format(self.iterations))
