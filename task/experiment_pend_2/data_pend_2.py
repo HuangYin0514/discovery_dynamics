@@ -2,7 +2,7 @@ import autograd
 import autograd.numpy as np
 
 import learner as ln
-from learner.integrator.rungekutta import RK4,RK45
+from learner.integrator.rungekutta import RK4, RK45
 
 
 class PendulumData(ln.Data):
@@ -29,13 +29,12 @@ class PendulumData(ln.Data):
 
         self.__init_data()
 
-    # def hamilton_right_fn(self, t, coords):
-    #     grad_ham = autograd.grad(self.hamilton_energy_fn)
-    #     grad = grad_ham(coords)
-    #     q, p = grad[self.dof:], -grad[:self.dof]
-    #     return np.asarray([q, p]).reshape(-1)
-
     def hamilton_right_fn(self, t, coords):
+        #     grad_ham = autograd.grad(self.hamilton_energy_fn)
+        #     grad = grad_ham(coords)
+        #     q, p = grad[self.dof:], -grad[:self.dof]
+        #     return np.asarray([q, p]).reshape(-1)
+
         """获取导数"""
         q1, q2, p1, p2 = coords
         l1, l2, m1, m2 = self.l[0], self.l[1], self.m[0], self.m[1]
@@ -48,7 +47,7 @@ class PendulumData(ln.Data):
                 2 * b ** 2)
         dp1 = -(m1 + m2) * g * l1 * np.sin(q1) - h1 + h2 * np.sin(2 * (q1 - q2))
         dp2 = -m2 * g * l2 * np.sin(q2) + h1 - h2 * np.sin(2 * (q1 - q2))
-        return np.asarray([ dq1, dq2, dp1, dp2]).reshape(-1)
+        return np.asarray([dq1, dq2, dp1, dp2]).reshape(-1)
 
     def hamiltonian_kinetic(self, coords):
         assert (len(coords) == self.dof * 2)
@@ -82,16 +81,16 @@ class PendulumData(ln.Data):
             (2 * m2 * (l1 ** 2) * (l2 ** 2) * (m1 + m2 * np.sin(q1 - q2) ** 2))
         return H
 
-    # def random_config(self, space, num):
-    #     qmin, qmax, pmin, pmax = space[0], space[1], space[2], space[3]
-    #     x0 = np.zeros((num, self.obj * 2))
-    #     for i in range(self.obj):
-    #         q = np.random.rand(num) * (qmax - qmin) + qmin
-    #         p = np.random.rand(num) * (pmax - pmin) + pmin
-    #         x0[..., i] = q
-    #         x0[..., i + self.obj] = p
-    #     return x0
     def random_config(self, space, num):
+
+        # qmin, qmax, pmin, pmax = space[0], space[1], space[2], space[3]
+        #     x0 = np.zeros((num, self.obj * 2))
+        #     for i in range(self.obj):
+        #         q = np.random.rand(num) * (qmax - qmin) + qmin
+        #         p = np.random.rand(num) * (pmax - pmin) + pmin
+        #         x0[..., i] = q
+        #         x0[..., i + self.obj] = p
+        #     return x0
         y0_list = []
         for i in range(num):
             max_momentum = 1.
