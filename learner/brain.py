@@ -103,18 +103,18 @@ class Brain:
                 return None
             if self.save:
                 torch.save(self.net, 'training_file/' + self.taskname + '/model/model{}.pkl'.format(i))
-        if i < self.iterations:
-            self.__optimizer.zero_grad()
-            loss.backward()
-            self.__optimizer.step()
-        if self.__scheduler is not None:
-            self.__scheduler.step()
+            if i < self.iterations:
+                self.__optimizer.zero_grad()
+                loss.backward()
+                self.__optimizer.step()
+            if self.__scheduler is not None:
+                self.__scheduler.step()
         loss_record = np.array(loss_history)
         np.savetxt('training_file/' + self.taskname + '/loss.txt', loss_record)
 
-    self.loss_history = np.array(loss_history)
-    print('Done!', flush=True)
-    return self.loss_history
+        self.loss_history = np.array(loss_history)
+        print('Done!', flush=True)
+        return self.loss_history
 
 
 def restore(self):
