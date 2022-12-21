@@ -203,6 +203,7 @@ class Brain:
 
     def __init_optimizer(self):
         if self.optimizer == 'adam':
+            print(self.net.parameters())
             self.__optimizer = torch.optim.Adam(self.net.parameters(),
                                                 lr=self.lr,
                                                 weight_decay=1e-4,  # 1e-8
