@@ -22,7 +22,7 @@ def polar2xy(x):
     return pos
 
 
-def plot_pend_traj(ax, truth_pos, net_pos, net_name, plot_color_marker):
+def plot_pend_trajectory(ax, truth_pos, net_pos, net_name, marker):
     time = min(400, len(net_pos) - 1)
 
     ax.set_xlabel('$x$ ($m$)')
@@ -30,7 +30,7 @@ def plot_pend_traj(ax, truth_pos, net_pos, net_name, plot_color_marker):
     for i in range(time - 3):
         ax.plot(truth_pos[i:i + 2, 2], truth_pos[i:i + 2, 3], 'k-', label='_nolegend_', linewidth=2,
                 alpha=0.2 + 0.8 * (i + 1) / time)
-        ax.plot(net_pos[i:i + 2, 2], net_pos[i:i + 2, 3], plot_color_marker, label='_nolegend_', linewidth=2,
+        ax.plot(net_pos[i:i + 2, 2], net_pos[i:i + 2, 3], marker, label='_nolegend_', linewidth=2,
                 alpha=0.2 + 0.8 * (i + 1) / time)
         if i % (time // 2) == 0:
             ax.plot([0, net_pos[i, 0]], [0, net_pos[i, 1]], color='brown', linewidth=2, label='_nolegend_',
@@ -42,7 +42,7 @@ def plot_pend_traj(ax, truth_pos, net_pos, net_name, plot_color_marker):
             ax.scatter(net_pos[i, 2], net_pos[i, 3], s=50, linewidths=2, facecolors='gray',
                        edgecolors='brown', label='_nolegend_', alpha=min(0.5 + 0.8 * (i + 1) / time, 1), zorder=3)
     ax.plot(truth_pos[time - 2:time, 2], truth_pos[time - 2:time, 3], 'k-', label='Ground truth', linewidth=2, alpha=1)
-    ax.plot(net_pos[time - 2:time, 2], net_pos[time - 2:time, 3], plot_color_marker, label=net_name.title(),
+    ax.plot(net_pos[time - 2:time, 2], net_pos[time - 2:time, 3], marker, label=net_name.title(),
             linewidth=2, alpha=1)
     ax.plot([0, net_pos[time, 0]], [0, net_pos[time, 1]], color='brown', linewidth=2, label='_nolegend_')
     ax.plot([net_pos[time, 0], net_pos[time, 2]], [net_pos[time, 1], net_pos[time, 3]], 'o-',
