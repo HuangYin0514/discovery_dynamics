@@ -75,21 +75,11 @@ def main():
             'energy': truth_e,
             'marker': 'k-',
         },
-        'baseline': {
-            'trajectory': hnn_traj,
-            'energy': hnn_e,
-            'marker': 'r--',
-        },
         'hnn': {
             'trajectory': hnn_traj,
             'energy': hnn_e,
             'marker': 'b-.',
-        },
-        'hnn2': {
-            'trajectory': hnn_traj,
-            'energy': hnn_e,
-            'marker': 'b-.',
-        },
+        }
     }
 
     # plot trajectories
