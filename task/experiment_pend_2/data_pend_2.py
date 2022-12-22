@@ -44,6 +44,7 @@ class PendulumData(ln.Data):
         return np.asarray([dq1, dq2, dp1, dp2]).reshape(-1)
 
     def hamilton_right_fn2(self, t, coords):
+        print("函数被废弃！！！！！！！！！！！！！！！！！！！！！！！")
         grad_ham = autograd.grad(self.hamilton_energy_fn)
         grad = grad_ham(coords)
         q, p = grad[self.dof:], -grad[:self.dof]
@@ -63,6 +64,7 @@ class PendulumData(ln.Data):
 
     def hamilton_energy_fn2(self, coords):
         """能量函数"""
+        print("函数被废弃！！！！！！！！！！！！！！！！！！！！！！！")
         H = self.hamiltonian_kinetic(coords) + self.hamiltonian_potential(coords)  # some error in this implementation
         return H
 
