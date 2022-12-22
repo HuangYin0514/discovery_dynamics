@@ -27,7 +27,7 @@ class RK4(RK):
         self.f = f
         self.t0 = t0
         self.t_end = t_end
-        print("Waring! you using the RK4 solver!!!!!!!!!!!!!!!!")
+        # print("Waring! you using the RK4 solver!!!!!!!!!!!!!!!!")
 
     def solver(self, y0, h):
         num = len(y0)

@@ -49,14 +49,14 @@ def main():
 
     # task variable
     # ground truth
+    truth_t = np.arange(args.t0, args.t_end, args.h)
     data = PendulumData(obj=args.obj, dim=args.dim,
                         train_num=args.train_num,
                         test_num=args.test_num,
                         m=[1 for i in range(args.obj)],
                         l=[1 for i in range(args.obj)])
-    # solver = ln.integrator.rungekutta.RK4(pendulumData.hamilton_right_fn, t0=t0, t_end=t_end)
-    truth_t = np.arange(args.t0, args.t_end, args.h)
-    solver = ln.integrator.rungekutta.RK45(data.hamilton_right_fn, t0=args.t0, t_end=args.t_end)
+    solver = ln.integrator.rungekutta.RK4(data.hamilton_right_fn,  t0=args.t0, t_end=args.t_end)
+    # solver = ln.integrator.rungekutta.RK45(data.hamilton_right_fn, t0=args.t0, t_end=args.t_end)
 
     # net
     input_dim = args.obj * args.dim * 2
@@ -120,7 +120,7 @@ def computer_trajectory(args, dataclass, method_solution):
         t_current = time.time()
         net_name = 'hnn'
         solver = method_solution[net_name]['solver']
-        traj = solver.predict(y0, args.h, args.t0, args.t_end, solver_method='RK45', circular_motion=True)
+        traj = solver.predict(y0, args.h, args.t0, args.t_end, solver_method='RK4', circular_motion=True)
         eng = np.asarray(list(map(lambda x: dataclass.hamilton_energy_fn(x), traj)))
         method_solution[net_name]['trajectory'].append(traj[:, :dof])
         method_solution[net_name]['energy'].append(eng)
