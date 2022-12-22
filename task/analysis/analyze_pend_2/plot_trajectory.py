@@ -24,6 +24,11 @@ parser.add_argument('--test_num', default=1, type=int, help='the number of sampl
 parser.add_argument('--load_net_path', default='', type=str, help='The path to load the pretrained network')
 # For other settings
 parser.add_argument('--dtype', default='float', type=str, help='Types of data and models')
+# For test
+parser.add_argument('--t0', default=0, type=int, help='number of elements')
+parser.add_argument('--t_end', default=10, type=int, help='number of elements')
+parser.add_argument('--h', default=0.02, type=int, help='number of elements')
+
 parser.set_defaults(feature=True)
 args = parser.parse_args()
 
@@ -37,12 +42,11 @@ def main():
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     print('Using the device is:', device)
     path = './outputs/'
-    save_path = path + '/analyze/analyze-pend-2/'
+    save_path = path + '/analyze/analyze_pend_2/'
     if not os.path.isdir(save_path): os.makedirs(save_path)
 
     # task variable
     y0 = np.array([1., 2., 0., 0.]).reshape(-1)
-    t0, t_end, h = 0, 10, 0.02
 
     # ground truth
     pendulumData = PendulumData(obj=args.obj, dim=args.dim,
@@ -51,9 +55,9 @@ def main():
                                 m=[1 for i in range(args.obj)],
                                 l=[1 for i in range(args.obj)])
     # solver = ln.integrator.rungekutta.RK4(pendulumData.hamilton_right_fn, t0=t0, t_end=t_end)
-    truth_t = np.arange(t0, t_end, h)
-    solver = ln.integrator.rungekutta.RK45(pendulumData.hamilton_right_fn, t0=t0, t_end=t_end)
-    truth_traj = solver.solve(y0, h)
+    truth_t = np.arange(args.t0, args.t_end, args.h)
+    solver = ln.integrator.rungekutta.RK45(pendulumData.hamilton_right_fn, t0=args.t0, t_end=args.t_end)
+    truth_traj = solver.solve(y0, args.h)
     truth_e = np.stack([pendulumData.hamilton_energy_fn(c) for c in truth_traj])
 
     # net
@@ -66,7 +70,7 @@ def main():
     hnn.device = device
     hnn.dtype = args.dtype
 
-    hnn_traj = hnn.predict(y0, h, t0, t_end, solver_method='RK45', circular_motion=True)
+    hnn_traj = hnn.predict(y0, args.h, args.t0, args.t_end, solver_method='RK45', circular_motion=True)
     hnn_e = np.stack([pendulumData.hamilton_energy_fn(c) for c in hnn_traj])
 
     method_solution = {

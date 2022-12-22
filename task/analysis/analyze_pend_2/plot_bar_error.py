@@ -26,6 +26,11 @@ parser.add_argument('--test_num', default=2, type=int, help='the number of sampl
 parser.add_argument('--load_net_path', default='', type=str, help='The path to load the pretrained network')
 # For other settings
 parser.add_argument('--dtype', default='float', type=str, help='Types of data and models')
+# For test
+parser.add_argument('--t0', default=0, type=int, help='number of elements')
+parser.add_argument('--t_end', default=30, type=int, help='number of elements')
+parser.add_argument('--h', default=0.05, type=int, help='number of elements')
+
 parser.set_defaults(feature=True)
 args = parser.parse_args()
 
@@ -39,12 +44,10 @@ def main():
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     print('Using the device is:', device)
     path = './outputs/'
-    save_path = path + '/analyze/analyze-pend-2/'
+    save_path = path + '/analyze/analyze_pend_2/'
     if not os.path.isdir(save_path): os.makedirs(save_path)
 
     # task variable
-    t0, t_end, h = 0, 5, 0.02
-
     # ground truth
     data = PendulumData(obj=args.obj, dim=args.dim,
                         train_num=args.train_num,
@@ -52,8 +55,8 @@ def main():
                         m=[1 for i in range(args.obj)],
                         l=[1 for i in range(args.obj)])
     # solver = ln.integrator.rungekutta.RK4(pendulumData.hamilton_right_fn, t0=t0, t_end=t_end)
-    truth_t = np.arange(t0, t_end, h)
-    solver = ln.integrator.rungekutta.RK45(data.hamilton_right_fn, t0=t0, t_end=t_end)
+    truth_t = np.arange(args.t0, args.t_end, args.h)
+    solver = ln.integrator.rungekutta.RK45(data.hamilton_right_fn, t0=args.t0, t_end=args.t_end)
 
     # net
     input_dim = args.obj * args.dim * 2
@@ -80,7 +83,7 @@ def main():
         },
     }
 
-    computer_trajectory(args, data, method_solution, t0, t_end, h)
+    computer_trajectory(args, data, method_solution)
     calculate_error(args, method_solution)
 
     # plot trajectories
@@ -96,9 +99,9 @@ def main():
     plt.show()
 
 
-def computer_trajectory(args, dataclass, method_solution, t0, t_end, h):
+def computer_trajectory(args, dataclass, method_solution):
+    print('Starting computer trajectory')
     dof = args.obj * args.dim
-
     pbar = tqdm(range(args.test_num), desc='Processing')
     for i in pbar:
         np.random.seed(i)
@@ -107,7 +110,7 @@ def computer_trajectory(args, dataclass, method_solution, t0, t_end, h):
         # ground truth
         t_current = time.time()
         solver = method_solution['ground_truth']['solver']
-        traj = solver.solve(y0, h)
+        traj = solver.solve(y0, args.h)
         eng = np.asarray(list(map(lambda x: dataclass.hamilton_energy_fn(x), traj)))
         method_solution['ground_truth']['trajectory'].append(traj[:, :dof])
         method_solution['ground_truth']['energy'].append(eng)
@@ -117,7 +120,7 @@ def computer_trajectory(args, dataclass, method_solution, t0, t_end, h):
         t_current = time.time()
         net_name = 'hnn'
         solver = method_solution[net_name]['solver']
-        traj = solver.predict(y0, h, t0, t_end, solver_method='RK45', circular_motion=True)
+        traj = solver.predict(y0, args.h, args.t0, args.t_end, solver_method='RK45', circular_motion=True)
         eng = np.asarray(list(map(lambda x: dataclass.hamilton_energy_fn(x), traj)))
         method_solution[net_name]['trajectory'].append(traj[:, :dof])
         method_solution[net_name]['energy'].append(eng)
@@ -145,8 +148,8 @@ def calculate_error(args, method_solution):
             pos_error_lisit.append(pos_error)
 
             truth_traj = method_solution['ground_truth']['energy'][i]
-            net_traj = method_solution[name]['energy'][i]
-            eng_error = np.linalg.norm(truth_traj - net_traj) / length
+            net_energy = method_solution[name]['energy'][i]
+            eng_error = np.linalg.norm(truth_traj - net_energy) / length
             eng_error_lisit.append(eng_error)
 
         content = ('\n'
