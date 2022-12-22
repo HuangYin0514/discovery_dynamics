@@ -139,7 +139,7 @@ def calculate_error(args, method_solution):
 
         pos_error_lisit = []
         eng_error_lisit = []
-        length = method_solution['ground_truth']['trajectory'][0]  # 时间步长度 (t_end - t0)/h
+        length = len(method_solution['ground_truth']['energy'][0])  # 时间步长度 (t_end - t0)/h
 
         for i in range(args.test_num):
             truth_traj = method_solution['ground_truth']['trajectory'][i]
@@ -147,9 +147,9 @@ def calculate_error(args, method_solution):
             pos_error = np.linalg.norm(truth_traj - net_traj) / length
             pos_error_lisit.append(pos_error)
 
-            truth_traj = method_solution['ground_truth']['energy'][i]
+            truth_energy = method_solution['ground_truth']['energy'][i]
             net_energy = method_solution[name]['energy'][i]
-            eng_error = np.linalg.norm(truth_traj - net_energy) / length
+            eng_error = np.linalg.norm(truth_energy - net_energy) / length
             eng_error_lisit.append(eng_error)
 
         content = ('\n'
