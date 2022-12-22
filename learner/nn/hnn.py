@@ -15,7 +15,7 @@ class HNN(LossNN):
     '''
 
     def __init__(self, dim, layers=3, width=30):
-        super(LossNN, self).__init__()
+        super(HNN, self).__init__()
         self.name = 'hnn'
 
         self.dim = dim
@@ -43,7 +43,7 @@ class HNN(LossNN):
         dy = self.J @ gradH.T  # dqq shape is (vector, batchsize)
         return dy.T
 
-    def criterion(self, y_hat, y, criterion_method='L2_norm_loss'):
+    def criterion(self, y_hat, y, criterion_method='MSELoss'):
         return self.__integrator_loss(y_hat, y, criterion_method)
 
     def __integrator_loss(self, y_hat, y, criterion_method):

@@ -1,5 +1,6 @@
 import os
 import time
+from functools import partial
 
 import numpy as np
 import torch
@@ -216,10 +217,7 @@ class Brain:
 
     def __init_criterion(self):
         if isinstance(self.net, LossNN):
-            self.__criterion = self.net.criterion
-            if self.criterion is not None:
-                raise Warning('loss-oriented neural network has already implemented its loss function')
-        elif self.criterion == 'MSE':
-            self.__criterion = torch.nn.MSELoss()
+            criterion = partial(self.net.criterion, criterion_method=self.criterion)
+            self.__criterion = criterion
         else:
-            raise NotImplementedError
+            raise NotImplementedError(' net must be LossNN instance')

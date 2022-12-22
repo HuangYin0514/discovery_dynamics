@@ -29,6 +29,7 @@ parser.add_argument('--width', default=200, type=int, help='number of width')
 parser.add_argument('--load_net_path', default='', type=str, help='The path to load the pretrained network')
 # For training settings
 parser.add_argument('--lr', default=1e-2, type=float, help='learning rate')
+parser.add_argument('--criterion', default='L2_norm_loss', type=str, help='Select criterion to learn')
 parser.add_argument('--optimizer', default='adam', type=str, help='Select optimizer to learn')
 parser.add_argument('--scheduler', default='MultiStepLR', type=str, help='Select scheduler to learn')
 parser.add_argument('--iterations', default=20, type=int, help='end of training epoch')
@@ -61,7 +62,7 @@ def run():
     arguments = {
         'taskname': args.taskname,
         'data': data,
-        'criterion': None,
+        'criterion': args.criterion,
         'optimizer': args.optimizer,
         'scheduler': args.scheduler,
         'lr': args.lr,
