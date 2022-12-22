@@ -53,7 +53,8 @@ def main():
     # solver = ln.integrator.rungekutta.RK4(pendulumData.hamilton_right_fn, t0=t0, t_end=t_end)
     truth_t = np.arange(t0, t_end, h)
     solver = ln.integrator.rungekutta.RK45(pendulumData.hamilton_right_fn, t0=t0, t_end=t_end)
-    traj_truth = solver.solve(y0, h)
+    truth_traj = solver.solve(y0, h)
+    truth_e = np.stack([pendulumData.hamilton_energy_fn(c) for c in truth_traj])
 
     # net
     input_dim = args.obj * args.dim * 2
@@ -66,22 +67,27 @@ def main():
     hnn.dtype = args.dtype
 
     hnn_traj = hnn.predict(y0, h, t0, t_end, solver_method='RK45', circular_motion=True)
+    hnn_e = np.stack([pendulumData.hamilton_energy_fn(c) for c in hnn_traj])
 
     method_solution = {
         'ground_truth': {
-            'trajectory': traj_truth,
+            'trajectory': truth_traj,
+            'energy': truth_e,
             'marker': 'k-',
         },
         'baseline': {
             'trajectory': hnn_traj,
+            'energy': hnn_e,
             'marker': 'r--',
         },
         'hnn': {
             'trajectory': hnn_traj,
+            'energy': hnn_e,
             'marker': 'b-.',
         },
         'hnn2': {
             'trajectory': hnn_traj,
+            'energy': hnn_e,
             'marker': 'b-.',
         },
     }
@@ -95,7 +101,7 @@ def main():
     plot_trajectory(ax[0, 1], 'hnn', method_solution)  # ax[0, 1]
 
     plot_coordinates_error(ax[1, 0], truth_t, method_solution)
-    plot_energy_error(ax[1, 1], pendulumData, truth_t, method_solution)
+    plot_energy_error(ax[1, 1], truth_t, method_solution)
 
     fig.set_tight_layout(True)
     fig.savefig(save_path + '/fig-trajectories.pdf', bbox_inches='tight')
@@ -127,22 +133,23 @@ def plot_coordinates_error(ax, t, method_solution):
         net_pos = ln.utils.polar2xy(method_solution[name]['trajectory'])
         error = ((truth_pos - net_pos) ** 2).mean(-1)
         ax.semilogy(t, error, value['marker'], label=name, linewidth=LINE_WIDTH)
+    ax.set_yscale('log')
     ax.legend(fontsize=LEGENDSIZE)
 
 
-def plot_energy_error(ax, data, t, method_solution):
+def plot_energy_error(ax, t, method_solution):
     ax.set_title("MSE of total energy")
     ax.set_xlabel('Time step ($s$)')
     ax.set_ylabel('$E\;(J)$')
 
-    true_e = np.stack([data.hamilton_energy_fn(c) for c in method_solution['ground_truth']['trajectory']])
-
     for name, value in method_solution.items():
         if name == 'ground_truth': continue
-        net_e = np.stack([data.hamilton_energy_fn(c) for c in value['trajectory']])
+        true_e = method_solution['ground_truth']['energy']
+        net_e = method_solution[name]['energy']
         error = (true_e - net_e) ** 2
         ax.semilogy(t, error, value['marker'], label=name, linewidth=LINE_WIDTH)
 
+    ax.set_yscale('log')
     ax.legend(fontsize=LEGENDSIZE)
 
 
