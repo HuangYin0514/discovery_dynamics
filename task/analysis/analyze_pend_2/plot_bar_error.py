@@ -194,7 +194,7 @@ def plot_energy_error(ax, args, method_solution, t):
     ax.legend(fontsize=LEGENDSIZE)
 
     ax.grid('on')
-    ax.set_ylabel('MSE of energy ($m$)')
+    ax.set_ylabel('MSE of energy ($J$)')
     ax.set_xlabel('Time ($s$)')
 
 
