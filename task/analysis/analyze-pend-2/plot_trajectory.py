@@ -18,7 +18,7 @@ parser.add_argument('--seed', default=0, type=int, help='random seed')
 # For task
 parser.add_argument('--obj', default=2, type=int, help='number of elements')
 parser.add_argument('--dim', default=1, type=int, help='degree of freedom')
-parser.add_argument('--train_num', default=1, type=int, help='the number of sampling trajectories')
+parser.add_argument('--train_num', default=0, type=int, help='the number of sampling trajectories')
 parser.add_argument('--test_num', default=1, type=int, help='the number of sampling trajectories')
 # For net
 parser.add_argument('--load_net_path', default='', type=str, help='The path to load the pretrained network')
