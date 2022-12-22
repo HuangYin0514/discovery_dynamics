@@ -155,9 +155,9 @@ def calculate_error(args, method_solution):
         content = ('\n'
                    + 'Model name: {}'.format(name)
                    + '\n'
-                   + 'Position error: {} +/- {} '.format(np.mean(pos_error_lisit), np.std(pos_error_lisit))
+                   + 'Position error: {:.3e} +/- {:.3e} '.format(np.mean(pos_error_lisit), np.std(pos_error_lisit))
                    + '\n'
-                   + 'Energy error: {} +/- {} '.format(np.mean(eng_error_lisit), np.std(eng_error_lisit)))
+                   + 'Energy error: {:.3e} +/- {:.3e} '.format(np.mean(eng_error_lisit), np.std(eng_error_lisit)))
         print(content)
 
 
