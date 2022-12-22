@@ -169,7 +169,7 @@ class Brain:
             plt.show()
 
         if info is not None:
-            filename = '/info-{}-{}.txt'.format(self.taskname, self.net.name)
+            filename = '/info-{}.txt'.format(self.taskname)
             with open(path + filename, 'w') as f:
                 for key, value in info.items():
                     f.write('{}: {}\n'.format(key, str(value)))

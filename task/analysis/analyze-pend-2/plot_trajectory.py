@@ -59,6 +59,8 @@ def main():
     input_dim = args.obj * args.dim * 2
     hnn = ln.nn.HNN(dim=input_dim, layers=1, width=200)
     local = path + 'pend_2_hnn/model-pend_2_hnn.pkl'
+    # local_url = 'https://drive.google.com/file/d/1bMzjQvPQZW2ByRQw0I0IQ67U2p8xzkh2/view?usp=share_link'
+    # ln.utils.download_file_from_google_drive(local_url, local)
     ln.utils.load_network(hnn, local, device)
     hnn.device = device
     hnn.dtype = args.dtype
@@ -98,6 +100,7 @@ def main():
     fig.set_tight_layout(True)
     fig.savefig(save_path + '/fig-trajectories.pdf', bbox_inches='tight')
     plt.show()
+
 
 def plot_trajectory(ax, method_name, method_solution):
     truth_pos = ln.utils.polar2xy(method_solution['ground_truth']['trajectory'])
