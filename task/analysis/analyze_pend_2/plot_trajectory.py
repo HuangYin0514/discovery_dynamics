@@ -27,7 +27,7 @@ parser.add_argument('--dtype', default='float', type=str, help='Types of data an
 # For test
 parser.add_argument('--t0', default=0, type=int, help='number of elements')
 parser.add_argument('--t_end', default=10, type=int, help='number of elements')
-parser.add_argument('--h', default=0.02, type=int, help='number of elements')
+parser.add_argument('--h', default=0.02, type=float, help='number of elements')
 
 parser.set_defaults(feature=True)
 args = parser.parse_args()
