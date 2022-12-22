@@ -105,7 +105,7 @@ def computer_trajectory(args, dataclass, method_solution):
     pbar = tqdm(range(args.test_num), desc='Processing')
     for i in pbar:
         np.random.seed(i)
-        y0 = dataclass.random_config().reshape(-1)
+        y0 = dataclass.random_config(1).reshape(-1)
 
         # ground truth
         t_current = time.time()

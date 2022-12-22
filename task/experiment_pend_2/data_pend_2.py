@@ -98,7 +98,7 @@ class PendulumData(ln.Data):
                 momentum = (2 * np.random.rand() - 1) * max_momentum  # [-1, 1]*max_momentum
                 x0[i] = theta
                 x0[i + self.obj] = momentum
-            x0_list.append(x0)
+            x0_list.append(x0.reshape(-1))
         return np.asarray(x0_list)
 
     def __init_data(self):
