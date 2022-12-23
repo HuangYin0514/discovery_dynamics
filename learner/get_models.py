@@ -7,7 +7,7 @@ from .utils import count_parameters, load_network
 def get_model(args, device):
     if args.net == 'hnn':
         input_dim = args.obj * args.dim * 2
-        net = HNN(dim=input_dim, layers=args.layers, width=args.width)
+        net = HNN(dim=input_dim, layers=1, width=200)
     else:
         raise ValueError('Model \'{}\' is not implemented'.format(args.net))
 

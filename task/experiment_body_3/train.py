@@ -6,20 +6,20 @@ import numpy as np
 import torch
 
 import learner as ln
-from data_pend_2 import PendulumData
+from data_body_3 import BodyData
 
 sys.path.append('.')
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 
 parser = argparse.ArgumentParser(description=None)
 # For general settings
-parser.add_argument('--taskname', default='pend_2_hnn', type=str, help='Task name')
+parser.add_argument('--taskname', default='body_3_hnn', type=str, help='Task name')
 parser.add_argument('--net', default='hnn', type=str, help='Select model to train')
 parser.add_argument('--seed', default=0, type=int, help='random seed')
 # For task
 parser.add_argument('--tasktype', default='pend', type=str, help='Task type')
-parser.add_argument('--obj', default=2, type=int, help='number of elements')
-parser.add_argument('--dim', default=1, type=int, help='degree of freedom')
+parser.add_argument('--obj', default=3, type=int, help='number of elements')
+parser.add_argument('--dim', default=2, type=int, help='degree of freedom')
 parser.add_argument('--train_num', default=3, type=int, help='the number of sampling trajectories')
 parser.add_argument('--test_num', default=2, type=int, help='the number of sampling trajectories')
 parser.add_argument('--dataset_url', default='', type=str, help='Download dataset from Internet')
@@ -47,11 +47,11 @@ def run():
     print('Using the device is:', device)
 
     # data
-    data = PendulumData(obj=args.obj, dim=args.dim,
-                        train_num=args.train_num,
-                        test_num=args.test_num,
-                        m=[1 for i in range(args.obj)],
-                        l=[1 for i in range(args.obj)])
+    data = BodyData(obj=args.obj, dim=args.dim,
+                    train_num=args.train_num,
+                    test_num=args.test_num,
+                    m=[1 for i in range(args.obj)],
+                    l=[1 for i in range(args.obj)])
     data = ln.get_dataset(args, data)
 
     # net
