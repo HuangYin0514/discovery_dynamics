@@ -6,7 +6,6 @@ import numpy as np
 import torch
 
 import learner as ln
-from pend_2_data import PendulumBaseData
 
 sys.path.append('.')
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -18,6 +17,7 @@ parser.add_argument('--net', default='hnn', type=str, help='Select model to trai
 parser.add_argument('--seed', default=0, type=int, help='random seed')
 # For task
 parser.add_argument('--tasktype', default='pend', type=str, help='Task type')
+parser.add_argument('--data_name', default='PendulumData', type=str, help='choose data')
 parser.add_argument('--obj', default=2, type=int, help='number of elements')
 parser.add_argument('--dim', default=1, type=int, help='degree of freedom')
 parser.add_argument('--train_num', default=3, type=int, help='the number of sampling trajectories')
@@ -47,12 +47,7 @@ def run():
     print('Using the device is:', device)
 
     # data
-    data = PendulumBaseData(obj=args.obj, dim=args.dim,
-                            train_num=args.train_num,
-                            test_num=args.test_num,
-                            m=[1 for i in range(args.obj)],
-                            l=[1 for i in range(args.obj)])
-    data = ln.get_dataset(args, data)
+    data = ln.get_dataset(args)
 
     # net
     net = ln.get_model(args, device=device)

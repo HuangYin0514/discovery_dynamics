@@ -5,9 +5,9 @@ import learner as ln
 from learner.integrator.rungekutta import RK4, RK45
 
 
-class PendulumData(ln.Data):
+class PendulumBaseData(ln.BaseData):
     def __init__(self, obj, dim, train_num, test_num, m=None, l=None, **kwargs):
-        super(PendulumData, self).__init__()
+        super(PendulumBaseData, self).__init__()
 
         self.train_num = train_num
         self.test_num = test_num

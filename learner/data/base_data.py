@@ -5,7 +5,7 @@ import numpy as np
 import torch
 
 
-class Data:
+class BaseData:
     '''Standard data format. 
     '''
 
@@ -62,19 +62,19 @@ class Data:
 
     @property
     def X_train_np(self):
-        return Data.to_np(self.X_train)
+        return BaseData.to_np(self.X_train)
 
     @property
     def y_train_np(self):
-        return Data.to_np(self.y_train)
+        return BaseData.to_np(self.y_train)
 
     @property
     def X_test_np(self):
-        return Data.to_np(self.X_test)
+        return BaseData.to_np(self.X_test)
 
     @property
     def y_test_np(self):
-        return Data.to_np(self.y_test)
+        return BaseData.to_np(self.y_test)
 
     @staticmethod
     def to_np(d):

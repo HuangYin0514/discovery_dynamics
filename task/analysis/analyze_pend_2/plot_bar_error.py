@@ -9,7 +9,7 @@ import torch
 from tqdm import tqdm
 
 import learner as ln
-from task.experiment_pend_2.data_pend_2 import PendulumData
+from task.experiment_pend_2.pend_2_data import PendulumBaseData
 
 sys.path.append('.')
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -50,11 +50,11 @@ def main():
     # task variable
     # ground truth
     truth_t = np.arange(args.t0, args.t_end, args.h)
-    data = PendulumData(obj=args.obj, dim=args.dim,
-                        train_num=args.train_num,
-                        test_num=args.test_num,
-                        m=[1 for i in range(args.obj)],
-                        l=[1 for i in range(args.obj)])
+    data = PendulumBaseData(obj=args.obj, dim=args.dim,
+                            train_num=args.train_num,
+                            test_num=args.test_num,
+                            m=[1 for i in range(args.obj)],
+                            l=[1 for i in range(args.obj)])
     solver = ln.integrator.rungekutta.RK4(data.hamilton_right_fn,  t0=args.t0, t_end=args.t_end)
     # solver = ln.integrator.rungekutta.RK45(data.hamilton_right_fn, t0=args.t0, t_end=args.t_end)
 

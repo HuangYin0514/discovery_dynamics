@@ -6,7 +6,7 @@ import numpy as np
 import torch
 
 import learner as ln
-from data_body_3 import BodyData
+from data_body_3 import BodyBaseData
 
 sys.path.append('.')
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -47,11 +47,11 @@ def run():
     print('Using the device is:', device)
 
     # data
-    data = BodyData(obj=args.obj, dim=args.dim,
-                    train_num=args.train_num,
-                    test_num=args.test_num,
-                    m=[1 for i in range(args.obj)],
-                    l=[1 for i in range(args.obj)])
+    data = BodyBaseData(obj=args.obj, dim=args.dim,
+                        train_num=args.train_num,
+                        test_num=args.test_num,
+                        m=[1 for i in range(args.obj)],
+                        l=[1 for i in range(args.obj)])
     data = ln.get_dataset(args, data)
 
     # net

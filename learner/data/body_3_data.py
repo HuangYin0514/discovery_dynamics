@@ -1,13 +1,13 @@
 import autograd
 import autograd.numpy as np
 
-import learner as ln
+from .base_data import BaseData
 from learner.integrator.rungekutta import RK4, RK45
 
 
-class BodyBaseData(ln.BaseData):
+class BodyData(BaseData):
     def __init__(self, obj, dim, train_num, test_num, m=None, l=None, **kwargs):
-        super(BodyBaseData, self).__init__()
+        super(BodyData, self).__init__()
 
         self.train_num = train_num
         self.test_num = test_num
