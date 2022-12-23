@@ -28,6 +28,17 @@ jt -t solarizedl -fs 11 -cellw 65% -ofs 11 -dfs 11 -T -N
     --iterations 10000 \
     --print_every 1
 
- %run  ./task/analysis/analyze-pend-2/plot_traj.py
+ %run  ./task/analysis/analyze_pend_2/plot_trajectory.py \
+    --test_num 1 \
+    --t0 0 \
+    --t_end 10 \
+    --h 0.02
 
- %rm -rf ./training_file
+%run  ./task/analysis/analyze_pend_2/plot_bar_error.py  \
+    --test_num 100 \
+    --t0 0 \
+    --t_end 30 \
+    --h 0.05
+
+
+%rm -rf ./training_file
