@@ -67,7 +67,7 @@ def run():
         'scheduler': args.scheduler,
         'lr': args.lr,
         'iterations': args.iterations,
-        'batch_size': None, # NoImplementation
+        'batch_size': None,  # NoImplementation
         'print_every': args.print_every,
         'save': True,
         'dtype': args.dtype,
