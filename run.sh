@@ -30,3 +30,24 @@
     --h 0.05
 
 %rm -rf ./training_file
+
+########################################################
+
+%run  ./task/train.py \
+    --taskname body_3_hnn \
+    --tasktype body \
+    --net_name hnn \
+    --data_name BodyData \
+    --obj 3 \
+    --dim 2 \
+    --train_num 180 \
+    --test_num 20 \
+    --lr 1e-3 \
+    --criterion L2_norm_loss \
+    --optimizer adam \
+    --scheduler MultiStepLR \
+    --iterations 3000 \
+    --print_every 1
+
+
+%rm -rf ./training_file
