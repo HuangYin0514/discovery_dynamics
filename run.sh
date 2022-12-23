@@ -1,15 +1,4 @@
 ########################################################
-conda activate pytorch
-cd C:\Users\qxcc-qdu\PycharmProjects\discovery_dynamics\baseline
-jupyter notebook
-
-#-----------------------
-rm  .\experiment-pend-2\data\
-
-jt -t  solarizedl
-jt -t solarizedl -fs 11 -cellw 65% -ofs 11 -dfs 11 -T -N
-
-########################################################
 
 # 双摆
 %run  ./task/train.py \
@@ -39,6 +28,5 @@ jt -t solarizedl -fs 11 -cellw 65% -ofs 11 -dfs 11 -T -N
     --t0 0 \
     --t_end 30 \
     --h 0.05
-
 
 %rm -rf ./training_file
