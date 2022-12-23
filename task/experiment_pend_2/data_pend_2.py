@@ -22,7 +22,7 @@ class PendulumData(ln.Data):
 
         t0 = 0
         t_end = 10
-        self.h = 0.01
+        self.h = 0.1
         self.solver = RK45(self.hamilton_right_fn, t0=t0, t_end=t_end)
 
     def Init_data(self):
