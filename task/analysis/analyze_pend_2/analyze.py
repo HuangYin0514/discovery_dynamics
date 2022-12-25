@@ -69,6 +69,7 @@ def main():
     hnn.device = device
     hnn.dtype = args.dtype
 
+    # result dict
     method_solution = {
         'ground_truth': {
             'solver': solver,
@@ -84,6 +85,7 @@ def main():
         },
     }
 
+    # plot the solution
     draw_one_sample_error_curve(data, method_solution, truth_t, save_path)
     draw_more_sample_error_curve(data, method_solution, truth_t, save_path)
 
@@ -171,7 +173,10 @@ def plot_one_sample_energy_error(ax, t, method_solution):
 def draw_more_sample_error_curve(dataclass, method_solution, truth_t, save_path):
     method_solution = copy.deepcopy(method_solution)
 
+    # Compute the trajectory for each model
     calculate_more_sample_trajectory(args, dataclass, method_solution)
+
+    # Calculate the error between each model's trajectory and the true trajectory
     calculate_more_sample_trajectory_error(args, method_solution)
 
     # plot trajectories
@@ -179,6 +184,7 @@ def draw_more_sample_error_curve(dataclass, method_solution, truth_t, save_path)
     fig.subplots_adjust(left=None, bottom=None, right=None, top=None,
                         wspace=0.01, hspace=0)
 
+    # plot each trajectory and energy error
     plot_more_sample_trajectory_error(ax[0], args, method_solution, truth_t)
     plot_more_sample_energy_error(ax[1], args, method_solution, truth_t)
 
