@@ -72,10 +72,15 @@ def main():
     input_dim = args.obj * args.dim * 2
     hnn = ln.nn.HNN(dim=input_dim, layers=1, width=200)
     local = path + 'pend_2_hnn/model-pend_2_hnn.pkl'
-    '''
+    
     input_dim = args.obj * args.dim * 2
     net = ln.nn.Baseline(dim=input_dim, layers=1, width=200)
     local = path + 'pend_2_baseline/model-pend_2_baseline.pkl'
+
+    '''
+    input_dim = args.obj * args.dim * 2
+    hnn = ln.nn.HNN(dim=input_dim, layers=1, width=200)
+    local = path + 'pend_2_hnn/model-pend_2_hnn.pkl'
 
     ln.utils.load_network(net, local, device)
     net.device = device
