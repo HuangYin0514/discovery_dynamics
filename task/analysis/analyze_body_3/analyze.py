@@ -69,7 +69,7 @@ def main():
     ln.utils.download_file_from_google_drive(local_url, local)
 
     input_dim = args.obj * args.dim * 2
-    hnn = ln.nn.HNN(dim=input_dim, layers=1, width=200)
+    net = ln.nn.HNN(dim=input_dim, layers=1, width=200)
     local = path + 'body_3_hnn/model-body_3_hnn.pkl'
     '''
     input_dim = args.obj * args.dim * 2
