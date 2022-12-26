@@ -60,14 +60,22 @@ def main():
     solver = ln.integrator.rungekutta.RK4(data.hamilton_right_fn, t0=args.t0, t_end=args.t_end)
 
     # net
+    '''
+    # download file 
+    local_url = 'https://drive.google.com/file/d/1bMzjQvPQZW2ByRQw0I0IQ67U2p8xzkh2/view?usp=share_link'
+    ln.utils.download_file_from_google_drive(local_url, local)
+
     input_dim = args.obj * args.dim * 2
     hnn = ln.nn.HNN(dim=input_dim, layers=1, width=200)
     local = path + 'body_3_hnn/model-body_3_hnn.pkl'
-    # local_url = 'https://drive.google.com/file/d/1bMzjQvPQZW2ByRQw0I0IQ67U2p8xzkh2/view?usp=share_link'
-    # ln.utils.download_file_from_google_drive(local_url, local)
-    ln.utils.load_network(hnn, local, device)
-    hnn.device = device
-    hnn.dtype = args.dtype
+    '''
+    input_dim = args.obj * args.dim * 2
+    net = ln.nn.Baseline(dim=input_dim, layers=1, width=200)
+    local = path + 'body_3_baseline/model-body_3_baseline.pkl'
+
+    ln.utils.load_network(net, local, device)
+    net.device = device
+    net.dtype = args.dtype
 
     # result dict
     method_solution = {
@@ -77,15 +85,16 @@ def main():
             'energy': [],
             'marker': 'k-',
         },
-        'hnn': {
-            'solver': hnn,
+        'net': {
+            'solver': net,
             'trajectory': [],
             'energy': [],
             'marker': 'r-.',
         },
     }
 
-    # # plot the solution
+
+    # plot the solution
     draw_one_sample_error_curve(args, data, method_solution, truth_t, save_path)
     draw_more_sample_error_curve(args, data, method_solution, truth_t, save_path)
 
@@ -134,10 +143,10 @@ def draw_one_sample_error_curve(args, dataclass, method_solution, truth_t, save_
                         wspace=0.01, hspace=0)
 
     plot_one_sample_trajectory(ax[0, 0], 'ground_truth', method_solution)  # ax[0, 1]
-    plot_one_sample_trajectory(ax[0, 1], 'hnn', method_solution)
+    plot_one_sample_trajectory(ax[0, 1], 'net', method_solution)
 
     plot_one_sample_energy(ax[1, 0], dataclass, 'ground_truth', method_solution, truth_t)
-    plot_one_sample_energy(ax[1, 1], dataclass, 'hnn', method_solution, truth_t)
+    plot_one_sample_energy(ax[1, 1], dataclass, 'net', method_solution, truth_t)
 
     plt.tight_layout()
     fig.savefig(save_path + '/fig-trajectories.pdf', bbox_inches='tight')
