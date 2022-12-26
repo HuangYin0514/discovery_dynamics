@@ -200,27 +200,27 @@ def calculate_more_sample_trajectory_error(args, method_solution):
     for name, value in method_solution.items():
         if name == 'ground_truth': continue
 
-        pos_error_lisit = []
-        eng_error_lisit = []
+        pos_error_list = []
+        eng_error_list = []
         length = len(method_solution['ground_truth']['energy'][0])  # 时间步长度 (t_end - t0)/h
 
         for i in range(args.test_num):
             truth_traj = method_solution['ground_truth']['trajectory'][i][:, :dof]
             net_traj = method_solution[name]['trajectory'][i][:, :dof]
             pos_error = np.linalg.norm(truth_traj - net_traj) / length
-            pos_error_lisit.append(pos_error)
+            pos_error_list.append(pos_error)
 
             truth_energy = method_solution['ground_truth']['energy'][i]
             net_energy = method_solution[name]['energy'][i]
             eng_error = np.linalg.norm(truth_energy - net_energy) / length
-            eng_error_lisit.append(eng_error)
+            eng_error_list.append(eng_error)
 
         content = ('\n'
                    + 'Model name: {}'.format(name)
                    + '\n'
-                   + 'Position error: {:.3e} +/- {:.3e} '.format(np.mean(pos_error_lisit), np.std(pos_error_lisit))
+                   + 'Position error: {:.3e} +/- {:.3e} '.format(np.mean(pos_error_list), np.std(pos_error_list))
                    + '\n'
-                   + 'Energy error: {:.3e} +/- {:.3e} '.format(np.mean(eng_error_lisit), np.std(eng_error_lisit)))
+                   + 'Energy error: {:.3e} +/- {:.3e} '.format(np.mean(eng_error_list), np.std(eng_error_list)))
         print(content)
 
 
