@@ -18,7 +18,7 @@ def choose_data(data_name, train_num, test_num, obj, dim):
                             train_num=train_num,
                             test_num=test_num,
                             m=[1 for i in range(obj)],
-                            l=[1 for i in range(obj)])
+                            l=[0 for i in range(obj)])
     else:
         raise NotImplementedError
 
