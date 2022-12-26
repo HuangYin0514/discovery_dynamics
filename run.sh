@@ -36,19 +36,35 @@
 # %%time
 
 %run  ./task/train.py \
-    --taskname body_3_hnn \
-    --tasktype body \
+    --taskname pend_2_hnn \
+    --tasktype pend \
     --net_name hnn \
-    --data_name BodyData \
-    --obj 3 \
-    --dim 2 \
-    --train_num 180 \
-    --test_num 20 \
-    --lr 1e-3 \
+    --data_name PendulumData \
+    --obj 2 \
+    --dim 1 \
+    --train_num 90 \
+    --test_num 10 \
+    --lr 1e-2 \
     --criterion L2_norm_loss \
     --optimizer adam \
     --scheduler MultiStepLR \
-    --iterations 3000 \
+    --iterations 10000 \
+    --print_every 1
+
+%run  ./task/train.py \
+    --taskname pend_2_baseline \
+    --tasktype pend \
+    --net_name baseline \
+    --data_name PendulumData \
+    --obj 2 \
+    --dim 1 \
+    --train_num 90 \
+    --test_num 10 \
+    --lr 1e-2 \
+    --criterion L2_norm_loss \
+    --optimizer adam \
+    --scheduler MultiStepLR \
+    --iterations 10000 \
     --print_every 1
 
 %run  ./task/analysis/analyze_body_3/analyze.py \
