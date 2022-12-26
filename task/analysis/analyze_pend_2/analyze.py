@@ -28,8 +28,8 @@ parser.add_argument('--load_net_path', default='', type=str, help='The path to l
 parser.add_argument('--dtype', default='float', type=str, help='Types of data and models')
 # For test
 parser.add_argument('--t0', default=0, type=int, help='number of elements')
-parser.add_argument('--t_end', default=5, type=int, help='number of elements')
-parser.add_argument('--h', default=0.01, type=float, help='number of elements')
+parser.add_argument('--t_end', default=30, type=int, help='number of elements')
+parser.add_argument('--h', default=0.05, type=float, help='number of elements')
 
 parser.set_defaults(feature=True)
 args = parser.parse_args()
