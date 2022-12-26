@@ -1,6 +1,6 @@
 import os
 
-from .nn import HNN
+from .nn import HNN, Baseline
 from .utils import count_parameters, load_network, download_file_from_google_drive, timing
 
 
@@ -8,11 +8,13 @@ def choose_model(net_name, obj, dim):
     if net_name == 'hnn':
         input_dim = obj * dim * 2
         net = HNN(dim=input_dim, layers=1, width=200)
+    elif net_name == 'baseline':
+        input_dim = obj * dim * 2
+        net = Baseline(dim=input_dim, layers=1, width=200)
     else:
         raise ValueError('Model \'{}\' is not implemented'.format(net_name))
 
     return net
-
 
 
 @timing
@@ -30,7 +32,6 @@ def get_model(taskname, net_name, obj, dim, net_url, load_net_path, device):
         filename = data_path + '/model_{}.pkl'.format(taskname)
 
         download_file_from_google_drive(net_url, filename)
-
 
     if os.path.exists(load_net_path):
         load_network(net, load_net_path, device)

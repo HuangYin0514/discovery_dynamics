@@ -10,9 +10,10 @@ if __name__ == '__main__':
 
     '''
         model = ln.nn.FNN(4, 1, width=200)
-    '''
-    model = ln.nn.HNN(4, layers=1, width=200)
+        model = ln.nn.HNN(4, layers=1, width=200)
 
+    '''
+    model = ln.nn.Baseline(4, layers=1, width=200)
     model.device = "cpu"
     model.dtype = "float"
     print(model)
@@ -20,7 +21,7 @@ if __name__ == '__main__':
     test_output = model(test_input)
     print(test_output.shape)
 
-    loss = model.criterion(test_input, test_target, criterion='MSELoss')
+    loss = model.criterion(test_input, test_target, criterion_method='MSELoss')
     print(loss)
 
     h = 0.05
