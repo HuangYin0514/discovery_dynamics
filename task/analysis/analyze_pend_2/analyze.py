@@ -59,8 +59,8 @@ def main():
                                 l=[1 for i in range(args.obj)])
 
     # ground truth
-    # solver = ln.integrator.rungekutta.RK45(data.hamilton_right_fn, t0=args.t0, t_end=args.t_end)
-    solver = ln.integrator.rungekutta.RK4(data.hamilton_right_fn, t0=args.t0, t_end=args.t_end)
+    solver = ln.integrator.rungekutta.RK45(data.hamilton_right_fn, t0=args.t0, t_end=args.t_end)
+    # solver = ln.integrator.rungekutta.RK4(data.hamilton_right_fn, t0=args.t0, t_end=args.t_end)
 
     # net
 
@@ -124,7 +124,8 @@ def calculate_sample_trajectory(args, dataclass, method_solution, test_num):
                 method_solution['ground_truth']['energy'].append(eng)
             else:
                 solver = method_solution[name]['solver']
-                traj = solver.predict(y0, args.h, args.t0, args.t_end, solver_method='RK4', circular_motion=True)
+                traj = solver.predict(y0, args.h, args.t0, args.t_end, solver_method='RK45', circular_motion=True)
+                # traj = solver.predict(y0, args.h, args.t0, args.t_end, solver_method='RK4', circular_motion=True)
                 eng = np.asarray(list(map(lambda x: dataclass.hamilton_energy_fn(x), traj)))
                 method_solution[name]['trajectory'].append(traj)
                 method_solution[name]['energy'].append(eng)
