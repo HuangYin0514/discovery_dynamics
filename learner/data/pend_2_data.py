@@ -60,7 +60,7 @@ class PendulumData(BaseData):
         H = (m1 + m2) * self.g * l1 * (-np.cos(q1)) + m2 * self.g * l2 * (-np.cos(q2)) \
             + ((m1 + m2) * l1 ** 2 * p2 ** 2 + m2 * l2 ** 2 * p1 ** 2 - 2 * m2 * l1 * l2 * p1 * p2 * np.cos(q1 - q2)) / \
             (2 * m2 * (l1 ** 2) * (l2 ** 2) * (m1 + m2 * np.sin(q1 - q2) ** 2))
-        return H
+        return np.asarray(H).reshape(-1)
 
     def hamilton_energy_fn2(self, coords):
         """能量函数"""
@@ -68,8 +68,31 @@ class PendulumData(BaseData):
         H = self.hamiltonian_kinetic(coords) + self.hamiltonian_potential(coords)  # some error in this implementation
         return H
 
+    def position_transformation_H2L(self, coords):
+        """
+        将哈密顿坐标p转换为拉格朗日坐标dth
+        """
+        th1, th2, p1, p2 = coords
+        denominator1 = self.l[0] ** 2 * self.l[1] * (self.m[0] + self.m[1] * np.sin(th1 - th2) ** 2)
+        denominator2 = self.m[1] * self.l[0] * self.l[1] ** 2 * (self.m[0] + self.m[1] * np.sin(th1 - th2) ** 2)
+        dth1 = (self.l[1] * p1 - self.l[0] * p2 * np.cos(th1 - th2)) / denominator1
+        dth2 = (-1 * self.m[1] * self.l[1] * p1 * np.cos(th1 - th2) + (self.m[0] + self.m[1]) * self.l[
+            0] * p2) / denominator2
+        return np.asarray([th1, th2, dth1, dth2]).reshape(-1)
+
+    def position_transformation_L2H(self, coords):
+        """
+        将拉格朗日坐标dth转换为哈密顿坐标p
+        """
+        th1, th2, dth1, dth2 = coords
+        dq1 = self.l[0] * (self.l[0] * self.m[0] * dth1 + self.m[1] * (
+                    self.l[0] * dth1 + self.l[1] * np.cos(th1 - th2) * dth2))
+        dq2 = self.l[1] * self.m[1] * (self.l[0] * np.cos(th1 - th2) * dth1 + self.l[1] * dth2)
+        return np.asarray([th1, th2, dq1, dq2]).reshape(-1)
+
     def hamiltonian_kinetic(self, coords):
         assert (len(coords) == self.dof * 2)
+        coords = self.position_transformation_H2L(coords)
         T = 0.
         vx, vy = 0., 0.
         for i in range(self.obj):
@@ -110,7 +133,7 @@ class PendulumData(BaseData):
         X = self.__generate(x0, h)
         X = np.concatenate(X)
         y = np.asarray(list(map(lambda x: self.hamilton_right_fn(None, x), X)))
-        E = np.array([self.hamilton_energy_fn(y) for y in X])
+        # E = np.array([self.hamilton_energy_fn(y) for y in X])
         return X, y
 
     def __generate(self, X, h):
