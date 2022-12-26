@@ -33,6 +33,8 @@
 
 ########################################################
 
+# %%time
+
 %run  ./task/train.py \
     --taskname body_3_hnn \
     --tasktype body \
@@ -49,5 +51,12 @@
     --iterations 3000 \
     --print_every 1
 
+%run  ./task/analysis/analyze_body_3/analyze.py \
+    --obj 3 \
+    --dim 2 \
+    --test_num 100 \
+    --t0 0 \
+    --t_end 30 \
+    --h 0.05
 
 %rm -rf ./training_file
