@@ -9,10 +9,13 @@ import numpy as np
 import torch
 from tqdm import tqdm
 
-import learner as ln
 
-sys.path.append('.')
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
+PARENT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append('.')
+sys.path.append(PARENT_DIR)
+
+import learner as ln
 
 parser = argparse.ArgumentParser(description=None)
 # For general settings
