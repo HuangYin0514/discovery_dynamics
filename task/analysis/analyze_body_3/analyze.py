@@ -56,8 +56,8 @@ def main():
                             l=[0 for i in range(args.obj)])
 
     # ground truth
-    # solver = ln.integrator.rungekutta.RK45(data.hamilton_right_fn, t0=args.t0, t_end=args.t_end)
-    solver = ln.integrator.rungekutta.RK4(data.hamilton_right_fn, t0=args.t0, t_end=args.t_end)
+    solver = ln.integrator.rungekutta.RK45(data.hamilton_right_fn, t0=args.t0, t_end=args.t_end)
+    # solver = ln.integrator.rungekutta.RK4(data.hamilton_right_fn, t0=args.t0, t_end=args.t_end)
 
     # net
     input_dim = args.obj * args.dim * 2
