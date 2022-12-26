@@ -60,7 +60,7 @@ class PendulumData(BaseData):
         H = (m1 + m2) * self.g * l1 * (-np.cos(q1)) + m2 * self.g * l2 * (-np.cos(q2)) \
             + ((m1 + m2) * l1 ** 2 * p2 ** 2 + m2 * l2 ** 2 * p1 ** 2 - 2 * m2 * l1 * l2 * p1 * p2 * np.cos(q1 - q2)) / \
             (2 * m2 * (l1 ** 2) * (l2 ** 2) * (m1 + m2 * np.sin(q1 - q2) ** 2))
-        return np.asarray(H).reshape(-1)
+        return H
 
     def hamilton_energy_fn2(self, coords):
         """能量函数"""

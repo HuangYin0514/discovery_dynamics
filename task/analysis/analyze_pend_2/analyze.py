@@ -44,7 +44,7 @@ def main():
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     print('Using the device is:', device)
     path = './outputs/'
-    save_path = path + '/analyze/analyze_body_3/'
+    save_path = path + '/analyze/analyze_pend_2/'
     if not os.path.isdir(save_path): os.makedirs(save_path)
 
     # task variable
@@ -62,7 +62,7 @@ def main():
     # net
     input_dim = args.obj * args.dim * 2
     hnn = ln.nn.HNN(dim=input_dim, layers=1, width=200)
-    local = path + 'body_3_hnn/model-body_3_hnn.pkl'
+    local = path + 'pend_2_hnn/model-pend_2_hnn.pkl'
     # local_url = 'https://drive.google.com/file/d/1bMzjQvPQZW2ByRQw0I0IQ67U2p8xzkh2/view?usp=share_link'
     # ln.utils.download_file_from_google_drive(local_url, local)
     ln.utils.load_network(hnn, local, device)
