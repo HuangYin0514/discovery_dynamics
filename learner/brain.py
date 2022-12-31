@@ -8,7 +8,7 @@ from matplotlib import pyplot as plt
 from tqdm import tqdm
 
 from .nn import LossNN
-from .utils import timing
+from .utils import timing, deprecated
 from .scheduler import lr_decay_scheduler, no_scheduler
 
 from torch.optim import lr_scheduler
@@ -109,13 +109,13 @@ class Brain:
         return self.loss_history
 
     def restore(self):
-        if self.loss_history is not None and self.save == True:
+        if self.loss_history is not None and self.save is True:
             best_loss_index = np.argmin(self.loss_history[:, 1])
             iteration = int(self.loss_history[best_loss_index, 0])
             loss_train = self.loss_history[best_loss_index, 1]
             loss_test = self.loss_history[best_loss_index, 2]
             print('Best model at iteration {}:'.format(iteration), flush=True)
-            print('Train loss:', loss_train, 'Test loss:', loss_test, flush=True)
+            print('Train loss: {:.4e}, Test loss: {:.4e}'.format( loss_train, loss_test), flush=True)
 
             path = './outputs/' + self.taskname
             if not os.path.isdir('./outputs/' + self.taskname): os.makedirs('./outputs/' + self.taskname)

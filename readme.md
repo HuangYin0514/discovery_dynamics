@@ -31,6 +31,23 @@
     --print_every 1
 ``` 
 
+``` 
+python  ./task/train.py \
+    --taskname pend_2_hnn \
+    --tasktype pend \
+    --net_name hnn \
+    --data_name PendulumData \
+    --obj 2 \
+    --dim 1 \
+    --train_num 3 \
+    --test_num 2 \
+    --lr 1e-2 \
+    --criterion L2_norm_loss \
+    --optimizer adam \
+    --scheduler MultiStepLR \
+    --iterations 8 \
+    --print_every 1
+``` 
 
 ## 1.2. baseline
 ```
@@ -104,6 +121,7 @@ python  ./task/train.py \
     --iterations 3000 \
     --print_every 1
 ```
+
 
 ## 2.2. baseline
 ```

@@ -94,7 +94,7 @@ def run():
     ln.Brain.Run()
     ln.Brain.Restore()
     ln.Brain.Output(info=arguments)
-    print(arguments)
+    # print(arguments)
 
 
 def main():

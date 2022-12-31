@@ -55,3 +55,12 @@ def timing(func):
         return result
 
     return wrapper
+
+
+def deprecated(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        # print('this function was deprecated!')
+        raise Exception(f' {func.__name__} function was deprecated!')
+
+    return wrapper
