@@ -119,8 +119,10 @@ class BaseData(abc.ABC):
 class BaseDynamicsData(BaseData):
     def __init__(self):
         super(BaseDynamicsData, self).__init__()
+
         self.train_num = None
         self.test_num = None
+
         self.h = None
 
         self.solver = None
