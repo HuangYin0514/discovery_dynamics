@@ -1,11 +1,11 @@
 import autograd
 import autograd.numpy as np
 
-from .base_data import BaseData
-from learner.integrator.rungekutta import RK4, RK45
+from .base_data import BaseDynamicsData
+from ..integrator.rungekutta import RK4, RK45
 
 
-class BodyData(BaseData):
+class BodyData(BaseDynamicsData):
     def __init__(self, obj, dim, train_num, test_num, m=None, l=None, **kwargs):
         super(BodyData, self).__init__()
 
@@ -26,9 +26,6 @@ class BodyData(BaseData):
         self.solver = RK45(self.hamilton_right_fn, t0=t0, t_end=t_end)
 
         self.k = 1  # body equation parameter
-
-    def Init_data(self):
-        self.__init_data()
 
     def hamiltonian_kinetic(self, coords):
         T = 0.
@@ -108,19 +105,3 @@ class BodyData(BaseData):
 
             x0_list.append(state.reshape(-1))
         return np.asarray(x0_list)
-
-    def __init_data(self):
-        self.X_train, self.y_train = self.__generate_random(self.train_num, self.h)
-        self.X_test, self.y_test = self.__generate_random(self.test_num, self.h)
-
-    def __generate_random(self, num, h):
-        x0 = self.random_config(num)
-        X = self.__generate(x0, h)
-        X = np.concatenate(X, axis=0)
-        y = np.asarray(list(map(lambda x: self.hamilton_right_fn(None, x), X)))
-        # E = np.array([self.hamilton_energy_fn(y) for y in X])
-        return X, y
-
-    def __generate(self, X, h):
-        X = np.array(list(map(lambda x: self.solver.solve(x, h), X)))
-        return X
