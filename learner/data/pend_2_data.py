@@ -1,12 +1,12 @@
 import autograd
 import autograd.numpy as np
 
-from .base_data import BaseData
+from .base_data import BaseDynamicsData
 from ..integrator.rungekutta import RK4, RK45
 from ..utils import deprecated
 
 
-class PendulumData(BaseData):
+class PendulumData(BaseDynamicsData):
     def __init__(self, obj, dim, train_num, test_num, m=None, l=None, **kwargs):
         super(PendulumData, self).__init__()
 
@@ -25,9 +25,6 @@ class PendulumData(BaseData):
         t_end = 10
         self.h = 0.1
         self.solver = RK45(self.hamilton_right_fn, t0=t0, t_end=t_end)
-
-    def Init_data(self):
-        self.__init_data()
 
     @deprecated
     def hamilton_right_fn2(self, t, coords):
@@ -125,18 +122,3 @@ class PendulumData(BaseData):
             x0_list.append(x0.reshape(-1))
         return np.asarray(x0_list)
 
-    def __init_data(self):
-        self.X_train, self.y_train = self.__generate_random(self.train_num, self.h)
-        self.X_test, self.y_test = self.__generate_random(self.test_num, self.h)
-
-    def __generate_random(self, num, h):
-        x0 = self.random_config(num)
-        X = self.__generate(x0, h)
-        X = np.concatenate(X)
-        y = np.asarray(list(map(lambda x: self.hamilton_right_fn(None, x), X)))
-        # E = np.array([self.hamilton_energy_fn(y) for y in X])
-        return X, y
-
-    def __generate(self, X, h):
-        X = np.array(list(map(lambda x: self.solver.solve(x, h), X)))
-        return X

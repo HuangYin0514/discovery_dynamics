@@ -1,11 +1,13 @@
 """
 @author: yin huang
 """
+import abc
+
 import numpy as np
 import torch
 
 
-class BaseData:
+class BaseData(abc.ABC):
     '''Standard data format. 
     '''
 
@@ -112,3 +114,40 @@ class BaseData:
         for d in ['X_train', 'y_train', 'X_test', 'y_test']:
             if isinstance(getattr(self, d), torch.Tensor):
                 setattr(self, d, getattr(self, d).double())
+
+
+class BaseDynamicsData(BaseData):
+    def __init__(self):
+        super(BaseDynamicsData, self).__init__()
+        self.train_num = None
+        self.test_num = None
+        self.h = None
+
+        self.solver = None
+
+    def Init_data(self):
+        self.__init_data()
+
+    def __init_data(self):
+        self.X_train, self.y_train = self.__generate_random(self.train_num, self.h)
+        self.X_test, self.y_test = self.__generate_random(self.test_num, self.h)
+
+    def __generate_random(self, num, h):
+        x0 = self.random_config(num)
+        X = self.__generate(x0, h)
+        X = np.concatenate(X)
+        y = np.asarray(list(map(lambda x: self.hamilton_right_fn(None, x), X)))
+        # E = np.array([self.hamilton_energy_fn(y) for y in X])
+        return X, y
+
+    def __generate(self, X, h):
+        X = np.array(list(map(lambda x: self.solver.solve(x, h), X)))
+        return X
+
+    @abc.abstractmethod
+    def random_config(self, num):
+        pass
+
+    @abc.abstractmethod
+    def hamilton_right_fn(self, t, x):
+        pass
