@@ -1,3 +1,4 @@
+- [common commod](#common-commod)
 - [1. double pend](#1-double-pend)
   - [1.1. hnn](#11-hnn)
   - [1.2. baseline](#12-baseline)
@@ -7,6 +8,13 @@
   - [2.2. baseline](#22-baseline)
   - [2.3. test](#23-test)
 
+---
+
+# common commod
+
+```
+rm -rf outputs 
+```
 
 ---
 
