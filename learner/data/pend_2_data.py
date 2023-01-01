@@ -67,7 +67,7 @@ class PendulumData(BaseDynamicsData):
         return H
 
     def hamiltonian_kinetic(self, coords):
-        assert (len(coords) == self.dof * 2)
+        assert len(coords) == self.dof * 2
         coords = self.position_transformation_H2L(coords)
         T = 0.
         vx, vy = 0., 0.
@@ -78,7 +78,7 @@ class PendulumData(BaseDynamicsData):
         return T
 
     def hamiltonian_potential(self, coords):
-        assert (len(coords) == self.dof * 2)
+        assert len(coords) == self.dof * 2
         g = self.g
         U = 0.
         y = 0.
