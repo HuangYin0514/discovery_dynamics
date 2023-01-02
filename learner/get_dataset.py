@@ -46,7 +46,7 @@ def get_dataset(data_name, taskname, tasktype, train_num, test_num, obj, dim, da
         data = choose_data(data_name, train_num, test_num, obj, dim)
         data.Init_data()
         os.makedirs(data_path) if not os.path.exists(data_path) else None
-        np.save(filename, data)
+        # np.save(filename, data)
 
     print('Number of samples in train dataset : ', len(data.y_train))
     print('Number of samples in test dataset : ', len(data.y_test))

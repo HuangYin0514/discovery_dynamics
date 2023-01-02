@@ -134,12 +134,20 @@ class BaseDynamicsData(BaseData):
         self.X_train, self.y_train = self.__generate_random(self.train_num, self.h)
         self.X_test, self.y_test = self.__generate_random(self.test_num, self.h)
 
+    # def __generate_random(self, num, h):
+    #     x0 = self.random_config(num)
+    #     X = self.__generate(x0, h)
+    #     X = np.concatenate(X)
+    #     y = np.asarray(list(map(lambda x: self.hamilton_right_fn(None, x), X)))
+    #     # E = np.array([self.hamilton_energy_fn(y) for y in X])
+    #     return X, y
+
     def __generate_random(self, num, h):
         x0 = self.random_config(num)
         X = self.__generate(x0, h)
         X = np.concatenate(X)
         y = np.asarray(list(map(lambda x: self.hamilton_right_fn(None, x), X)))
-        # E = np.array([self.hamilton_energy_fn(y) for y in X])
+        E = np.array([self.energy_fn(y) for y in X])
         return X, y
 
     def __generate(self, X, h):
@@ -153,3 +161,4 @@ class BaseDynamicsData(BaseData):
     @abc.abstractmethod
     def hamilton_right_fn(self, t, x):
         pass
+

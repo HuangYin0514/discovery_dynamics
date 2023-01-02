@@ -116,14 +116,14 @@ def calculate_sample_trajectory(args, dataclass, method_solution, test_num):
             if name == 'ground_truth':
                 solver = value['solver']
                 traj = solver.solve(y0, args.h)
-                eng = np.asarray(list(map(lambda x: dataclass.hamilton_energy_fn(x), traj)))
+                eng = np.asarray(list(map(lambda x: dataclass.energy_fn(x), traj)))
                 method_solution['ground_truth']['trajectory'].append(traj)
                 method_solution['ground_truth']['energy'].append(eng)
             else:
                 solver = method_solution[name]['solver']
                 # traj = solver.predict(y0, args.h, args.t0, args.t_end, solver_method='RK4', circular_motion=False)
                 traj = solver.predict(y0, args.h, args.t0, args.t_end, solver_method='RK45', circular_motion=False)
-                eng = np.asarray(list(map(lambda x: dataclass.hamilton_energy_fn(x), traj)))
+                eng = np.asarray(list(map(lambda x: dataclass.energy_fn(x), traj)))
                 method_solution[name]['trajectory'].append(traj)
                 method_solution[name]['energy'].append(eng)
 
