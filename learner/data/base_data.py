@@ -140,7 +140,7 @@ class BaseDynamicsData(BaseData):
         X = self.__generate(x0, h)
         X = np.concatenate(X)
         y = np.asarray(list(map(lambda x: self.hamilton_right_fn(None, x), X)))
-        E = np.array([self.energy_fn(y) for y in X])
+        # E = np.array([self.energy_fn(y) for y in X])
         return X, y
 
     def __generate(self, X, h):
