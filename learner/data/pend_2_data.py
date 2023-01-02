@@ -27,13 +27,25 @@ class PendulumData(BaseDynamicsData):
         self.h = 0.1
         self.solver = RK45(self.hamilton_right_fn, t0=t0, t_end=t_end)
 
+    # def hamilton_right_fn(self, t, coords):
+    #     coords = torch.tensor(coords, requires_grad=True)
+    #     grad_ham = dfx(self.energy_fn(coords), coords).detach().numpy()
+    #     q, p = grad_ham[self.dof:], -grad_ham[:self.dof]
+    #     return np.asarray([q, p]).reshape(-1)
+
     def hamilton_right_fn(self, t, coords):
-        # grad_ham = autograd.grad(self.energy_fn)
-        # grad = grad_ham(coords)
-        coords = torch.tensor(coords, requires_grad=True)
-        grad_ham = dfx(self.energy_fn(coords), coords).detach().numpy()
-        q, p = grad_ham[self.dof:], -grad_ham[:self.dof]
-        return np.asarray([q, p]).reshape(-1)
+        q1, q2, p1, p2 = coords
+        l1, l2, m1, m2 = self.l[0], self.l[1], self.m[0], self.m[1]
+        g = self.g
+        b = l1 * l2 * (m1 + m2 * np.sin(q1 - q2) ** 2)
+        dq1 = (l2 * p1 - l1 * p2 * np.cos(q1 - q2)) / (b * l1)
+        dq2 = (-m2 * l2 * p1 * np.cos(q1 - q2) + (m1 + m2) * l1 * p2) / (m2 * b * l2)
+        h1 = p1 * p2 * np.sin(q1 - q2) / b
+        h2 = (m2 * l2 ** 2 * p1 ** 2 + (m1 + m2) * l1 ** 2 * p2 ** 2 - 2 * m2 * l1 * l2 * p1 * p2 * np.cos(q1 - q2)) / (
+                2 * b ** 2)
+        dp1 = -(m1 + m2) * g * l1 * np.sin(q1) - h1 + h2 * np.sin(2 * (q1 - q2))
+        dp2 = -m2 * g * l2 * np.sin(q2) + h1 - h2 * np.sin(2 * (q1 - q2))
+        return np.asarray([dq1, dq2, dp1, dp2]).reshape(-1)
 
     def M(self, x):
         """
