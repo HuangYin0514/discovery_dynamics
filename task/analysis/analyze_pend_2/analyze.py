@@ -188,8 +188,8 @@ def plot_one_sample_energy(ax, dataclass, method_name, method_solution, dynamics
     coords = method_solution[method_name]['trajectory'][0]
     marker = method_solution[method_name]['marker']
 
-    T = np.array([dataclass.hamiltonian_kinetic(y) for y in coords])
-    U = np.array([dataclass.hamiltonian_potential(y) for y in coords])
+    T = np.array([dataclass.kinetic(y).detach().numpy() for y in coords])
+    U = np.array([dataclass.potential(y).detach().numpy() for y in coords])
 
     ax.set_xlabel('Time step $(s)$')
     ax.set_ylabel('$E\;(J)$')

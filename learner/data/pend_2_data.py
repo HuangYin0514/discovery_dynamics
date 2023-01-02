@@ -68,7 +68,7 @@ class PendulumData(BaseDynamicsData):
     def Minv(self, x):
         return torch.inverse(self.M(x)).double()
 
-    def hamilton_kinetic(self, coords):
+    def kinetic(self, coords):
         """Kinetic energy"""
         assert len(coords) == self.dof * 2
         if isinstance(coords, np.ndarray):
@@ -91,7 +91,7 @@ class PendulumData(BaseDynamicsData):
 
     def energy_fn(self, coords):
         """能量函数"""
-        H = self.hamilton_kinetic(coords) + self.potential(coords)  # some error in this implementation
+        H = self.kinetic(coords) + self.potential(coords)  # some error in this implementation
         return H
 
     def random_config(self, num):
