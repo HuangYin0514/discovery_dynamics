@@ -74,8 +74,8 @@ class PendulumData(BaseDynamicsData):
         if isinstance(coords, np.ndarray):
             coords = torch.tensor(coords)
         x, p = torch.split(coords, 2)
-        kinetic = torch.sum(0.5 * p @ self.Minv(x) @ p)
-        return kinetic
+        T = torch.sum(0.5 * p @ self.Minv(x) @ p)
+        return T
 
     def potential(self, coords):
         assert len(coords) == self.dof * 2
