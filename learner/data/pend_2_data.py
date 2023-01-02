@@ -37,11 +37,11 @@ class PendulumData(BaseDynamicsData):
 
     def M(self, x):
         """
-                ref: Simplifying Hamiltonian and Lagrangian Neural Networks via Explicit Constraints
-                Create a square mass matrix of size N x N.
-                Note: the matrix is symmetric
-                In the future, only half of the matrix can be considered
-                """
+        ref: Simplifying Hamiltonian and Lagrangian Neural Networks via Explicit Constraints
+        Create a square mass matrix of size N x N.
+        Note: the matrix is symmetric
+        In the future, only half of the matrix can be considered
+        """
         N = self.obj
         M = torch.zeros((N, N))
         for i in range(N):
