@@ -81,6 +81,9 @@ class Brain:
         for i in pbar:
             '''training'''
             for inputs, labels in self.train_loader:
+                inputs = inputs.to(self.device)
+                labels = labels.to(self.device)
+
                 loss = self.__criterion(self.net(inputs), labels)
 
                 if torch.any(torch.isnan(loss)):
@@ -95,6 +98,9 @@ class Brain:
             '''test'''
             if i % self.print_every == 0 or i == self.iterations:
                 for inputs, labels in self.test_loader:
+                    inputs = inputs.to(self.device)
+                    labels = labels.to(self.device)
+
                     loss_test = self.__criterion(self.net(inputs), labels)
 
                 loss_history.append([i, loss.item(), loss_test.item()])
