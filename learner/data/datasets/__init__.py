@@ -6,11 +6,11 @@
 @desc:
 """
 
-from .pend_2 import PendulumData
+from .pend_2 import Pendulum2
 from .body_3 import BodyData
 
 __factory = {
-    'PendulumData': PendulumData,
+    'Pendulum2': Pendulum2,
     'BodyData': BodyData,
 }
 

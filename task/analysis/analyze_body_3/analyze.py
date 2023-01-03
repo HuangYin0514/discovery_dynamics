@@ -59,7 +59,7 @@ def main():
                             l=[0 for i in range(args.obj)])
 
     # ground truth
-    solver = ln.integrator.rungekutta.RK45(data.hamilton_right_fn, t0=args.t0, t_end=args.t_end)
+    solver = ln.integrator.rungekutta.RK45(data.right_fn, t0=args.t0, t_end=args.t_end)
     # solver = ln.integrator.rungekutta.RK4(data.hamilton_right_fn, t0=args.t0, t_end=args.t_end)
 
     # net
@@ -115,14 +115,14 @@ def calculate_sample_trajectory(args, dataclass, method_solution, test_num):
 
             if name == 'ground_truth':
                 solver = value['solver']
-                traj = solver.solve(y0, args.h)
+                traj = solver.solve(y0, args._h)
                 eng = np.asarray(list(map(lambda x: dataclass.energy_fn(x), traj)))
                 method_solution['ground_truth']['trajectory'].append(traj)
                 method_solution['ground_truth']['energy'].append(eng)
             else:
                 solver = method_solution[name]['solver']
                 # traj = solver.predict(y0, args.h, args.t0, args.t_end, solver_method='RK4', circular_motion=False)
-                traj = solver.predict(y0, args.h, args.t0, args.t_end, solver_method='RK45', circular_motion=False)
+                traj = solver.predict(y0, args._h, args.t0, args.t_end, solver_method='RK45', circular_motion=False)
                 eng = np.asarray(list(map(lambda x: dataclass.energy_fn(x), traj)))
                 method_solution[name]['trajectory'].append(traj)
                 method_solution[name]['energy'].append(eng)
@@ -208,7 +208,7 @@ def draw_more_sample_error_curve(args, dataclass, method_solution, truth_t, save
 
 
 def calculate_more_sample_trajectory_error(args, method_solution):
-    dof = args.obj * args.dim
+    dof = args._obj * args._dim
 
     for name, value in method_solution.items():
         if name == 'ground_truth': continue
@@ -238,7 +238,7 @@ def calculate_more_sample_trajectory_error(args, method_solution):
 
 
 def plot_more_sample_trajectory_error(ax, args, method_solution, t):
-    dof = args.obj * args.dim
+    dof = args._obj * args._dim
 
     for name, value in method_solution.items():
         if name == 'ground_truth': continue

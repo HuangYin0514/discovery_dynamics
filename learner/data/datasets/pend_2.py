@@ -1,42 +1,55 @@
-# import autograd
-# import autograd.numpy as np
+# encoding: utf-8
+"""
+@author: Yin Huang
+@contact: hy1071324110@gmail.com
+@time: 2023/1/3 3:50 PM
+@desc:
+"""
 import numpy as np
 import torch
-from .base_data import BaseDynamicsData
-from learner.integrator.rungekutta import RK4, RK45
-from learner.utils import deprecated, lazy_property, dfx
+
+from learner.integrator.rungekutta import RK45
+from .bases import BaseBodyDynamicsDataset
 
 
-class PendulumData(BaseDynamicsData):
-    def __init__(self, obj, dim, train_num, test_num, m=None, l=None, **kwargs):
-        super(PendulumData, self).__init__()
+class Pendulum2(BaseBodyDynamicsDataset):
+    """
+    Pendulum with 2 bodies
+    Reference:
+    # ref: Simplifying Hamiltonian and Lagrangian Neural Networks via Explicit Constraints
+    # URL: https://proceedings.neurips.cc/paper/2020/file/9f655cc8884fda7ad6d8a6fb15cc001e-Paper.pdf
+    Dataset statistics:
+    # type: hamilton
+    # obj: 2
+    # dim: 1
+    """
+
+    def __init__(self, train_num, test_num, obj, dim, m=None, l=None, **kwargs):
+        super(Pendulum2, self).__init__()
 
         self.train_num = train_num
         self.test_num = test_num
 
-        self.m = m
-        self.l = l
-        self.g = 9.8
+        self.__init_dynamic_variable(obj, dim, m, l)
 
-        self.obj = obj
-        self.dim = dim
-        self.dof = obj * self.dim  # degree of freedom
+    def __init_dynamic_variable(self, obj, dim, m=None, l=None):
+        self._m = m
+        self._l = l
+        self._g = 9.8
+
+        self._obj = obj
+        self._dim = dim
+        self._dof = self._obj * self._dim  # degree of freedom
 
         t0 = 0
         t_end = 10
-        self.h = 0.1
-        self.solver = RK45(self.hamilton_right_fn, t0=t0, t_end=t_end)
+        self._h = 0.1
+        self.solver = RK45(self.right_fn, t0=t0, t_end=t_end)
 
-    # def hamilton_right_fn(self, t, coords):
-    #     coords = torch.tensor(coords, requires_grad=True)
-    #     grad_ham = dfx(self.energy_fn(coords), coords).detach().numpy()
-    #     q, p = grad_ham[self.dof:], -grad_ham[:self.dof]
-    #     return np.asarray([q, p]).reshape(-1)
-
-    def hamilton_right_fn(self, t, coords):
+    def right_fn(self, t, coords):
         q1, q2, p1, p2 = coords
-        l1, l2, m1, m2 = self.l[0], self.l[1], self.m[0], self.m[1]
-        g = self.g
+        l1, l2, m1, m2 = self._l[0], self._l[1], self._m[0], self._m[1]
+        g = self._g
         b = l1 * l2 * (m1 + m2 * np.sin(q1 - q2) ** 2)
         dq1 = (l2 * p1 - l1 * p2 * np.cos(q1 - q2)) / (b * l1)
         dq2 = (-m2 * l2 * p1 * np.cos(q1 - q2) + (m1 + m2) * l1 * p2) / (m2 * b * l2)
@@ -54,15 +67,15 @@ class PendulumData(BaseDynamicsData):
         Note: the matrix is symmetric
         In the future, only half of the matrix can be considered
         """
-        N = self.obj
+        N = self._obj
         M = torch.zeros((N, N))
         for i in range(N):
             for k in range(N):
                 m_sum = 0
                 j = i if i >= k else k
                 for tmp in range(j, N):
-                    m_sum += self.m[tmp]
-                M[i, k] += self.l[i] * self.l[k] * torch.cos(x[i] - x[k]) * m_sum
+                    m_sum += self._m[tmp]
+                M[i, k] += self._l[i] * self._l[k] * torch.cos(x[i] - x[k]) * m_sum
         return M.double()
 
     def Minv(self, x):
@@ -70,7 +83,7 @@ class PendulumData(BaseDynamicsData):
 
     def kinetic(self, coords):
         """Kinetic energy"""
-        assert len(coords) == self.dof * 2
+        assert len(coords) == self._dof * 2
         if isinstance(coords, np.ndarray):
             coords = torch.tensor(coords)
         x, p = torch.split(coords, 2)
@@ -78,15 +91,15 @@ class PendulumData(BaseDynamicsData):
         return T
 
     def potential(self, coords):
-        assert len(coords) == self.dof * 2
+        assert len(coords) == self._dof * 2
         if isinstance(coords, np.ndarray):
             coords = torch.tensor(coords)
-        g = self.g
+        g = self._g
         U = 0.
         y = 0.
-        for i in range(self.obj):
-            y = y - self.l[i] * torch.cos(coords[i])
-            U = U + self.m[i] * self.g * y
+        for i in range(self._obj):
+            y = y - self._l[i] * torch.cos(coords[i])
+            U = U + self._m[i] * self._g * y
         return U
 
     def energy_fn(self, coords):
@@ -98,11 +111,11 @@ class PendulumData(BaseDynamicsData):
         x0_list = []
         for _ in range(num):
             max_momentum = 1.
-            x0 = np.zeros(self.obj * 2)
-            for i in range(self.obj):
+            x0 = np.zeros(self._obj * 2)
+            for i in range(self._obj):
                 theta = (2 * np.pi - 0) * np.random.rand() + 0  # [0, 2pi]
                 momentum = (2 * np.random.rand() - 1) * max_momentum  # [-1, 1]*max_momentum
                 x0[i] = theta
-                x0[i + self.obj] = momentum
+                x0[i + self._obj] = momentum
             x0_list.append(x0.reshape(-1))
         return np.asarray(x0_list)
