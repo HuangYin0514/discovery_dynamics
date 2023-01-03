@@ -181,16 +181,23 @@ class Brain:
         self.loss_history = None
         self.encounter_nan = False
         self.best_model = None
+
+
+        self.__init_data()
+        self.__init_net()
+        self.__init_optimizer()
+        self.__init_scheduler()
+        self.__init_criterion()
+
+    def __init_data(self):
         self.data.device = self.device
         self.data.dtype = self.dtype
         self.data.X_train.requires_grad = True
         self.data.X_test.requires_grad = True
 
+    def __init_net(self):
         self.net.device = self.device
         self.net.dtype = self.dtype
-        self.__init_optimizer()
-        self.__init_scheduler()
-        self.__init_criterion()
 
     def __init_optimizer(self):
         if self.optimizer == 'adam':
