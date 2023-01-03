@@ -79,9 +79,24 @@ class Brain:
 
         pbar = tqdm(range(self.iterations + 1), desc='Processing')
         for i in pbar:
-            loss = self.__criterion(self.net(self.data.X_train), self.data.y_train)
+            '''training'''
+            for inputs, labels in self.train_loader:
+                loss = self.__criterion(self.net(inputs), labels)
+
+                if torch.any(torch.isnan(loss)):
+                    self.encounter_nan = True
+                    print('Encountering nan, stop training', flush=True)
+                    return None
+
+                if i < self.iterations:
+                    self.__optimizer.zero_grad()
+                    loss.backward()
+                    self.__optimizer.step()
+            '''test'''
             if i % self.print_every == 0 or i == self.iterations:
-                loss_test = self.__criterion(self.net(self.data.X_test), self.data.y_test)
+                for inputs, labels in self.test_loader:
+                    loss_test = self.__criterion(self.net(inputs), labels)
+
                 loss_history.append([i, loss.item(), loss_test.item()])
                 postfix = {
                     'Train_loss': '{:.3e}'.format(loss.item()),
@@ -89,18 +104,14 @@ class Brain:
                     'lr': self.__optimizer.param_groups[0]['lr']
                 }
                 pbar.set_postfix(postfix)
-            if torch.any(torch.isnan(loss)):
-                self.encounter_nan = True
-                print('Encountering nan, stop training', flush=True)
-                return None
+
+            '''save'''
             if self.save:
                 torch.save(self.net, 'training_file/' + self.taskname + '/model/model{}.pkl'.format(i))
-            if i < self.iterations:
-                self.__optimizer.zero_grad()
-                loss.backward()
-                self.__optimizer.step()
+
             if self.__scheduler is not None:
                 self.__scheduler.step()
+
         loss_record = np.array(loss_history)
         np.savetxt('training_file/' + self.taskname + '/loss.txt', loss_record)
 
@@ -115,7 +126,7 @@ class Brain:
             loss_train = self.loss_history[best_loss_index, 1]
             loss_test = self.loss_history[best_loss_index, 2]
             print('Best model at iteration {}:'.format(iteration), flush=True)
-            print('Train loss: {:.4e}, Test loss: {:.4e}'.format( loss_train, loss_test), flush=True)
+            print('Train loss: {:.4e}, Test loss: {:.4e}'.format(loss_train, loss_test), flush=True)
 
             path = './outputs/' + self.taskname
             if not os.path.isdir('./outputs/' + self.taskname): os.makedirs('./outputs/' + self.taskname)
@@ -182,7 +193,6 @@ class Brain:
         self.encounter_nan = False
         self.best_model = None
 
-
         self.__init_data()
         self.__init_net()
         self.__init_optimizer()
@@ -190,12 +200,12 @@ class Brain:
         self.__init_criterion()
 
     def __init_data(self):
-        self.data.device = self.device
-        self.data.dtype = self.dtype
-        self.data.X_train.requires_grad = True
-        self.data.X_test.requires_grad = True
-
-
+        train_loader, test_loader = self.data
+        self.train_loader = train_loader
+        self.test_loader = test_loader
+        for x, y in self.train_loader:
+            print(x.shape)
+            print(y.shape)
 
     def __init_net(self):
         self.net.device = self.device

@@ -6,6 +6,7 @@
 @desc:
 """
 import os.path as osp
+
 from torch.utils.data import Dataset
 
 
@@ -24,5 +25,6 @@ class DynamicsDataset(Dataset):
 
         if self.transform is not None:
             X = self.transform(X)
+            y = self.transform(y)
 
         return x0, t, h, X, y, E

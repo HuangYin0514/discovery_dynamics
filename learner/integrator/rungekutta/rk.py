@@ -17,7 +17,7 @@ class RK(abc.ABC):
 
     def solve(self, y0, h):
         t, y = self.solver(y0, h)
-        return y
+        return t,y
 
 
 class RK4(RK):

@@ -70,8 +70,8 @@ class BaseBodyDynamicsDataset(BaseDynamicsDataset):
         for _ in range(num):
             x0 = self.random_config()
             t, X = self.__generate(x0, h)
-            y = self.right_fn(None, X)
-            E = self.energy_fn(X)
+            y = np.asarray(list(map(lambda x: self.right_fn(None, x), X)))
+            E = np.array([self.energy_fn(y) for y in X])
             dataset.append((x0, t, h, X, y, E))
         return dataset
 

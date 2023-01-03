@@ -7,11 +7,9 @@
 """
 
 from .pend_2 import Pendulum2
-from .body_3 import BodyData
 
 __factory = {
     'Pendulum2': Pendulum2,
-    'BodyData': BodyData,
 }
 
 
