@@ -195,6 +195,8 @@ class Brain:
         self.data.X_train.requires_grad = True
         self.data.X_test.requires_grad = True
 
+
+
     def __init_net(self):
         self.net.device = self.device
         self.net.dtype = self.dtype

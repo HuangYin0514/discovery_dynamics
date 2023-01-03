@@ -10,6 +10,7 @@ import abc
 import numpy as np
 
 
+
 class BaseDataset(abc.ABC):
     """
         Base class of dynamics dataset
@@ -59,23 +60,27 @@ class BaseBodyDynamicsDataset(BaseDynamicsDataset):
         self.__init_data()
 
     def __init_data(self):
-        self.X_train, self.y_train = self.__generate_random(self.train_num, self._h)
-        self.X_test, self.y_test = self.__generate_random(self.test_num, self._h)
+        train_dataset = self.__generate_random(self.train_num, self._h)
+        test_dataset = self.__generate_random(self.test_num, self._h)
+        self.train = train_dataset
+        self.test = test_dataset
 
     def __generate_random(self, num, h):
-        x0 = self.random_config(num)
-        X = self.__generate(x0, h)
-        X = np.concatenate(X)
-        y = np.asarray(list(map(lambda x: self.right_fn(None, x), X)))
-        E = np.array([self.energy_fn(y) for y in X])
-        return X, y
+        dataset = []
+        for _ in range(num):
+            x0 = self.random_config()
+            t, X = self.__generate(x0, h)
+            y = self.right_fn(None, X)
+            E = self.energy_fn(X)
+            dataset.append((x0, t, h, X, y, E))
+        return dataset
 
-    def __generate(self, X, h):
-        X = np.array(list(map(lambda x: self.solver.solve(x, h), X)))
-        return X
+    def __generate(self, x0, h):
+        t, x = self.solver.solve(x0, h)
+        return t, x
 
     @abc.abstractmethod
-    def random_config(self, num):
+    def random_config(self):
         pass
 
     @abc.abstractmethod

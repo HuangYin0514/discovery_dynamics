@@ -107,15 +107,12 @@ class Pendulum2(BaseBodyDynamicsDataset):
         H = self.kinetic(coords) + self.potential(coords)  # some error in this implementation
         return H
 
-    def random_config(self, num):
-        x0_list = []
-        for _ in range(num):
-            max_momentum = 1.
-            x0 = np.zeros(self._obj * 2)
-            for i in range(self._obj):
-                theta = (2 * np.pi - 0) * np.random.rand() + 0  # [0, 2pi]
-                momentum = (2 * np.random.rand() - 1) * max_momentum  # [-1, 1]*max_momentum
-                x0[i] = theta
-                x0[i + self._obj] = momentum
-            x0_list.append(x0.reshape(-1))
-        return np.asarray(x0_list)
+    def random_config(self):
+        max_momentum = 1.
+        x0 = np.zeros(self._obj * 2)
+        for i in range(self._obj):
+            theta = (2 * np.pi - 0) * np.random.rand() + 0  # [0, 2pi]
+            momentum = (2 * np.random.rand() - 1) * max_momentum  # [-1, 1]*max_momentum
+            x0[i] = theta
+            x0[i + self._obj] = momentum
+        return x0.reshape(-1)
