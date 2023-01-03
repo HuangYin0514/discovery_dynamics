@@ -2,7 +2,7 @@ import autograd
 import autograd.numpy as np
 
 from .base_data import BaseDynamicsData
-from ..integrator.rungekutta import RK4, RK45
+from learner.integrator.rungekutta import RK4, RK45
 
 
 class BodyData(BaseDynamicsData):

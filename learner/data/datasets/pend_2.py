@@ -3,8 +3,8 @@
 import numpy as np
 import torch
 from .base_data import BaseDynamicsData
-from ..integrator.rungekutta import RK4, RK45
-from ..utils import deprecated, lazy_property, dfx
+from learner.integrator.rungekutta import RK4, RK45
+from learner.utils import deprecated, lazy_property, dfx
 
 
 class PendulumData(BaseDynamicsData):
