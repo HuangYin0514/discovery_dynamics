@@ -26,14 +26,14 @@ def choose_dataset(data_name, obj, dim, train_num, test_num):
     return dataset
 
 
-def get_dataset(data_name, taskname, tasktype, obj, dim, download_data=False, **kwargs):
+def get_dataset(data_name, taskname, obj, dim, download_data=False, **kwargs):
     print('=> Start get dataset.')
     dataset = choose_dataset(data_name, obj, dim, **kwargs)
 
     data_path = osp.join('./outputs/', taskname)
 
     # example: dataset_pend_2_1_hamilton.npy
-    filename = osp.join(data_path, 'dataset_{}_{}_{}_hamilton.npy'.format(tasktype, obj, dim))
+    filename = osp.join(data_path, 'dataset_{}.npy'.format(data_name))
 
     if download_data:
         print('=> Start downloading dataset.')

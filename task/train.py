@@ -21,7 +21,6 @@ parser.add_argument('--taskname', default='pend_2_hnn', type=str, help='Task nam
 parser.add_argument('--seed', default=0, type=int, help='random seed')
 
 # For task
-parser.add_argument('--tasktype', default='pend', type=str, help='Task type')
 parser.add_argument('--net_name', default='hnn', type=str, help='Select model to train')
 parser.add_argument('--data_name', default='Pendulum2', type=str, help='choose dataset')
 parser.add_argument('--obj', default=2, type=int, help='number of elements')
@@ -60,7 +59,6 @@ def run():
     arguments = {
         'taskname': args.taskname,
         'data_name': args.data_name,
-        'tasktype': args.tasktype,
         'obj': args.obj,
         'dim': args.dim,
         'train_num': args.train_num,
