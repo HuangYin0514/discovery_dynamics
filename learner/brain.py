@@ -209,9 +209,7 @@ class Brain:
         train_loader, test_loader = self.data
         self.train_loader = train_loader
         self.test_loader = test_loader
-        for x, y in self.train_loader:
-            print(x.shape)
-            print(y.shape)
+
 
     def __init_net(self):
         self.net.device = self.device

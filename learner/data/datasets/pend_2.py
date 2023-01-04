@@ -9,10 +9,10 @@ import numpy as np
 import torch
 
 from learner.integrator.rungekutta import RK45
-from .bases import BaseBodyDynamicsDataset
+from .base_body_dataset import BaseBodyDataset
 
 
-class Pendulum2(BaseBodyDynamicsDataset):
+class Pendulum2(BaseBodyDataset):
     """
     Pendulum with 2 bodies
     Reference:
@@ -29,12 +29,13 @@ class Pendulum2(BaseBodyDynamicsDataset):
 
         self.train_num = train_num
         self.test_num = test_num
+        self.dataset_url = ''
 
-        self.__init_dynamic_variable(obj, dim, m, l)
+        self.__init_dynamic_variable(obj, dim)
 
-    def __init_dynamic_variable(self, obj, dim, m=None, l=None):
-        self._m = m
-        self._l = l
+    def __init_dynamic_variable(self, obj, dim):
+        self._m = [1 for i in range(obj)]
+        self._l = [1 for i in range(obj)]
         self._g = 9.8
 
         self._obj = obj

@@ -9,7 +9,8 @@
 import torchvision.transforms as T
 from .to_tensor import To_Tensor
 
-def build_transforms(args, is_train=True):
+
+def build_transforms(is_train=True, **kwargs):
     if is_train:
         transform = T.Compose([
             To_Tensor(),

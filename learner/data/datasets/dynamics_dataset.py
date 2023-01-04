@@ -2,7 +2,7 @@
 """
 @author: Yin Huang
 @contact: hy1071324110@gmail.com
-@time: 2023/1/3 10:02 PM
+@time: 2023/1/4 3:42 PM
 @desc:
 """
 import os.path as osp
@@ -25,6 +25,5 @@ class DynamicsDataset(Dataset):
 
         if self.transform is not None:
             X = self.transform(X)
-            y = self.transform(y)
 
         return x0, t, h, X, y, E
