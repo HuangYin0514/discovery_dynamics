@@ -22,8 +22,10 @@ class BaseDataset(abc.ABC):
         num_traj = len(data)
         x0, t, h, X, y, E = data[0]
         num_t = len(t)
+        min_t = min(t)
+        max_t = max(t)
         num_states = len(x0)
-        return num_traj, num_t, num_states
+        return num_traj, num_t, min_t, max_t, num_states
 
     @abc.abstractmethod
     def print_dataset_statistics(self, train_ds, test_ds):
@@ -36,13 +38,21 @@ class BaseDynamicsDataset(BaseDataset):
         super(BaseDynamicsDataset, self).__init__()
 
     def print_dataset_statistics(self, train_ds, test_ds):
-        num_train_traj, num_train_t, num_train_states = self.get_dynamics_data_info(train_ds)
-        num_test_traj, num_test_t, num_test_states = self.get_dynamics_data_info(test_ds)
+        num_train_traj, num_train_t, min_train_t, max_train_t, num_train_states = self.get_dynamics_data_info(train_ds)
+        num_test_traj, num_test_t, min_test_t, max_test_t, num_test_states = self.get_dynamics_data_info(test_ds)
 
         print("Dataset statistics:")
-        print("  ----------------------------------------")
-        print("  subset   | # traj| # t   | # states")
-        print("  ----------------------------------------")
-        print("  train    | {:5d} | {:8d} | {:9d}".format(num_train_traj, num_train_t, num_train_states))
-        print("  test     | {:5d} | {:8d} | {:9d}".format(num_test_traj, num_test_t, num_test_states ))
-        print("  ----------------------------------------")
+        print("  ----------------------------------------------------")
+        print("  subset   | # traj| # t -> [t_min, t_max]  | # states")
+        print("  ----------------------------------------------------")
+        print("  train    | {:5d} | {:9d} -> [{},{}] | {:9d}".format(num_train_traj,
+                                                                    num_train_t,
+                                                                    min_train_t,
+                                                                    max_train_t,
+                                                                    num_train_states))
+        print("  test     | {:5d} | {:9d} -> [{},{}] | {:9d}".format(num_test_traj,
+                                                                    num_test_t,
+                                                                    min_test_t,
+                                                                    max_test_t,
+                                                                    num_test_states))
+        print("  ----------------------------------------------------")
