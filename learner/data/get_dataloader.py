@@ -37,7 +37,7 @@ def __get_data(dataset, data_name, taskname, tasktype, obj, dim, download_data=F
         print('=>Start generating dataset.')
         dataset.Init_data()
         os.makedirs(data_path) if not os.path.exists(data_path) else None
-        np.save(filename, dataset)
+        # np.save(filename, dataset)
 
     return dataset
 

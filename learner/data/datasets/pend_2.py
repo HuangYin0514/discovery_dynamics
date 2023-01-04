@@ -61,7 +61,7 @@ class Pendulum2(BaseBodyDataset):
         dp2 = -m2 * g * l2 * np.sin(q2) + h1 - h2 * np.sin(2 * (q1 - q2))
         return np.asarray([dq1, dq2, dp1, dp2]).reshape(-1)
 
-    def M(self, x):
+    def __M(self, x):
         """
         ref: Simplifying Hamiltonian and Lagrangian Neural Networks via Explicit Constraints
         Create a square mass matrix of size N x N.
@@ -79,8 +79,8 @@ class Pendulum2(BaseBodyDataset):
                 M[i, k] += self._l[i] * self._l[k] * torch.cos(x[i] - x[k]) * m_sum
         return M.double()
 
-    def Minv(self, x):
-        return torch.inverse(self.M(x)).double()
+    def __Minv(self, x):
+        return torch.inverse(self.__M(x)).double()
 
     def kinetic(self, coords):
         """Kinetic energy"""
@@ -88,7 +88,7 @@ class Pendulum2(BaseBodyDataset):
         if isinstance(coords, np.ndarray):
             coords = torch.tensor(coords)
         x, p = torch.split(coords, 2)
-        T = torch.sum(0.5 * p @ self.Minv(x) @ p)
+        T = torch.sum(0.5 * p @ self.__Minv(x) @ p)
         return T
 
     def potential(self, coords):
