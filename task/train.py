@@ -5,7 +5,7 @@ import sys
 import numpy as np
 import torch
 
-from learner.data import get_dataloader
+
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 PARENT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -13,6 +13,7 @@ sys.path.append('.')
 sys.path.append(PARENT_DIR)
 
 import learner as ln
+
 
 parser = argparse.ArgumentParser(description=None)
 # For general settings
@@ -67,7 +68,7 @@ def run():
         'download_data': args.download_data,
         'num_workers': args.num_workers,
     }
-    data = get_dataloader(**arguments)
+    data = ln.data.get_dataloader(**arguments)
 
     # net
     arguments = {
@@ -79,7 +80,7 @@ def run():
         'load_net_path': args.load_net_path,
         'device': device
     }
-    net = ln.get_model(**arguments)
+    net = ln.nn.get_model(**arguments)
 
     arguments = {
         'taskname': args.taskname,

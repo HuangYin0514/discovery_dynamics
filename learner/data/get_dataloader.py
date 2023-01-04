@@ -14,7 +14,7 @@ from .collate_batch import train_collate_fn, val_collate_fn
 from .datasets import init_dataset
 from .datasets.dynamics_dataset import DynamicsDataset
 from .transforms import build_transforms
-from ..utils import download_file_from_google_drive
+from ..utils import download_file_from_google_drive, timing
 
 import os.path as osp
 
@@ -42,6 +42,7 @@ def __get_data(dataset, data_name, taskname, tasktype, obj, dim, download_data=F
     return dataset
 
 
+@timing
 def get_dataloader(data_name, num_workers=0, **kwargs):
     num_workers = num_workers
 

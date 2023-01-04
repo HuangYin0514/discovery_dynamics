@@ -7,7 +7,7 @@ import torch
 from matplotlib import pyplot as plt
 from tqdm import tqdm
 
-from .nn import LossNN
+from .nn.base_module import LossNN
 from .utils import timing, deprecated
 from .scheduler import lr_decay_scheduler, no_scheduler
 

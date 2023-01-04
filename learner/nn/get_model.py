@@ -1,7 +1,9 @@
 import os
+import os.path as osp
 
-from .nn import HNN, Baseline
-from .utils import count_parameters, load_network, download_file_from_google_drive, timing
+from learner.utils import timing, count_parameters, download_file_from_google_drive, load_network
+from .baseline import Baseline
+from .hnn import HNN
 
 
 def choose_model(net_name, obj, dim):
@@ -19,17 +21,18 @@ def choose_model(net_name, obj, dim):
 
 @timing
 def get_model(taskname, net_name, obj, dim, net_url, load_net_path, device):
+    print('=>Start get models.')
     net = choose_model(net_name, obj, dim)
-
     print('Number of parameters in model: ', count_parameters(net))
 
     if len(net_url) != 0:
-        print('Start downloading net.')
-        data_path = './outputs/' + taskname
+        print('=>Start downloading net.')
+        data_path = osp.join('./outputs/', taskname)
+
         os.makedirs(data_path) if not os.path.exists(data_path) else None
 
         # example: model-pend_2_hnn.pkl
-        filename = data_path + '/model_{}.pkl'.format(taskname)
+        filename = osp.join(data_path, '/model_{}.pkl'.format(taskname))
 
         download_file_from_google_drive(net_url, filename)
 
