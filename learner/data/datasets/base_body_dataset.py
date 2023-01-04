@@ -23,9 +23,6 @@ class BaseBodyDataset(BaseDynamicsDataset):
         self.solver = None
 
     def Init_data(self):
-        self.__init_data()
-
-    def __init_data(self):
         train_dataset = self.__generate_random(self.train_num, self._h)
         test_dataset = self.__generate_random(self.test_num, self._h)
         self.train = train_dataset

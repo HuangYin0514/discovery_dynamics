@@ -26,18 +26,21 @@ def __get_data(dataset, data_name, taskname, tasktype, obj, dim, download_data=F
     filename = osp.join(data_path, 'dataset_{}_{}_{}_hamilton.npy'.format(tasktype, obj, dim))
 
     if download_data:
-        print('=>Start downloading dataset.')
+        print('=> Start downloading dataset.')
         os.makedirs(data_path) if not os.path.exists(data_path) else None
         download_file_from_google_drive(dataset.dataset_url, filename)
 
     if os.path.exists(filename):
-        print('=>Start loading dataset from {} .'.format(filename))
+        print('=> Start loading dataset from {} .'.format(filename))
         dataset = np.load(filename, allow_pickle=True).item()
     else:
-        print('=>Start generating dataset.')
+        print('=> Start generating dataset.')
         dataset.Init_data()
         os.makedirs(data_path) if not os.path.exists(data_path) else None
         # np.save(filename, dataset)
+
+    print("=> {} loaded".format(data_name))
+    dataset.print_dataset_statistics(dataset.train, dataset.test)
 
     return dataset
 

@@ -19,27 +19,30 @@ class BaseDataset(abc.ABC):
         super(BaseDataset, self).__init__()
 
     def get_dynamics_data_info(self, data):
-        return 0, 0, 0
+        num_traj = len(data)
+        x0, t, h, X, y, E = data[0]
+        num_t = len(t)
+        num_states = len(x0)
+        return num_traj, num_t, num_states
 
     @abc.abstractmethod
-    def print_dataset_statistics(self, ds):
+    def print_dataset_statistics(self, train_ds, test_ds):
         raise NotImplementedError
 
 
 class BaseDynamicsDataset(BaseDataset):
-    """
-    Base class of image reid dataset
-    """
 
     def __init__(self):
         super(BaseDynamicsDataset, self).__init__()
 
-    def print_dataset_statistics(self, ds):
-        num_train_pids, num_train_imgs, num_train_cams = self.get_dynamics_data_info(ds)
+    def print_dataset_statistics(self, train_ds, test_ds):
+        num_train_traj, num_train_t, num_train_states = self.get_dynamics_data_info(train_ds)
+        num_test_traj, num_test_t, num_test_states = self.get_dynamics_data_info(test_ds)
 
         print("Dataset statistics:")
         print("  ----------------------------------------")
-        print("  subset   | # ids | # images | # cameras")
+        print("  subset   | # traj| # t   | # states")
         print("  ----------------------------------------")
-        print("  train    | {:5d} | {:8d} | {:9d}".format(num_train_pids, num_train_imgs, num_train_cams))
+        print("  train    | {:5d} | {:8d} | {:9d}".format(num_train_traj, num_train_t, num_train_states))
+        print("  test     | {:5d} | {:8d} | {:9d}".format(num_test_traj, num_test_t, num_test_states ))
         print("  ----------------------------------------")
