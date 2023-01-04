@@ -80,7 +80,8 @@ class Brain:
         pbar = tqdm(range(self.iterations + 1), desc='Processing')
         for i in pbar:
             '''training'''
-            for inputs, labels in self.train_loader:
+            for data in self.train_loader:
+                inputs, labels = data
                 inputs = inputs.to(self.device)
                 labels = labels.to(self.device)
 
@@ -95,9 +96,11 @@ class Brain:
                     self.__optimizer.zero_grad()
                     loss.backward()
                     self.__optimizer.step()
+
             '''test'''
             if i % self.print_every == 0 or i == self.iterations:
-                for inputs, labels in self.test_loader:
+                for data in self.test_loader:
+                    inputs, labels = data
                     inputs = inputs.to(self.device)
                     labels = labels.to(self.device)
 
@@ -209,7 +212,6 @@ class Brain:
         train_loader, test_loader = self.data
         self.train_loader = train_loader
         self.test_loader = test_loader
-
 
     def __init_net(self):
         self.net.device = self.device
