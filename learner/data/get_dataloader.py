@@ -42,8 +42,8 @@ def __get_data(dataset, data_name, taskname, tasktype, obj, dim, download_data=F
     return dataset
 
 
-def get_dataloader(data_name, **kwargs):
-    num_workers = 0
+def get_dataloader(data_name, num_workers=0, **kwargs):
+    num_workers = num_workers
 
     '''transforms'''
     train_transforms = build_transforms(is_train=True, **kwargs)

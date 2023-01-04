@@ -17,7 +17,7 @@ def download_file_from_google_drive(dest_url, destination):
 
     save_response_content(response, destination)
 
-    print("Successfully download file {} from url {}".format(destination, dest_url))
+    print("Successfully download file to {} from url {}".format(destination, dest_url))
 
 
 def get_confirm_token(response):
