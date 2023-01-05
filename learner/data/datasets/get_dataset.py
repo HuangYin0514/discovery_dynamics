@@ -10,7 +10,8 @@ import os.path as osp
 
 import numpy as np
 
-from learner.data.datasets import Pendulum2
+from .pend_2 import Pendulum2
+from .body3 import Body3
 from learner.utils import download_file_from_google_drive
 
 
@@ -18,6 +19,11 @@ def choose_dataset(data_name, obj, dim, train_num, test_num):
     dataset = None
     if data_name == 'Pendulum2':
         dataset = Pendulum2(train_num=train_num,
+                            test_num=test_num,
+                            obj=obj,
+                            dim=dim)
+    elif data_name == 'Body3':
+        dataset = Body3(train_num=train_num,
                             test_num=test_num,
                             obj=obj,
                             dim=dim)
