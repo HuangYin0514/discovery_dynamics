@@ -77,6 +77,23 @@ rm -rf outputs
 # 2. three body
 
 ## 2.1. hnn
+```
+%run  ./task/train.py \
+    --taskname body_3_hnn \
+    --net_name hnn \
+    --data_name Body3 \
+    --obj 3 \
+    --dim 2 \
+    --train_num 180 \
+    --test_num 20 \
+    --lr 1e-3 \
+    --criterion L2_norm_loss \
+    --optimizer adam \
+    --scheduler MultiStepLR \
+    --iterations 3000 \
+    --print_every 1
+
+```
 
 ## 2.2. baseline
 

@@ -21,7 +21,7 @@ parser.add_argument('--taskname', default='3body', type=str, help='Task name')
 parser.add_argument('--seed', default=0, type=int, help='random seed')
 
 # For task
-parser.add_argument('--net_name', default='baseline', type=str, help='Select model to train')
+parser.add_argument('--net_name', default='hnn', type=str, help='Select model to train')
 parser.add_argument('--data_name', default='Body3', type=str, help='choose dataset')
 parser.add_argument('--obj', default=3, type=int, help='number of elements')
 parser.add_argument('--dim', default=2, type=int, help='degree of freedom')
