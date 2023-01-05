@@ -41,7 +41,22 @@ rm -rf outputs
 
 
 ## 1.2. baseline
-
+```
+%run  ./task/train.py \
+    --taskname pend_2_hnn \
+    --net_name baseline \
+    --data_name Pendulum2 \
+    --obj 2 \
+    --dim 1 \
+    --train_num 90 \
+    --test_num 10 \
+    --lr 1e-2 \
+    --criterion L2_norm_loss \
+    --optimizer adam \
+    --scheduler MultiStepLR \
+    --iterations 10000 \
+    --print_every 1
+```
 
 
 ## 1.3. test

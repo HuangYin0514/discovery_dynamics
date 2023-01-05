@@ -15,6 +15,7 @@ training_file/
 *.ipynb_checkpoints/
 
 # file
+*.pyc
 *.txt
 *.pkl
 *.tar
