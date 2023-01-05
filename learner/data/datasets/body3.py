@@ -44,7 +44,7 @@ class Body3(BaseBodyDataset):
 
         t0 = 0
         t_end = 10
-        self._h = 0.1
+        self._h = 0.05
         self.solver = RK45(self.right_fn, t0=t0, t_end=t_end)
 
         self.k = 1  # body equation parameter

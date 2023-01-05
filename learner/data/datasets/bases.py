@@ -45,12 +45,12 @@ class BaseDynamicsDataset(BaseDataset):
         print("  ----------------------------------------------------")
         print("  subset   | # traj| # t -> [t_min, t_max]  | # states")
         print("  ----------------------------------------------------")
-        print("  train    | {:5d} | {:9d} -> [{},{}] | {:9d}".format(num_train_traj,
+        print("  train    | {:5d} | {:9d} -> [{:.3},{:.3}] | {:5d}".format(num_train_traj,
                                                                     num_train_t,
                                                                     min_train_t,
                                                                     max_train_t,
                                                                     num_train_states))
-        print("  test     | {:5d} | {:9d} -> [{},{}] | {:9d}".format(num_test_traj,
+        print("  test     | {:5d} | {:9d} -> [{:.3},{:.3}] | {:5d}".format(num_test_traj,
                                                                     num_test_t,
                                                                     min_test_t,
                                                                     max_test_t,
