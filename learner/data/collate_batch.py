@@ -13,14 +13,11 @@ def train_collate_fn(batch):
     x0, t, h, X, y, E = zip(*batch)
 
     X = torch.stack(X, dim=0).float()
-    y = torch.Tensor(np.asarray(y))  # Creating a tensor from a list of numpy.ndarrays is extremely slow.
+    y = torch.stack(y, dim=0).float()
 
     # todo: (N, 100, dof) -> (Nx100, dof)
     X = torch.flatten(X, start_dim=0, end_dim=1)
     y = torch.flatten(y, start_dim=0, end_dim=1)
-
-    X = X.float()
-    y = y.float()
 
     X.requires_grad = True
 
@@ -31,14 +28,11 @@ def val_collate_fn(batch):
     x0, t, h, X, y, E = zip(*batch)
 
     X = torch.stack(X, dim=0).float()
-    y =  torch.Tensor(np.asarray(y))
+    y = torch.stack(y, dim=0).float()
 
     # todo: (N, 100, dof) -> (Nx100, dof)
     X = torch.flatten(X, start_dim=0, end_dim=1)
     y = torch.flatten(y, start_dim=0, end_dim=1)
-
-    X = X.float()
-    y = y.float()
 
     X.requires_grad = True
 

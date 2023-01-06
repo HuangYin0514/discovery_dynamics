@@ -7,12 +7,13 @@
 """
 import numpy as np
 import torch
+from torch import nn
 
 from learner.integrator.rungekutta import RK45
 from .base_body_dataset import BaseBodyDataset
 
 
-class Pendulum2(BaseBodyDataset):
+class Pendulum2(BaseBodyDataset, nn.Module):
     """
     Pendulum with 2 bodies
     Reference:
@@ -42,26 +43,29 @@ class Pendulum2(BaseBodyDataset):
         self._dim = dim
         self._dof = self._obj * self._dim  # degree of freedom
 
-        t0 = 0
-        t_end = 10
-        self._h = 0.1
-        self.solver = RK45(self.right_fn, t0=t0, t_end=t_end)
+        t0 = 0.
+        t_end = 10.
+        self.dt = 0.01
+        _time_step = int((t_end - t0) / self.dt)
 
-    def right_fn(self, t, coords):
-        q1, q2, p1, p2 = coords
+        self.t = torch.linspace(t0, t_end, _time_step)
+
+    def forward(self, t, coords):
+        assert len(coords) == self._dof * 2
+        q1, q2, p1, p2 = torch.chunk(coords, 4, dim=0)
         l1, l2, m1, m2 = self._l[0], self._l[1], self._m[0], self._m[1]
         g = self._g
-        b = l1 * l2 * (m1 + m2 * np.sin(q1 - q2) ** 2)
-        dq1 = (l2 * p1 - l1 * p2 * np.cos(q1 - q2)) / (b * l1)
-        dq2 = (-m2 * l2 * p1 * np.cos(q1 - q2) + (m1 + m2) * l1 * p2) / (m2 * b * l2)
-        h1 = p1 * p2 * np.sin(q1 - q2) / b
-        h2 = (m2 * l2 ** 2 * p1 ** 2 + (m1 + m2) * l1 ** 2 * p2 ** 2 - 2 * m2 * l1 * l2 * p1 * p2 * np.cos(q1 - q2)) / (
-                2 * b ** 2)
-        dp1 = -(m1 + m2) * g * l1 * np.sin(q1) - h1 + h2 * np.sin(2 * (q1 - q2))
-        dp2 = -m2 * g * l2 * np.sin(q2) + h1 - h2 * np.sin(2 * (q1 - q2))
-        return np.asarray([dq1, dq2, dp1, dp2]).reshape(-1)
+        b = l1 * l2 * (m1 + m2 * torch.sin(q1 - q2) ** 2)
+        dq1 = (l2 * p1 - l1 * p2 * torch.cos(q1 - q2)) / (b * l1)
+        dq2 = (-m2 * l2 * p1 * torch.cos(q1 - q2) + (m1 + m2) * l1 * p2) / (m2 * b * l2)
+        h1 = p1 * p2 * torch.sin(q1 - q2) / b
+        h2 = (m2 * l2 ** 2 * p1 ** 2 + (m1 + m2) * l1 ** 2 * p2 ** 2 - 2 * m2 * l1 * l2 * p1 * p2 * torch.cos(
+            q1 - q2)) / (2 * b ** 2)
+        dp1 = -(m1 + m2) * g * l1 * torch.sin(q1) - h1 + h2 * torch.sin(2 * (q1 - q2))
+        dp2 = -m2 * g * l2 * torch.sin(q2) + h1 - h2 * torch.sin(2 * (q1 - q2))
+        return torch.cat([dq1, dq2, dp1, dp2], dim=0)
 
-    def __M(self, x):
+    def M(self, x):
         """
         ref: Simplifying Hamiltonian and Lagrangian Neural Networks via Explicit Constraints
         Create a square mass matrix of size N x N.
@@ -76,25 +80,21 @@ class Pendulum2(BaseBodyDataset):
                 j = i if i >= k else k
                 for tmp in range(j, N):
                     m_sum += self._m[tmp]
-                M[i, k] += self._l[i] * self._l[k] * torch.cos(x[i] - x[k]) * m_sum
-        return M.double()
+                M[i, k] = self._l[i] * self._l[k] * torch.cos(x[i] - x[k]) * m_sum
+        return M
 
-    def __Minv(self, x):
-        return torch.inverse(self.__M(x)).double()
+    def Minv(self, x):
+        return torch.inverse(self.M(x))
 
     def kinetic(self, coords):
         """Kinetic energy"""
         assert len(coords) == self._dof * 2
-        if isinstance(coords, np.ndarray):
-            coords = torch.tensor(coords)
-        x, p = torch.split(coords, 2)
-        T = torch.sum(0.5 * p @ self.__Minv(x) @ p)
+        x, p = torch.chunk(coords, 2, dim=0)
+        T = torch.sum(0.5 * p @ self.Minv(x) @ p)
         return T
 
     def potential(self, coords):
         assert len(coords) == self._dof * 2
-        if isinstance(coords, np.ndarray):
-            coords = torch.tensor(coords)
         g = self._g
         U = 0.
         y = 0.
@@ -110,10 +110,10 @@ class Pendulum2(BaseBodyDataset):
 
     def random_config(self):
         max_momentum = 1.
-        x0 = np.zeros(self._obj * 2)
+        x0 = torch.zeros(self._obj * 2)
         for i in range(self._obj):
-            theta = (2 * np.pi - 0) * np.random.rand() + 0  # [0, 2pi]
-            momentum = (2 * np.random.rand() - 1) * max_momentum  # [-1, 1]*max_momentum
+            theta = (2 * np.pi - 0) * torch.rand(1, ) + 0  # [0, 2pi]
+            momentum = (2 * torch.rand(1, ) - 1) * max_momentum  # [-1, 1]*max_momentum
             x0[i] = theta
             x0[i + self._obj] = momentum
         return x0.reshape(-1)

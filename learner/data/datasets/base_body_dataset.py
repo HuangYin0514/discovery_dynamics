@@ -8,8 +8,10 @@
 import abc
 
 import numpy as np
+import torch
 
 from learner.data.datasets.bases import BaseDynamicsDataset
+from learner.integrator.torchdiffeq import odeint
 
 
 class BaseBodyDataset(BaseDynamicsDataset):
@@ -19,35 +21,33 @@ class BaseBodyDataset(BaseDynamicsDataset):
         self.train_num = None
         self.test_num = None
 
-        self._h = None
-        self.solver = None
+        self.t = None
 
     def Init_data(self):
-        train_dataset = self.__generate_random(self.train_num, self._h)
-        test_dataset = self.__generate_random(self.test_num, self._h)
+        train_dataset = self.__generate_random(self.train_num)
+        test_dataset = self.__generate_random(self.test_num)
         self.train = train_dataset
         self.test = test_dataset
 
-    def __generate_random(self, num, h):
+    def __generate_random(self, num):
         dataset = []
         for _ in range(num):
-            x0 = self.random_config()
-            t, X = self.__generate(x0, h)
-            y = np.asarray(list(map(lambda x: self.right_fn(None, x), X)))
-            E = np.array([self.energy_fn(y) for y in X])
-            dataset.append((x0, t, h, X, y, E))
+            x0 = self.random_config()  # (1, D)
+            X = self.__generate(x0, self.t)  # (T, 1, D)
+            y = torch.stack(list(map(lambda x: self(None, x), X)))
+            E = np.stack([self.energy_fn(y) for y in X])
+            dataset.append((x0, self.t, self.dt, X, y, E))
+            # from matplotlib import pyplot as plt
+            # plt.plot(E)
+            # plt.show()
         return dataset
 
-    def __generate(self, x0, h):
-        t, x = self.solver.solve(x0, h)
-        return t, x
+    def __generate(self, x0, t):
+        x = odeint(self, x0, t, method='rk4')  # (num, 1, D)
+        return x
 
     @abc.abstractmethod
-    def random_config(self):
-        pass
-
-    @abc.abstractmethod
-    def right_fn(self, t, x):
+    def random_config(self, num):
         pass
 
     @abc.abstractmethod

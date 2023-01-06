@@ -96,7 +96,22 @@ rm -rf outputs
 ```
 
 ## 2.2. baseline
-
+```
+%run  ./task/train.py \
+    --taskname body_3_baseline \
+    --net_name baseline \
+    --data_name Body3 \
+    --obj 3 \
+    --dim 2 \
+    --train_num 180 \
+    --test_num 20 \
+    --lr 1e-3 \
+    --criterion L2_norm_loss \
+    --optimizer adam \
+    --scheduler MultiStepLR \
+    --iterations 3000 \
+    --print_every 1
+```
 
 ## 2.3. test
 ```
