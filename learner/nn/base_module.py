@@ -2,6 +2,8 @@ import abc
 
 import torch
 
+from ..criterion import L2_norm_loss
+
 
 class BaseModule(torch.nn.Module):
     '''Standard module format. 
@@ -73,11 +75,14 @@ class LossNN(BaseModule, abc.ABC):
     def __init__(self):
         super(LossNN, self).__init__()
 
+    def criterion(self, y_hat, y, criterion_method='MSELoss'):
+        if criterion_method == 'MSELoss':
+            return torch.nn.MSELoss()(y_hat, y)
+        elif criterion_method == 'L2_norm_loss':
+            return L2_norm_loss(y_hat, y)
+        else:
+            raise NotImplementedError
 
     @abc.abstractmethod
-    def criterion(self, X, y):
-        pass
-
-    @abc.abstractmethod
-    def predict(self, X, h, t0, t_end):
+    def integrate(self, X, t):
         pass

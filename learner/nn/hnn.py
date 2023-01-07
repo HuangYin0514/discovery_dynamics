@@ -5,9 +5,8 @@ import torch
 
 from .fnn import FNN
 from .base_module import LossNN
-from ..integrator.rungekutta import RK4, RK45
+from ..integrator import ODESolver
 from ..utils import lazy_property, dfx
-from ..criterion import L2_norm_loss
 
 
 class HNN(LossNN):
@@ -38,25 +37,9 @@ class HNN(LossNN):
     def forward(self, t, x):
         h = self.baseline(x)
         gradH = dfx(h, x)
-        dy = self.J @ gradH.T  # dqq shape is (vector, batchsize)
+        dy = self.J @ gradH.T  # dy shape is (vector, batchsize)
         return dy.T
 
-    def criterion(self, y_hat, y, criterion_method='MSELoss'):
-        if criterion_method == 'MSELoss':
-            return torch.nn.MSELoss()(y_hat, y)
-        elif criterion_method == 'L2_norm_loss':
-            return L2_norm_loss(y_hat, y)
-        else:
-            raise NotImplementedError
-
-    def predict(self, X, h, t0, t_end, solver_method="RK45", circular_motion=False):
-        assert isinstance(X, np.ndarray), "input data must be numpy types"
-        model_f = partial(self.__model_f, circular_motion=circular_motion)
-        if solver_method == "RK45":
-            solver = RK45(model_f, t0, t_end)
-        elif solver_method == "RK4":
-            solver = RK4(model_f, t0, t_end)
-        else:
-            raise NotImplementedError
-        res = solver.solve(X, h)
-        return res
+    def integrate(self, X, t):
+        x = ODESolver(self, X, t, method='dopri5')  # (T, D)
+        return x
