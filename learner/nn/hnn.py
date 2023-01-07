@@ -41,5 +41,5 @@ class HNN(LossNN):
         return dy.T
 
     def integrate(self, X, t):
-        x = ODESolver(self, X, t, method='dopri5')  # (T, D)
-        return x
+        out = ODESolver(self, X, t, method='dopri5').permute(1, 0, 2)  # (T, D)
+        return out

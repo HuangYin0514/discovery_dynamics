@@ -106,7 +106,7 @@ class Brain:
                     X, t = X.to(self.device), t.to(self.device)
                     labels = labels.to(self.device)
 
-                    loss_test = self.__criterion(self.net(t, X), labels)
+                    loss_test = self.__criterion(self.net.integrate(X, t), labels)
 
                 loss_history.append([i, loss.item(), loss_test.item()])
                 postfix = {
