@@ -82,10 +82,11 @@ class Brain:
             '''training'''
             for data in self.train_loader:
                 inputs, labels = data
-                inputs = inputs.to(self.device)
+                X, t = inputs
+                X, t = X.to(self.device), t.to(self.device)
                 labels = labels.to(self.device)
 
-                loss = self.__criterion(self.net(inputs), labels)
+                loss = self.__criterion(self.net(t, X), labels)
 
                 if torch.any(torch.isnan(loss)):
                     self.encounter_nan = True
@@ -101,10 +102,11 @@ class Brain:
             if i % self.print_every == 0 or i == self.iterations:
                 for data in self.test_loader:
                     inputs, labels = data
-                    inputs = inputs.to(self.device)
+                    X, t = inputs
+                    X, t = X.to(self.device), t.to(self.device)
                     labels = labels.to(self.device)
 
-                    loss_test = self.__criterion(self.net(inputs), labels)
+                    loss_test = self.__criterion(self.net(t, X), labels)
 
                 loss_history.append([i, loss.item(), loss_test.item()])
                 postfix = {
@@ -145,7 +147,7 @@ class Brain:
                         + '\n'
                         + 'Task name: {}'.format(self.taskname)
                         + '\n'
-                        + 'net name: {}'.format(self.net.name)
+                        + 'net name: {}'.format(self.net.__class__.__name__)
                         + '\n'
                         + 'Best model at iteration: {}'.format(iteration)
                         + '\n'

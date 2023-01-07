@@ -16,7 +16,6 @@ class HNN(LossNN):
 
     def __init__(self, dim, layers=3, width=30):
         super(HNN, self).__init__()
-        self.name = 'hnn'
 
         self.dim = dim
         self.layers = layers
@@ -30,14 +29,13 @@ class HNN(LossNN):
 
     @lazy_property
     def J(self):
-        # [ 0, 1]
-        # [-1, 0]
+        # [ 0, I]
+        # [-I, 0]
         d = int(self.dim / 2)
         res = np.eye(self.dim, k=d) - np.eye(self.dim, k=-d)
         return torch.tensor(res, dtype=self.Dtype, device=self.Device)
 
-
-    def forward(self, x):
+    def forward(self, t, x):
         h = self.baseline(x)
         gradH = dfx(h, x)
         dy = self.J @ gradH.T  # dqq shape is (vector, batchsize)
@@ -50,14 +48,6 @@ class HNN(LossNN):
             return L2_norm_loss(y_hat, y)
         else:
             raise NotImplementedError
-
-    def __model_f(self, t, X, circular_motion=False):
-        if circular_motion:  # Handle the case of circular motion
-            position_dim = len(X) // 2
-            X[:position_dim] = X[:position_dim] % (2 * np.pi)
-        x = torch.tensor(X, requires_grad=True, dtype=self.Dtype, device=self.Device).view(1, -1)
-        dx = self.forward(x).cpu().detach().numpy().reshape(-1)
-        return dx
 
     def predict(self, X, h, t0, t_end, solver_method="RK45", circular_motion=False):
         assert isinstance(X, np.ndarray), "input data must be numpy types"

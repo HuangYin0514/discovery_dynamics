@@ -73,9 +73,6 @@ class LossNN(BaseModule, abc.ABC):
     def __init__(self):
         super(LossNN, self).__init__()
 
-    @abc.abstractmethod
-    def forward(self, x):
-        return x
 
     @abc.abstractmethod
     def criterion(self, X, y):
