@@ -44,4 +44,4 @@ def get_dataloader(data_name, num_workers=0, **kwargs):
         num_workers=num_workers, collate_fn=val_collate_fn
     )
 
-    return train_loader, test_loader
+    return dataset, train_loader, test_loader

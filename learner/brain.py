@@ -79,7 +79,7 @@ class Brain:
 
         pbar = tqdm(range(self.iterations + 1), desc='Processing')
         for i in pbar:
-            '''training'''
+            #  train ---------------------------------------------------------------
             for data in self.train_loader:
                 inputs, labels = data
                 X, t = inputs
@@ -98,7 +98,7 @@ class Brain:
                     loss.backward()
                     self.__optimizer.step()
 
-            '''test'''
+            #  test ---------------------------------------------------------------
             if i % self.print_every == 0 or i == self.iterations:
 
                 for data in self.test_loader:
@@ -117,10 +117,11 @@ class Brain:
                 }
                 pbar.set_postfix(postfix)
 
-            '''save'''
+            #  save ---------------------------------------------------------------
             if self.save:
                 torch.save(self.net, 'training_file/' + self.taskname + '/model/model{}.pkl'.format(i))
 
+            #  lr step ---------------------------------------------------------------
             if self.__scheduler is not None:
                 self.__scheduler.step()
 
@@ -137,6 +138,7 @@ class Brain:
             iteration = int(self.loss_history[best_loss_index, 0])
             loss_train = self.loss_history[best_loss_index, 1]
             loss_test = self.loss_history[best_loss_index, 2]
+
             print('Best model at iteration {}:'.format(iteration), flush=True)
             print('Train loss: {:.4e}, Test loss: {:.4e}'.format(loss_train, loss_test), flush=True)
 
@@ -212,9 +214,12 @@ class Brain:
         self.__init_criterion()
 
     def __init_data(self):
-        train_loader, test_loader = self.data
+        dataset, train_loader, test_loader = self.data
+        # dataloader
         self.train_loader = train_loader
         self.test_loader = test_loader
+        # energy function
+        self.energy_fn = dataset.energy_fn
 
     def __init_net(self):
         self.net.device = self.device
