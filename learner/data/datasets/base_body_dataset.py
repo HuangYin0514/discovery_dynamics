@@ -35,7 +35,7 @@ class BaseBodyDataset(BaseDynamicsDataset):
             x0 = self.random_config()  # (D, )
             X = self.__generate(x0, self.t)  # (T, D)
             y = torch.stack(list(map(lambda x: self(None, x), X)))  # (T, D)
-            E = np.stack([self.energy_fn(y) for y in X])
+            E = torch.stack([self.energy_fn(y) for y in X])
             dataset.append((x0, self.t, self.dt, X, y, E))
             # from matplotlib import pyplot as plt
             # plt.plot(E)

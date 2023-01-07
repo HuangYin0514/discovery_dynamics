@@ -7,6 +7,7 @@ import torch
 from matplotlib import pyplot as plt
 from tqdm import tqdm
 
+from .metrics import accuracy_fn
 from .nn.base_module import LossNN
 from .utils import timing, deprecated
 from .scheduler import lr_decay_scheduler, no_scheduler
@@ -107,12 +108,16 @@ class Brain:
                     X, t = X.to(self.device), t.to(self.device)
                     labels = labels.to(self.device)
 
-                    loss_test = self.__criterion(self.net.integrate(X, t), labels)
+                    pred = self.net.integrate(X, t)
+                    err = accuracy_fn(pred, labels, self.energy_fn)
+                    mse_err, rel_err, eng_err = err
 
-                loss_history.append([i, loss.item(), loss_test.item()])
+                loss_history.append([i, loss.item(), mse_err.item(), rel_err.item(), eng_err.item()])
                 postfix = {
                     'Train_loss': '{:.3e}'.format(loss.item()),
-                    'Test_loss': '{:.3e}'.format(loss_test.item()),
+                    'mse_err': '{:.3e}'.format(mse_err.item()),
+                    'rel_err': '{:.3e}'.format(rel_err.item()),
+                    'eng_err': '{:.3e}'.format(eng_err.item()),
                     'lr': self.__optimizer.param_groups[0]['lr']
                 }
                 pbar.set_postfix(postfix)
@@ -134,17 +139,17 @@ class Brain:
 
     def restore(self):
         if self.loss_history is not None and self.save is True:
-            best_loss_index = np.argmin(self.loss_history[:, 1])
+            best_loss_index = np.argmin(self.loss_history[:, -1])
+
             iteration = int(self.loss_history[best_loss_index, 0])
             loss_train = self.loss_history[best_loss_index, 1]
-            loss_test = self.loss_history[best_loss_index, 2]
-
-            print('Best model at iteration {}:'.format(iteration), flush=True)
-            print('Train loss: {:.4e}, Test loss: {:.4e}'.format(loss_train, loss_test), flush=True)
+            mse_err = self.loss_history[best_loss_index, 2]
+            rel_err = self.loss_history[best_loss_index, 3]
+            eng_err = self.loss_history[best_loss_index, 4]
 
             path = './outputs/' + self.taskname
             if not os.path.isdir('./outputs/' + self.taskname): os.makedirs('./outputs/' + self.taskname)
-            contents = ('\n\n'
+            contents = ('\n'
                         + 'Train completion time: '
                         + time.strftime('%Y-%m-%d-%H-%M-%S', time.localtime(time.time()))
                         + '\n'
@@ -156,11 +161,18 @@ class Brain:
                         + '\n'
                         + 'Train loss: %s' % (loss_train)
                         + '\n'
-                        + 'Test loss: %s' % (loss_test))
+                        + 'mse_err: %s' % (mse_err)
+                        + '\n'
+                        + 'rel_err: %s' % (rel_err)
+                        + '\n'
+                        + 'eng_err: %s' % (eng_err)
+                        )
             f = open(path + '/output.txt', mode='a')
             f.write(contents)
             f.close()
-            # self.best_model = torch.load('training_file/' + self.taskname + '/model/model{}.pkl'.format(iteration))
+
+            print(contents)
+
             self.best_model = torch.load(
                 'training_file/' + self.taskname + '/model/model{}.pkl'.format(self.iterations))
         else:
@@ -189,7 +201,9 @@ class Brain:
             filename = '/fig-{}.png'.format(self.taskname)
             plt.figure()
             plt.semilogy(self.loss_history[:, 0], self.loss_history[:, 1], 'b', label='train loss')
-            plt.semilogy(self.loss_history[:, 0], self.loss_history[:, 2], 'r', label='test loss')
+            plt.semilogy(self.loss_history[:, 0], self.loss_history[:, 2], 'r', label='mse_err')
+            plt.semilogy(self.loss_history[:, 0], self.loss_history[:, 3], 'g', label='rel_err')
+            plt.semilogy(self.loss_history[:, 0], self.loss_history[:, 4], 'y', label='eng_err')
             plt.legend()
             plt.savefig(path + filename, format='png')
             plt.show()

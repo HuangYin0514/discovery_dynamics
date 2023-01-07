@@ -31,6 +31,8 @@ def train_collate_fn(batch):
 def val_collate_fn(batch):
     x0, t, h, X, y, E = zip(*batch)
 
+    X = torch.stack(X, dim=0).float()
+
     x0 = torch.stack(x0, dim=0).float()  # (bs, D)
     x0.requires_grad = True
 
@@ -38,5 +40,5 @@ def val_collate_fn(batch):
     y = torch.stack(y, dim=0).float()  # (bs, T, D)
 
     input = (x0, t)
-    output = y
+    output = X
     return input, output
