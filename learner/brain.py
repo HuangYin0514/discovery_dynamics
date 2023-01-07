@@ -100,6 +100,7 @@ class Brain:
 
             '''test'''
             if i % self.print_every == 0 or i == self.iterations:
+
                 for data in self.test_loader:
                     inputs, labels = data
                     X, t = inputs

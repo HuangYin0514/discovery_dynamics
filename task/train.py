@@ -38,7 +38,7 @@ parser.add_argument('--criterion', default='L2_norm_loss', type=str, help='Selec
 parser.add_argument('--optimizer', default='adam', type=str, help='Select optimizer to learn')
 parser.add_argument('--scheduler', default='MultiStepLR', type=str, help='Select scheduler to learn')
 parser.add_argument('--iterations', default=20, type=int, help='end of training epoch')
-parser.add_argument('--print_every', default=2, type=int, help='number of gradient steps between prints')
+parser.add_argument('--print_every', default=10, type=int, help='number of gradient steps between prints')
 
 # For other settings
 parser.add_argument('--dtype', default='float', type=str, help='Types of data and models')
