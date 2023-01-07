@@ -90,6 +90,9 @@ class Pendulum2(BaseBodyDataset, nn.Module):
         """Kinetic energy"""
         assert len(coords) == self._dof * 2
         x, p = torch.chunk(coords, 2, dim=0)
+        print(x.device)
+        print(p.device)
+        print(self.Minv(x).device)
         T = torch.sum(0.5 * p @ self.Minv(x) @ p)
         return T
 
