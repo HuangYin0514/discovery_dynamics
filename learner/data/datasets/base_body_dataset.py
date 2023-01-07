@@ -11,7 +11,7 @@ import numpy as np
 import torch
 
 from learner.data.datasets.bases import BaseDynamicsDataset
-from learner.integrator.torchdiffeq import odeint
+from learner.integrator import ODESolver
 
 
 class BaseBodyDataset(BaseDynamicsDataset):
@@ -32,9 +32,9 @@ class BaseBodyDataset(BaseDynamicsDataset):
     def __generate_random(self, num):
         dataset = []
         for _ in range(num):
-            x0 = self.random_config()  # (1, D)
-            X = self.__generate(x0, self.t)  # (T, 1, D)
-            y = torch.stack(list(map(lambda x: self(None, x), X)))
+            x0 = self.random_config()  # (D, )
+            X = self.__generate(x0, self.t)  # (T, D)
+            y = torch.stack(list(map(lambda x: self(None, x), X)))  # (T, D)
             E = np.stack([self.energy_fn(y) for y in X])
             dataset.append((x0, self.t, self.dt, X, y, E))
             # from matplotlib import pyplot as plt
@@ -43,7 +43,7 @@ class BaseBodyDataset(BaseDynamicsDataset):
         return dataset
 
     def __generate(self, x0, t):
-        x = odeint(self, x0, t, method='rk4')  # (num, 1, D)
+        x = ODESolver(self, x0, t, method='dopri5')  # (T, D)
         return x
 
     @abc.abstractmethod
