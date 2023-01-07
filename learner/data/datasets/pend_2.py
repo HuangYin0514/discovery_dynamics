@@ -73,7 +73,7 @@ class Pendulum2(BaseBodyDataset, nn.Module):
         In the future, only half of the matrix can be considered
         """
         N = self._obj
-        M = torch.zeros((N, N))
+        M = torch.zeros((N, N), device=x.device)
         for i in range(N):
             for k in range(N):
                 m_sum = 0
