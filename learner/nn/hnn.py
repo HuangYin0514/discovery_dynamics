@@ -35,9 +35,8 @@ class HNN(LossNN):
     def forward(self, t, x):
         h = self.baseline(x)
         gradH = dfx(h, x)
-        # dy = self.J @ gradH.T  # dy shape is (vector, batchsize)
-        # return dy.T
-        return ham_J(gradH.T).T
+        dy = (self.J @ gradH.T).T  # dy shape is (bs, vector)
+        return dy
 
     def integrate(self, X, t):
         out = ODESolver(self, X, t, method='dopri5').permute(1, 0, 2)  # (T, D)
