@@ -159,13 +159,13 @@ class Brain:
                         + '\n'
                         + 'Best model at iteration: {}'.format(iteration)
                         + '\n'
-                        + 'Train loss: %s' % (loss_train)
+                        + 'Train loss: {:.3e}'.format(loss_train)
                         + '\n'
-                        + 'mse_err: %s' % (mse_err)
+                        + 'mse_err: {:.3e}'.format(mse_err)
                         + '\n'
-                        + 'rel_err: %s' % (rel_err)
+                        + 'rel_err: {:.3e}'.format(rel_err)
                         + '\n'
-                        + 'eng_err: %s' % (eng_err)
+                        + 'eng_err: {:.3e}'.format(eng_err)
                         )
             f = open(path + '/output.txt', mode='a')
             f.write(contents)

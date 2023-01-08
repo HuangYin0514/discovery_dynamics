@@ -16,6 +16,7 @@ def square_err_fn(x, y):
 
 
 def rel_err_fn(x, y):
+    #  This function is  sqrt（a-b）** 2/ (a**2 + b**2)
     square_err = square_err_fn(x, y)
     rel_err = torch.sqrt(square_err) / \
               (torch.sqrt((x ** 2).mean((-1, -2))) + torch.sqrt((y ** 2).mean((-1, -2))))
