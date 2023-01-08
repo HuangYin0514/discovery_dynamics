@@ -23,9 +23,9 @@ def choose_dataset(data_name, obj, dim, train_num, test_num):
                             dim=dim)
     elif data_name == 'Body3':
         dataset = Body3(train_num=train_num,
-                            test_num=test_num,
-                            obj=obj,
-                            dim=dim)
+                        test_num=test_num,
+                        obj=obj,
+                        dim=dim)
     else:
         raise NotImplementedError('{} not implemented'.format(data_name))
     return dataset
@@ -40,9 +40,7 @@ def get_dataset(data_name, taskname, obj, dim, download_data=False, **kwargs):
     # example: dataset_Pendulum2.npy
     filename = osp.join(data_path, 'dataset_{}.npy'.format(data_name))
 
-    print(download_data)
-
-    if download_data:
+    if download_data == 'True':
         print('=> Start downloading dataset.')
         os.makedirs(data_path) if not os.path.exists(data_path) else None
         download_file_from_google_drive(dataset.dataset_url, filename)

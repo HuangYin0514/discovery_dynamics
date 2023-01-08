@@ -5,15 +5,12 @@ import sys
 import numpy as np
 import torch
 
-
-
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 PARENT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append('.')
 sys.path.append(PARENT_DIR)
 
 import learner as ln
-
 
 parser = argparse.ArgumentParser(description=None)
 # For general settings
@@ -27,7 +24,7 @@ parser.add_argument('--obj', default=3, type=int, help='number of elements')
 parser.add_argument('--dim', default=2, type=int, help='degree of freedom')
 parser.add_argument('--train_num', default=3, type=int, help='the number of train sampling trajectories')
 parser.add_argument('--test_num', default=2, type=int, help='the number of test sampling trajectories')
-parser.add_argument('--download_data', default=False, type=bool, help='Download dataset from Internet')
+parser.add_argument('--download_data', default='False', type=str, help='Download dataset from Internet')
 parser.add_argument('--net_url', default='', type=str, help='Download net from Internet')
 parser.add_argument('--load_net_path', default='', type=str, help='The path to load the pretrained network')
 parser.add_argument('--num_workers', default=0, type=int, help='how many subprocesses to use for data loading. ')
