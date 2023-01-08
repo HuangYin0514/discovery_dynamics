@@ -86,8 +86,8 @@ class Brain:
                 X, t = X.to(self.device), t.to(self.device)
                 labels = labels.to(self.device)
 
-                # pred = self.net(t, X)
-                pred = self.net.integrate(X, t)
+                pred = self.net(t, X)
+                # pred = self.net.integrate(X, t)
                 loss = self.__criterion(pred, labels)
 
                 if torch.any(torch.isnan(loss)):
