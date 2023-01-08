@@ -23,19 +23,19 @@ class BaseBodyDataset(BaseDynamicsDataset):
         self.t = None
 
     def Init_data(self):
-        train_dataset = self.__generate_random(self.train_num)
-        test_dataset = self.__generate_random(self.test_num)
+        train_dataset = self.__generate_random(self.train_num, self.t)
+        test_dataset = self.__generate_random(self.test_num, self.t)
         self.train = train_dataset
         self.test = test_dataset
 
-    def __generate_random(self, num):
+    def __generate_random(self, num, t):
         dataset = []
         for _ in range(num):
             x0 = self.random_config()  # (D, )
-            X = self.__generate(x0, self.t)  # (T, D)
+            X = self.__generate(x0, t)  # (T, D)
             y = torch.stack(list(map(lambda x: self(None, x), X)))  # (T, D)
             E = torch.stack([self.energy_fn(y) for y in X])
-            dataset.append((x0, self.t, self.dt, X, y, E))
+            dataset.append((x0, t, self.dt, X, y, E))
             # from matplotlib import pyplot as plt
             # plt.plot(E.detach().numpy() )
             # plt.show()
