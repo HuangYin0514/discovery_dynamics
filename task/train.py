@@ -30,7 +30,7 @@ parser.add_argument('--num_workers', default=0, type=int, help='how many subproc
 
 # For training settings
 parser.add_argument('--lr', default=1e-2, type=float, help='learning rate')
-parser.add_argument('--criterion', default='L2_norm_loss', type=str, help='Select criterion to learn')
+parser.add_argument('--criterion', default='L2_loss', type=str, help='Select criterion to learn')
 parser.add_argument('--optimizer', default='adam', type=str, help='Select optimizer to learn')
 parser.add_argument('--scheduler', default='MultiStepLR', type=str, help='Select scheduler to learn')
 parser.add_argument('--iterations', default=20, type=int, help='end of training epoch')

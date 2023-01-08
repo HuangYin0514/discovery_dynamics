@@ -2,7 +2,7 @@ import abc
 
 import torch
 
-from ..criterion import L2_norm_loss
+from ..criterion import L1_loss, L2_loss, L2_norm_loss
 
 
 class BaseModule(torch.nn.Module):
@@ -78,6 +78,10 @@ class LossNN(BaseModule, abc.ABC):
     def criterion(self, y_hat, y, criterion_method='MSELoss'):
         if criterion_method == 'MSELoss':
             return torch.nn.MSELoss()(y_hat, y)
+        elif criterion_method == 'L1_loss':
+            return L1_loss(y_hat, y)
+        elif criterion_method == 'L2_loss':
+            return L2_loss(y_hat, y)
         elif criterion_method == 'L2_norm_loss':
             return L2_norm_loss(y_hat, y)
         else:
