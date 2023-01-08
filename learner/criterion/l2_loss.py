@@ -1,5 +1,6 @@
 import torch
 
+import torch.nn.functional as F
 
 def L2_loss(x, y):
     # norm is sqrt [ (x - y).pow(2).sum(dim) ]
@@ -8,7 +9,7 @@ def L2_loss(x, y):
     # diff_norms = torch.norm(x.reshape(num_examples, -1) - y.reshape(num_examples, -1), 2, 1)
     # res = torch.mean(diff_norms)
     # res = torch.mean((x.reshape(num_examples, -1) - y.reshape(num_examples, -1)) ** 2)
-    res = torch.nn.functional.mse_loss(x,y)
+    res = F.mse_loss(x,y)
     return res
 
 
