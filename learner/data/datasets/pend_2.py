@@ -105,6 +105,7 @@ class Pendulum2(BaseBodyDataset, nn.Module):
 
     def energy_fn(self, coords):
         """能量函数"""
+        assert len(coords) == self._dof * 2
         H = self.kinetic(coords) + self.potential(coords)  # some error in this implementation
         return H
 
