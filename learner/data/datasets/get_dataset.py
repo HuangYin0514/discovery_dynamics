@@ -40,6 +40,8 @@ def get_dataset(data_name, taskname, obj, dim, download_data=False, **kwargs):
     # example: dataset_Pendulum2.npy
     filename = osp.join(data_path, 'dataset_{}.npy'.format(data_name))
 
+    print(download_data)
+
     if download_data:
         print('=> Start downloading dataset.')
         os.makedirs(data_path) if not os.path.exists(data_path) else None
