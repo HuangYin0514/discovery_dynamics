@@ -2,9 +2,12 @@ import torch
 
 
 def L2_loss(x, y):
-    num_examples = x.size()[0]
-    diff_norms = torch.norm(x.reshape(num_examples, -1) - y.reshape(num_examples, -1), 2, 1)
-    return (x - y).pow(2).mean()
+    # norm is sqrt [ (x - y).pow(2).sum(dim) ]
+    # num_examples = x.size()[0]
+    # diff_norms = torch.norm(x.reshape(num_examples, -1) - y.reshape(num_examples, -1), 2, 1)
+    # res = torch.mean(diff_norms)
+    res2 = (x - y).pow(2).mean()
+    return res2
 
 
 def L2_norm_loss(x, y):
