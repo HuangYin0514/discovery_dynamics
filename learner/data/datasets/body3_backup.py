@@ -2,66 +2,57 @@
 """
 @author: Yin Huang
 @contact: hy1071324110@gmail.com
-@time: 2023/1/3 3:50 PM
+@time: 2023/1/5 11:10 AM
 @desc:
 """
 import numpy as np
 import torch
-from torch import nn
 
-from learner.integrator.rungekutta import RK45
 from .base_body_dataset import BaseBodyDataset
+from learner.integrator.rungekutta import RK45
 from ...utils import dfx
 
 
-class Body3(BaseBodyDataset, nn.Module):
+class Body3(BaseBodyDataset):
     """
-    Pendulum with 2 bodies
+    Pendulum with 3 bodies
     Reference:
-    # ref: Simplifying Hamiltonian and Lagrangian Neural Networks via Explicit Constraints
-    # URL: https://proceedings.neurips.cc/paper/2020/file/9f655cc8884fda7ad6d8a6fb15cc001e-Paper.pdf
+    # ref: ModLaNets: Learning Generalisable Dynamics via Modularity and Physical Inductive Bias
+    # URL: https://proceedings.mlr.press/v162/lu22c/lu22c.pdf
     Dataset statistics:
     # type: hamilton
-    # obj: 2
-    # dim: 1
+    # obj: 3
+    # dim: 2
     """
 
-    def __init__(self, train_num, test_num, obj, dim, m=None, l=None, **kwargs):
+    def __init__(self, train_num, test_num, obj, dim, m=None, **kwargs):
         super(Body3, self).__init__()
 
         self.train_num = train_num
         self.test_num = test_num
-        self.dataset_url = 'https://drive.google.com/file/d/1Aj6dAjN1UP-DCycpJqSVq9QeIvSEuxbD/view?usp=sharing'
+        self.dataset_url = ''
 
         self.__init_dynamic_variable(obj, dim)
 
     def __init_dynamic_variable(self, obj, dim):
         self._m = [1 for i in range(obj)]
-        self._l = [1 for i in range(obj)]
         self._g = 9.8
 
         self._obj = obj
         self._dim = dim
         self._dof = self._obj * self._dim  # degree of freedom
 
-        t0 = 0.
-        t_end = 10.
-        self.dt = 0.05
-        _time_step = int((t_end - t0) / self.dt)
-
-        self.t = torch.linspace(t0, t_end, _time_step)
+        t0 = 0
+        t_end = 10
+        self._h = 0.05
+        self.solver = RK45(self.right_fn, t0=t0, t_end=t_end)
 
         self.k = 1  # body equation parameter
 
-    def forward(self, t, coords):
-        assert len(coords) == self._dof * 2
-        coords =  coords.clone().detach().requires_grad_(True)
-        grad_ham = dfx(self.energy_fn(coords), coords)
-        q, p = grad_ham[self._dof:], -grad_ham[:self._dof]
-        return torch.cat([q, p], dim=0).clone().detach()
-
     def kinetic(self, coords):
         assert len(coords) == self._dof * 2
+        if isinstance(coords, np.ndarray):
+            coords = torch.tensor(coords)
         T = 0.
         for i in range(self._obj):
             T = T + 0.5 * torch.sum(coords[self._dof + 2 * i: self._dof + 2 * i + 2] ** 2, axis=0) / self._m[i]
@@ -87,6 +78,13 @@ class Body3(BaseBodyDataset, nn.Module):
         # NOT STANDARD
         H = T + U
         return H
+
+
+    def right_fn(self, t, coords):
+        coords = torch.tensor(coords, requires_grad=True)
+        grad_ham = dfx(self.energy_fn(coords), coords).detach().numpy()
+        q, p = grad_ham[self._dof:], -grad_ham[:self._dof]
+        return np.asarray([q, p]).reshape(-1)
 
     @staticmethod
     def rotate2d(p, theta):
@@ -129,4 +127,4 @@ class Body3(BaseBodyDataset, nn.Module):
                 v *= self._m[i] * (1 + nu * (2 * np.random.rand(2) - 1))
             state[self._dof + 2 * i: self._dof + 2 * i + 2] = self.rotate2d(v, theta=i * theta)
 
-        return torch.tensor(state)
+        return state.reshape(-1)
