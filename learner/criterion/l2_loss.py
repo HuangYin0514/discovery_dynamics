@@ -6,7 +6,7 @@ def L2_loss(x, y):
     num_examples = x.size()[0]
     # diff_norms = torch.norm(x.reshape(num_examples, -1) - y.reshape(num_examples, -1), 2, 1)
     # res = torch.mean(diff_norms)
-    res = torch.mean((x.reshape(num_examples, -1) - y.reshape(num_examples, -1)).pow(2))
+    res = torch.mean((x.reshape(num_examples, -1) - y.reshape(num_examples, -1)))
     return res
 
 
