@@ -56,6 +56,7 @@ def run():
     print('Using the device is:', device)
 
     # data
+    print(args.download_data)
     arguments = {
         'taskname': args.taskname,
         'data_name': args.data_name,
