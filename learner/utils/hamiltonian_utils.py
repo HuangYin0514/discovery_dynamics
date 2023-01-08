@@ -11,12 +11,12 @@ import torch
 def ham_J(M):
     """
     applies the J matrix to another matrix M.
-    input: M (*,2nd,b)
+    input: M (*,2nd,bs)
 
     J ->  # [ 0, I]
           # [-I, 0]
 
-    output: J@M (*,2nd,b)
+    output: J@M (*,2nd,bs)
     """
     *star, D, b = M.shape
     JM = torch.cat([M[..., D // 2:, :], -M[..., : D // 2, :]], dim=-2)

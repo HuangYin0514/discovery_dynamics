@@ -37,7 +37,7 @@ class HNN(LossNN):
         gradH = dfx(h, x)
         # dy = self.J @ gradH.T  # dy shape is (vector, batchsize)
         # return dy.T
-        return ham_J(gradH)
+        return ham_J(gradH.T).T
 
     def integrate(self, X, t):
         out = ODESolver(self, X, t, method='dopri5').permute(1, 0, 2)  # (T, D)
