@@ -128,4 +128,4 @@ class Body3(BaseBodyDataset, nn.Module):
                 v *= self._m[i] * (1 + nu * (2 * np.random.rand(2) - 1))
             state[self._dof + 2 * i: self._dof + 2 * i + 2] = self.rotate2d(v, theta=i * theta)
 
-        return torch.tensor(state)
+        return torch.tensor(state).float()
