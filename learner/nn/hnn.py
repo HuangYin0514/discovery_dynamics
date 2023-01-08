@@ -4,7 +4,7 @@ import torch
 from .base_module import LossNN
 from .fnn import FNN
 from ..integrator import ODESolver
-from ..utils import lazy_property, dfx
+from ..utils import lazy_property, dfx, ham_J
 
 
 class HNN(LossNN):
@@ -35,8 +35,9 @@ class HNN(LossNN):
     def forward(self, t, x):
         h = self.baseline(x)
         gradH = dfx(h, x)
-        dy = self.J @ gradH.T  # dy shape is (vector, batchsize)
-        return dy.T
+        # dy = self.J @ gradH.T  # dy shape is (vector, batchsize)
+        # return dy.T
+        return ham_J(gradH)
 
     def integrate(self, X, t):
         out = ODESolver(self, X, t, method='dopri5').permute(1, 0, 2)  # (T, D)
