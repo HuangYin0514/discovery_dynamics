@@ -35,7 +35,8 @@ rm -rf outputs
     --optimizer adam \
     --scheduler MultiStepLR \
     --iterations 10000 \
-    --print_every 1
+    --print_every  500 \
+    --download_data True
 
 ``` 
 
