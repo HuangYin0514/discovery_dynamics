@@ -16,7 +16,7 @@ def train_collate_fn(batch):
     t = torch.stack(t, dim=0).float()
     y = torch.stack(y, dim=0).float()
 
-    # todo: (N, 100, dof) -> (Nx100, dof)
+    # (N, 100, dof) -> (Nx100, dof)
     X = torch.flatten(X, start_dim=0, end_dim=1)
     t = torch.flatten(t, start_dim=0, end_dim=1)
     y = torch.flatten(y, start_dim=0, end_dim=1)
