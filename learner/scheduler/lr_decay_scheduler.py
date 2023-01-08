@@ -1,6 +1,3 @@
-import torch
-
-
 # Schedule learning rate--------------------------------------------
 class lr_decay_scheduler():
     def __init__(self, optimizer, lr_decay, iterations):

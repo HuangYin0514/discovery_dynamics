@@ -1,10 +1,8 @@
-from functools import partial
-
 import numpy as np
 import torch
 
-from .fnn import FNN
 from .base_module import LossNN
+from .fnn import FNN
 from ..integrator import ODESolver
 from ..utils import lazy_property, dfx
 

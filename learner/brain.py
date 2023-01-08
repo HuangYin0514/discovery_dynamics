@@ -5,14 +5,13 @@ from functools import partial
 import numpy as np
 import torch
 from matplotlib import pyplot as plt
+from torch.optim import lr_scheduler
 from tqdm import tqdm
 
 from .metrics import accuracy_fn
 from .nn.base_module import LossNN
-from .utils import timing, deprecated
 from .scheduler import lr_decay_scheduler, no_scheduler
-
-from torch.optim import lr_scheduler
+from .utils import timing
 
 
 class Brain:

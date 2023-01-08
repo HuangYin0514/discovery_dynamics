@@ -3,11 +3,11 @@ from functools import partial
 import numpy as np
 import torch
 
-from .fnn import FNN
 from .base_module import LossNN
-from ..integrator.rungekutta import RK4, RK45
-from ..utils import lazy_property, dfx
+from .fnn import FNN
 from ..criterion import L2_norm_loss
+from ..integrator.rungekutta import RK4, RK45
+from ..utils import lazy_property
 
 
 class Baseline(LossNN):

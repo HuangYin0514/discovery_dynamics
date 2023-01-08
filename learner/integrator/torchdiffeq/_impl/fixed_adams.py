@@ -1,11 +1,12 @@
 import collections
-import sys
-import torch
 import warnings
-from .solvers import FixedGridODESolver
-from .misc import _compute_error_ratio, _linf_norm
+
+import torch
+
 from .misc import Perturb
+from .misc import _compute_error_ratio, _linf_norm
 from .rk_common import rk4_alt_step_func
+from .solvers import FixedGridODESolver
 
 _BASHFORTH_COEFFICIENTS = [
     [],  # order 0

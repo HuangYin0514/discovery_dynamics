@@ -1,14 +1,15 @@
 import torch
 from torch.autograd.functional import vjp
-from .dopri5 import Dopri5Solver
-from .bosh3 import Bosh3Solver
+
 from .adaptive_heun import AdaptiveHeunSolver
-from .fehlberg2 import Fehlberg2
-from .fixed_grid import Euler, Midpoint, RK4
-from .fixed_adams import AdamsBashforth, AdamsBashforthMoulton
+from .bosh3 import Bosh3Solver
+from .dopri5 import Dopri5Solver
 from .dopri8 import Dopri8Solver
-from .scipy_wrapper import ScipyWrapperODESolver
+from .fehlberg2 import Fehlberg2
+from .fixed_adams import AdamsBashforth, AdamsBashforthMoulton
+from .fixed_grid import Euler, Midpoint, RK4
 from .misc import _check_inputs, _flat_to_shape
+from .scipy_wrapper import ScipyWrapperODESolver
 
 SOLVERS = {
     'dopri8': Dopri8Solver,

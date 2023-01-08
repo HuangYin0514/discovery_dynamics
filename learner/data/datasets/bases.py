@@ -7,8 +7,6 @@
 """
 import abc
 
-import numpy as np
-
 
 class BaseDataset(abc.ABC):
     """

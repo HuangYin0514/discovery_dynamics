@@ -1,8 +1,10 @@
 import warnings
+
 import torch
 import torch.nn as nn
-from .odeint import SOLVERS, odeint
+
 from .misc import _check_inputs, _flat_to_shape, _mixed_norm, _all_callback_names, _all_adjoint_callback_names
+from .odeint import SOLVERS, odeint
 
 
 class OdeintAdjointMethod(torch.autograd.Function):

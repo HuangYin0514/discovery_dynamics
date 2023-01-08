@@ -1,6 +1,6 @@
 import torch
-from .rk_common import _ButcherTableau, RKAdaptiveStepsizeODESolver
 
+from .rk_common import _ButcherTableau, RKAdaptiveStepsizeODESolver
 
 _ADAPTIVE_HEUN_TABLEAU = _ButcherTableau(
     alpha=torch.tensor([1.], dtype=torch.float64),

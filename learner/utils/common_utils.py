@@ -1,7 +1,5 @@
 import random
 import time
-import warnings
-from collections import OrderedDict
 from functools import wraps
 
 import numpy as np

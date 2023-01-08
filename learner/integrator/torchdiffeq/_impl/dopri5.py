@@ -1,6 +1,6 @@
 import torch
-from .rk_common import _ButcherTableau, RKAdaptiveStepsizeODESolver
 
+from .rk_common import _ButcherTableau, RKAdaptiveStepsizeODESolver
 
 _DORMAND_PRINCE_SHAMPINE_TABLEAU = _ButcherTableau(
     alpha=torch.tensor([1 / 5, 3 / 10, 4 / 5, 8 / 9, 1., 1.], dtype=torch.float64),

@@ -7,7 +7,6 @@
 """
 import abc
 
-import numpy as np
 import torch
 
 from learner.data.datasets.bases import BaseDynamicsDataset

@@ -5,7 +5,6 @@
 @time: 2023/1/4 3:42 PM
 @desc:
 """
-import os.path as osp
 
 from torch.utils.data import Dataset
 

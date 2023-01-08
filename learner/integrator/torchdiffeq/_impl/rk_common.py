@@ -1,14 +1,15 @@
 import bisect
 import collections
+
 import torch
+
 from .event_handling import find_event
 from .interp import _interp_evaluate, _interp_fit
+from .misc import Perturb
 from .misc import (_compute_error_ratio,
                    _select_initial_step,
                    _optimal_step_size)
-from .misc import Perturb
 from .solvers import AdaptiveStepsizeEventODESolver
-
 
 _ButcherTableau = collections.namedtuple('_ButcherTableau', 'alpha, beta, c_sol, c_error')
 

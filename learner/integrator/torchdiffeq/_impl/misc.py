@@ -1,10 +1,10 @@
+import warnings
 from enum import Enum
-import math
+
 import numpy as np
 import torch
-import warnings
-from .event_handling import combine_event_functions
 
+from .event_handling import combine_event_functions
 
 _all_callback_names = ['callback_step', 'callback_accept_step', 'callback_reject_step']
 _all_adjoint_callback_names = [name + '_adjoint' for name in _all_callback_names]

@@ -9,7 +9,6 @@ import numpy as np
 import torch
 from tqdm import tqdm
 
-
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 PARENT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append('.')

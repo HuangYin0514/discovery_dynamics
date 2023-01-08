@@ -10,9 +10,9 @@ import os.path as osp
 
 import numpy as np
 
-from .pend_2 import Pendulum2
-from .body3 import Body3
 from learner.utils import download_file_from_google_drive
+from .body3 import Body3
+from .pend_2 import Pendulum2
 
 
 def choose_dataset(data_name, obj, dim, train_num, test_num):

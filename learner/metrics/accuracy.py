@@ -7,8 +7,6 @@
 """
 
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
 
 
 def square_err_fn(x, y):

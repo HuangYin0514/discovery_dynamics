@@ -1,6 +1,6 @@
 import torch
-from .rk_common import _ButcherTableau, RKAdaptiveStepsizeODESolver
 
+from .rk_common import _ButcherTableau, RKAdaptiveStepsizeODESolver
 
 A = [1 / 18, 1 / 12, 1 / 8, 5 / 16, 3 / 8, 59 / 400, 93 / 200, 5490023248 / 9719169821, 13 / 20, 1201146811 / 1299019798, 1, 1, 1]
 

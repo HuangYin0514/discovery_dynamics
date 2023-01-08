@@ -1,6 +1,6 @@
-from .solvers import FixedGridODESolver
-from .rk_common import rk4_alt_step_func
 from .misc import Perturb
+from .rk_common import rk4_alt_step_func
+from .solvers import FixedGridODESolver
 
 
 class Euler(FixedGridODESolver):
