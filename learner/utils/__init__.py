@@ -10,4 +10,4 @@ from .net_utils import weights_init_xavier_normal
 
 from .pend_utils import polar2xy, plot_pend_trajectory
 
-from hamiltonian_utils import Ham_J
+from hamiltonian_utils import ham_J

@@ -2,6 +2,8 @@ import torch
 
 
 def L2_loss(x, y):
+    num_examples = x.size()[0]
+    diff_norms = torch.norm(x.reshape(num_examples, -1) - y.reshape(num_examples, -1), 2, 1)
     return (x - y).pow(2).mean()
 
 
