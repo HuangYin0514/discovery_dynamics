@@ -42,12 +42,16 @@ class Pendulum2(BaseBodyDataset, nn.Module):
         self._dim = dim
         self._dof = self._obj * self._dim  # degree of freedom
 
+        self.dt = 0.1
+
         t0 = 0.
         t_end = 10.
-        self.dt = 0.1
         _time_step = int((t_end - t0) / self.dt)
-
         self.t = torch.linspace(t0, t_end, _time_step)
+
+        t_end = 15.
+        _time_step = int((t_end - t0) / self.dt)
+        self.test_t = torch.linspace(t0, t_end, _time_step)
 
     def forward(self, t, coords):
         assert len(coords) == self._dof * 2
