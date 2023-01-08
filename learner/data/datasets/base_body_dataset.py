@@ -21,10 +21,11 @@ class BaseBodyDataset(BaseDynamicsDataset):
         self.test_num = None
 
         self.t = None
+        self.test_t = None
 
     def Init_data(self):
         train_dataset = self.__generate_random(self.train_num, self.t)
-        test_dataset = self.__generate_random(self.test_num, self.t)
+        test_dataset = self.__generate_random(self.test_num, self.test_t)
         self.train = train_dataset
         self.test = test_dataset
 
