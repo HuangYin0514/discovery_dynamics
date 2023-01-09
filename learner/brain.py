@@ -91,7 +91,6 @@ class Brain:
                 # pred = self.net.integrate(X, t)
                 loss = self.__criterion(pred, labels)
 
-                # self.net.reg()
                 reg_loss = symplectic_prior_reg(self.net, X)
                 loss = loss + reg_loss
 
