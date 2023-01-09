@@ -10,6 +10,7 @@ from tqdm import tqdm
 
 from .metrics import accuracy_fn
 from .nn.base_module import LossNN
+from .regularization import symplectic_prior_reg
 from .scheduler import lr_decay_scheduler, no_scheduler
 from .utils import timing
 
@@ -89,6 +90,10 @@ class Brain:
                 pred = self.net(t, X)
                 # pred = self.net.integrate(X, t)
                 loss = self.__criterion(pred, labels)
+
+                # self.net.reg()
+                reg_loss = symplectic_prior_reg(self.net, X)
+                loss = loss + reg_loss
 
                 if torch.any(torch.isnan(loss)):
                     self.encounter_nan = True

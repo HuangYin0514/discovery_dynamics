@@ -90,3 +90,6 @@ class LossNN(BaseModule, abc.ABC):
     @abc.abstractmethod
     def integrate(self, X, t):
         pass
+
+    def regularization(self):
+        pass

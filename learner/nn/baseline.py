@@ -22,7 +22,8 @@ class Baseline(LossNN):
 
     def forward(self, t, x):
         out = self.baseline(x)
-        return  out
+        return out
+
     def integrate(self, X, t):
         out = ODESolver(self, X, t, method='dopri5').permute(1, 0, 2)  # (T, D)
         return out
