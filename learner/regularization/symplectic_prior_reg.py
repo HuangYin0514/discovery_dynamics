@@ -11,7 +11,7 @@ from torch.autograd.functional import jacobian
 from ..utils import ham_J
 
 
-def symplectic_prior_reg(net, z, alpha=1e8):
+def symplectic_prior_reg(net, z, alpha=1e5):
     """ Computes the symplectic prior regularization term
     Args:
         z: N x T x D Tensor representing the state
