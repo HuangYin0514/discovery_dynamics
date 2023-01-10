@@ -18,14 +18,9 @@ if __name__ == '__main__':
     model.dtype = "float"
     print(model)
 
-    test_output = model(test_input)
+    test_output = model(None, test_input)
     print(test_output.shape)
 
     loss = model.criterion(test_input, test_target, criterion_method='MSELoss')
     print(loss)
 
-    h = 0.05
-    test_traj = np.asarray([11, 2, 0, 0])
-    pred_res = model.predict(test_traj, h, 0, 3, circular_motion=True)
-    print(pred_res.shape)
-    print("done")
