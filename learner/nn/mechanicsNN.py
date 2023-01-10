@@ -96,12 +96,14 @@ class MechanicsNN(LossNN):
         _obj = 2
 
         self.mass_net = nn.Sequential(
-            FNN(q_dim, q_dim * q_dim, self.layers, self.width),
+            CosSin(q_dim, range(_obj), only_q=True),
+            FNN(q_dim+2, q_dim * q_dim, self.layers, self.width),
             Reshape(-1, q_dim, q_dim)
         )
 
         self.dynamics_net = nn.Sequential(
-            FNN(self.dim, q_dim, self.layers, self.width),
+            CosSin(q_dim, range(_obj), only_q=False),
+            FNN(self.dim+2, q_dim, self.layers, self.width),
             Reshape(-1, q_dim)
         )
 
