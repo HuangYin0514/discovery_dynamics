@@ -91,8 +91,8 @@ class Brain:
                 # pred = self.net.integrate(X, t)
                 loss = self.__criterion(pred, labels)
 
-                reg_loss = symplectic_prior_reg(self.net, X)
-                loss = loss + reg_loss
+                # reg_loss = symplectic_prior_reg(self.net, X)
+                # loss = loss + reg_loss
 
                 if torch.any(torch.isnan(loss)):
                     self.encounter_nan = True
