@@ -4,6 +4,7 @@ import os.path as osp
 from learner.utils import timing, count_parameters, download_file_from_google_drive, load_network
 from .baseline import Baseline
 from .hnn import HNN
+from .mechanicsNN import MechanicsNN
 
 
 def choose_model(net_name, obj, dim):
@@ -13,6 +14,9 @@ def choose_model(net_name, obj, dim):
     elif net_name == 'baseline':
         input_dim = obj * dim * 2
         net = Baseline(dim=input_dim, layers=1, width=200)
+    elif net_name == 'mechanicsNN':
+        input_dim = obj * dim * 2
+        net = MechanicsNN(dim=input_dim, layers=1, width=200)
     else:
         raise ValueError('Model \'{}\' is not implemented'.format(net_name))
 
