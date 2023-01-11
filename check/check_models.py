@@ -4,8 +4,13 @@ import torch
 import learner as ln
 
 if __name__ == '__main__':
-    test_input = torch.randn(20, 4)
-    test_target = torch.randn(20, 2)
+    obj = 2
+    dim = 1
+
+    dof = obj * dim * 2
+
+    test_input = torch.randn(20, dof)
+    test_target = torch.randn(20, dof)
     test_input.requires_grad = True
 
     '''

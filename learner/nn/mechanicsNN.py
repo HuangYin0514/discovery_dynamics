@@ -13,68 +13,35 @@ from .base_module import LossNN
 from .fnn import FNN
 from torch import Tensor
 
-
-class CosSin(nn.Module):
-    def __init__(self, q_ndim, angular_dims, only_q=True):
-        super().__init__()
-        self.q_ndim = q_ndim
-        self.angular_dims = tuple(angular_dims)
-        self.non_angular_dims = tuple(set(range(q_ndim)) - set(angular_dims))
-        self.only_q = only_q
-
-    def forward(self, q_or_qother):
-        if self.only_q:
-            q = q_or_qother
-        else:
-            split_dim = q_or_qother.size(-1)
-            splits = [self.q_ndim, split_dim - self.q_ndim]
-            q, other = q_or_qother.split(splits, dim=-1)
-
-        # print("\n")
-        # print(q_or_qother.size())
-        # print(q.size())
-        # print(other.size())
-        # print(self.q_ndim)
-        # print("")
-        assert q.size(-1) == self.q_ndim
-
-        q_angular = q[..., self.angular_dims]
-        q_not_angular = q[..., self.non_angular_dims]
-
-        cos_ang_q, sin_ang_q = torch.cos(q_angular), torch.sin(q_angular)
-        q = torch.cat([cos_ang_q, sin_ang_q, q_not_angular], dim=-1)
-
-        if self.only_q:
-            q_or_other = q
-        else:
-            q_or_other = torch.cat([q, other], dim=-1)
-
-        return q_or_other
+from .reshapeNN import ReshapeNet
 
 
-def Linear(chin, chout, zero_bias=False, orthogonal_init=False):
-    linear = nn.Linear(chin, chout)
-    if zero_bias:
-        torch.nn.init.zeros_(linear.bias)
-    if orthogonal_init:
-        torch.nn.init.orthogonal_(linear.weight, gain=0.5)
-    return linear
+class MassNet(nn.Module):
+    def __init__(self, q_dim, layers=3, width=30):
+        super(MassNet, self).__init__()
+
+        self.net = nn.Sequential(
+            FNN(q_dim, q_dim * q_dim, layers, width),
+            ReshapeNet(-1, q_dim, q_dim)
+        )
+
+    def forward(self, q):
+        out = self.net(q)
+        return out
 
 
-def FCtanh(chin, chout, zero_bias=False, orthogonal_init=False):
-    return nn.Sequential(
-        Linear(chin, chout, zero_bias, orthogonal_init),
-        nn.Tanh()
-    )
+class DynamicsNet(nn.Module):
+    def __init__(self, dof, p_dim, layers=3, width=30):
+        super(DynamicsNet, self).__init__()
 
-
-class Reshape(nn.Module):
-    def __init__(self, *args):
-        super().__init__()
-        self.shape = args
+        self.dynamics_net = nn.Sequential(
+            FNN(dof, p_dim, layers, width),
+            ReshapeNet(-1, p_dim)
+        )
 
     def forward(self, x):
-        return x.view(self.shape)
+        out = self.dynamics_net(x)
+        return out
 
 
 class MechanicsNN(LossNN):
@@ -82,32 +49,22 @@ class MechanicsNN(LossNN):
     Mechanics neural networks.
     """
 
-    def __init__(self, dim, layers=3, width=30):
+    def __init__(self, dof, layers=3, width=30):
         super(MechanicsNN, self).__init__()
 
-        self.dim = dim
-        self.layers = layers
-        self.width = width
+        q_dim = int(dof // 2)
+        p_dim = int(dof // 2)
 
-        self.__init_modules()
-
-    def __init_modules(self):
-        q_dim = int(self.dim // 2)
-        _obj = 2
-
-        self.mass_net = nn.Sequential(
-            CosSin(q_dim, range(_obj), only_q=True),
-            FNN(q_dim*2, q_dim * q_dim, self.layers, self.width),
-            Reshape(-1, q_dim, q_dim)
-        )
-
-        self.dynamics_net = nn.Sequential(
-            CosSin(q_dim, range(_obj), only_q=False),
-            FNN(self.dim*2, q_dim, self.layers, self.width),
-            Reshape(-1, q_dim)
-        )
+        self.mass_net = MassNet(q_dim=q_dim, layers=layers, width=width)
+        self.dynamics_net = DynamicsNet(dof=dof, p_dim=p_dim, layers=layers, width=width)
 
     def tril_Minv(self, q):
+        """
+        Computes the inverse of a matrix M^{-1}(q)
+        But only get the lower triangle of the inverse matrix  M^{-1}(q)
+        to get lower triangle of  M^{-1}(q)  = [x, 0]
+                                               [x, x]
+        """
         mass_net_q = self.mass_net(q)
         res = torch.triu(mass_net_q, diagonal=1)
         res = res + torch.diag_embed(
@@ -122,6 +79,8 @@ class MechanicsNN(LossNN):
         """Compute the learned inverse mass matrix M^{-1}(q)
             M = LU
             M^{-1} = (LU)^{-1} = U^{-1} @ L^{-1}
+            M^{-1}(q) = [x, 0] @ [x, x]
+                        [x, x]   [0, x]
         Args:
             q: bs x D Tensor representing the position
         """
@@ -147,8 +106,11 @@ class MechanicsNN(LossNN):
             Loss.
         """
         assert (x.ndim == 2)
-        q, p = x.chunk(2, dim=-1)
-        dq_dt = self.Minv(q).matmul(p.unsqueeze(-1)).squeeze(-1)
+        q, p = x.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
+        Minv = self.Minv(q)
+        # dq_dt = v = Minv @ p
+        dq_dt = Minv.matmul(p.unsqueeze(-1)).squeeze(-1)
+        # dp_dt = A(q, v)
         dp_dt = self.dynamics_net(x)
         dz_dt = torch.cat([dq_dt, dp_dt], dim=-1)
         return dz_dt
