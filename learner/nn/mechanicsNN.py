@@ -13,33 +13,38 @@ from .base_module import LossNN
 from .fnn import FNN
 from torch import Tensor
 
-from .reshapeNN import ReshapeNet
+from .utils_nn import ReshapeNet, CosSinNet
 
 
 class MassNet(nn.Module):
     def __init__(self, q_dim, layers=3, width=30):
         super(MassNet, self).__init__()
 
+        self.cos_sin_net = CosSinNet()
         self.net = nn.Sequential(
-            FNN(q_dim, q_dim * q_dim, layers, width),
+            FNN(q_dim * 2, q_dim * q_dim, layers, width),
             ReshapeNet(-1, q_dim, q_dim)
         )
 
     def forward(self, q):
+        q = self.cos_sin_net(q)
         out = self.net(q)
         return out
 
 
 class DynamicsNet(nn.Module):
-    def __init__(self, dof, p_dim, layers=3, width=30):
+    def __init__(self, q_dim, p_dim, layers=3, width=30):
         super(DynamicsNet, self).__init__()
+        self.cos_sin_net = CosSinNet()
 
         self.dynamics_net = nn.Sequential(
-            FNN(dof, p_dim, layers, width),
+            FNN(q_dim * 2 + p_dim, p_dim, layers, width),
             ReshapeNet(-1, p_dim)
         )
 
-    def forward(self, x):
+    def forward(self, q, p):
+        q = self.cos_sin_net(q)
+        x = torch.cat([q, p], dim=1)
         out = self.dynamics_net(x)
         return out
 
@@ -56,7 +61,7 @@ class MechanicsNN(LossNN):
         p_dim = int(dof // 2)
 
         self.mass_net = MassNet(q_dim=q_dim, layers=layers, width=width)
-        self.dynamics_net = DynamicsNet(dof=dof, p_dim=p_dim, layers=layers, width=width)
+        self.dynamics_net = DynamicsNet(q_dim=q_dim, p_dim=p_dim, layers=layers, width=width)
 
     def tril_Minv(self, q):
         """
@@ -111,7 +116,7 @@ class MechanicsNN(LossNN):
         # dq_dt = v = Minv @ p
         dq_dt = Minv.matmul(p.unsqueeze(-1)).squeeze(-1)
         # dp_dt = A(q, v)
-        dp_dt = self.dynamics_net(x)
+        dp_dt = self.dynamics_net(q, p)
         dz_dt = torch.cat([dq_dt, dp_dt], dim=-1)
         return dz_dt
 

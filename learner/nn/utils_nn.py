@@ -2,9 +2,10 @@
 """
 @author: Yin Huang
 @contact: hy1071324110@gmail.com
-@time: 2023/1/11 10:18 PM
+@time: 2023/1/12 12:21 AM
 @desc:
 """
+import torch
 from torch import nn
 
 
@@ -15,3 +16,13 @@ class ReshapeNet(nn.Module):
 
     def forward(self, x):
         return x.view(self.shape)
+
+
+class CosSinNet(nn.Module):
+    def __init__(self):
+        super(CosSinNet, self).__init__()
+
+    def forward(self, x):
+        cos_ang_q, sin_ang_q = torch.cos(x), torch.sin(x)
+        q = torch.cat([cos_ang_q, sin_ang_q], dim=-1)
+        return q
