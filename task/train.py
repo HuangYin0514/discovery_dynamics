@@ -41,7 +41,6 @@ parser.add_argument('--iterations', default=20, type=int, help='end of training 
 parser.add_argument('--print_every', default=10, type=int, help='number of gradient steps between prints')
 
 # For other settings
-parser.add_argument('--download_data', default='False', type=str, help='Download dataset from Internet')
 parser.add_argument('--dtype', default='float', type=str, help='Types of data and models')
 
 parser.set_defaults(feature=True)
