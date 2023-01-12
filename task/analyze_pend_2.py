@@ -150,6 +150,7 @@ def main():
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     print('Using the device is:', device)
 
+
     # net ----------------------------------------------------------------
     arguments = {
         'taskname': args.taskname,

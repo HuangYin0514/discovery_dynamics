@@ -179,7 +179,7 @@ class Brain:
             print(contents)
 
             self.best_model = torch.load(
-                'training_file/' + self.taskname + '/model/model{}.pkl'.format(self.iterations))
+                'training_file/' + self.taskname + '/model/model{}.pkl'.format(iteration))
         else:
             raise RuntimeError('restore before running or without saved models')
         return self.best_model
