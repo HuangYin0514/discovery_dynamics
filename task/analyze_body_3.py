@@ -27,11 +27,11 @@ parser.add_argument('--taskname', default='test_poor', type=str, help='Task name
 parser.add_argument('--seed', default=0, type=int, help='random seed')
 
 # For task
-parser.add_argument('--obj', default=2, type=int, help='number of objects')
-parser.add_argument('--dim', default=1, type=int, help='coordinate dimension')
+parser.add_argument('--obj', default=3, type=int, help='number of objects')
+parser.add_argument('--dim', default=2, type=int, help='coordinate dimension')
 
 # data
-parser.add_argument('--data_name', default='Pendulum2', type=str, help='choose dataset')
+parser.add_argument('--data_name', default='Body3', type=str, help='choose dataset')
 parser.add_argument('--train_num', default=0, type=int, help='the number of train sampling trajectories')
 parser.add_argument('--test_num', default=0, type=int, help='the number of test sampling trajectories')
 parser.add_argument('--download_data', default='False', type=str, help='Download dataset from Internet')
@@ -48,59 +48,16 @@ LINE_WIDTH = 2
 LEGENDSIZE = 12
 
 
-def polar2xy(x):
-    """
-    Convert polar coordinates to x,y coordinates.
-
-    Parameters
-    ----------
-    x : float
-        Polar coordinates.
-    """
-
-    pos = np.zeros([x.shape[0], x.shape[1] * 2])
-    for i in range(x.shape[1]):
-        if i == 0:
-            pos[:, 2 * i:2 * (i + 1)] += np.concatenate([np.sin(x[:, i:i + 1]), -np.cos(x[:, i:i + 1])], 1)
-        else:
-            pos[:, 2 * i:2 * (i + 1)] += pos[:, 2 * (i - 1):2 * i] + np.concatenate(
-                [np.sin(x[:, i:i + 1]), -np.cos(x[:, i:i + 1])], 1)
-    return pos
-
-
 def plot_trajectory(ax, true_q, pred_q, title_label):
-    truth_pos = ln.utils.polar2xy(true_q)
-    net_pos = ln.utils.polar2xy(pred_q)
+    ax.set_xlabel('$x\;(m)$')
+    ax.set_ylabel('$y\;(m)$')
+    for i in range(args.obj):
+        ax.text(true_q[0, i * 2], true_q[0, i * 2 + 1], '{}'.format(i))
+        ax.plot(true_q[:, 2 * i], true_q[:, 2 * i + 1], 'g--', label='body {} path'.format(i), linewidth=2)
 
-    time = min(400, len(truth_pos) - 1)
-
-    ax.set_xlabel('$x$ ($m$)')
-    ax.set_ylabel('$y$ ($m$)')
-    for i in range(time - 3):
-        ax.plot(truth_pos[i:i + 2, 2], truth_pos[i:i + 2, 3], 'k-', label='_nolegend_', linewidth=2,
-                alpha=0.2 + 0.8 * (i + 1) / time)
-        ax.plot(net_pos[i:i + 2, 2], net_pos[i:i + 2, 3], 'r-', label='_nolegend_', linewidth=2,
-                alpha=0.2 + 0.8 * (i + 1) / time)  # net_pred
-        if i % (time // 2) == 0:  # pendulum in the middle state
-            ax.plot([0, net_pos[i, 0]], [0, net_pos[i, 1]], color='brown', linewidth=2, label='_nolegend_',
-                    alpha=0.2 + 0.8 * (i + 1) / time)
-            ax.plot([net_pos[i, 0], net_pos[i, 2]], [net_pos[i, 1], net_pos[i, 3]], 'o-',
-                    color='brown', linewidth=2, label='_nolegend_', alpha=0.2 + 0.8 * (i + 1) / time)
-            ax.scatter(net_pos[i, 0], net_pos[i, 1], s=50, linewidths=2, facecolors='gray',
-                       edgecolors='brown', label='_nolegend_', alpha=min(0.5 + 0.8 * (i + 1) / time, 1), zorder=3)
-            ax.scatter(net_pos[i, 2], net_pos[i, 3], s=50, linewidths=2, facecolors='gray',
-                       edgecolors='brown', label='_nolegend_', alpha=min(0.5 + 0.8 * (i + 1) / time, 1), zorder=3)
-    ax.plot(truth_pos[time - 2:time, 2], truth_pos[time - 2:time, 3], 'k-', label='Ground truth', linewidth=2, alpha=1)
-    ax.plot(net_pos[time - 2:time, 2], net_pos[time - 2:time, 3], 'r-', label='Net Prediction',
-            linewidth=2, alpha=1)  # net_pred
-    ax.plot([0, net_pos[time, 0]], [0, net_pos[time, 1]], color='brown', linewidth=2, label='_nolegend_')
-    ax.plot([net_pos[time, 0], net_pos[time, 2]], [net_pos[time, 1], net_pos[time, 3]], 'o-',
-            color='brown', linewidth=2, label='Pendulum')
-    ax.scatter(net_pos[time, 0], net_pos[time, 1], s=50, linewidths=2, facecolors='gray', edgecolors='brown',
-               label='_nolegend_', alpha=1, zorder=3)
-    ax.scatter(net_pos[time, 2], net_pos[time, 3], s=50, linewidths=2, facecolors='gray', edgecolors='brown',
-               label='_nolegend_', alpha=1, zorder=3)
-    ax.legend(fontsize=12)
+        ax.text(pred_q[0, i * 2], pred_q[0, i * 2 + 1], '{}'.format(i))
+        ax.plot(pred_q[:, 2 * i], pred_q[:, 2 * i + 1], 'r--', label='body {} path'.format(i), linewidth=2)
+    ax.axis('equal')
     ax.set_title(title_label)
 
 
