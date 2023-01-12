@@ -142,6 +142,7 @@ def plot_field(ax, t, state_q, state_p, title_label):
 
 
 def main():
+    print('=' * 500)
     print('Task name: {}'.format(args.taskname))
 
     # seed
