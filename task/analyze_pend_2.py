@@ -6,21 +6,18 @@
 @desc:
 """
 import argparse
-import copy
 import os
+import os.path as osp
 import sys
-import time
 
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
-from tqdm import tqdm
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 PARENT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append('.')
 sys.path.append(PARENT_DIR)
-import os.path as osp
 
 import learner as ln
 
@@ -43,7 +40,6 @@ parser.add_argument('--num_workers', default=0, type=int, help='how many subproc
 # net
 parser.add_argument('--net_name', default='mechanicsNN', type=str, help='Select model to train')
 parser.add_argument('--net_url', default='', type=str, help='Download net from Internet')
-parser.add_argument('--load_net_path', default='', type=str, help='The path to load the pretrained network')
 
 parser.set_defaults(feature=True)
 args = parser.parse_args()
