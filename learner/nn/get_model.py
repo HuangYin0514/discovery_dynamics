@@ -37,7 +37,7 @@ def get_model(taskname, net_name, obj, dim, net_url, load_net_path, device):
         os.makedirs(data_path) if not os.path.exists(data_path) else None
 
         # example: model-pend_2_hnn.pkl
-        filename = osp.join(data_path, '/model_{}.pkl'.format(taskname))
+        filename = osp.join(data_path, '/model-{}.pkl'.format(taskname))
 
         download_file_from_google_drive(net_url, filename)
 

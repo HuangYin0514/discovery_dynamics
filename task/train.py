@@ -17,16 +17,20 @@ parser.add_argument('--taskname', default='test_poor', type=str, help='Task name
 parser.add_argument('--seed', default=0, type=int, help='random seed')
 
 # For task
-parser.add_argument('--net_name', default='mechanicsNN', type=str, help='Select model to train')
-parser.add_argument('--data_name', default='Pendulum2', type=str, help='choose dataset')
 parser.add_argument('--obj', default=2, type=int, help='number of objects')
 parser.add_argument('--dim', default=1, type=int, help='coordinate dimension')
+
+# data
+parser.add_argument('--data_name', default='Pendulum2', type=str, help='choose dataset')
 parser.add_argument('--train_num', default=3, type=int, help='the number of train sampling trajectories')
 parser.add_argument('--test_num', default=2, type=int, help='the number of test sampling trajectories')
 parser.add_argument('--download_data', default='False', type=str, help='Download dataset from Internet')
+parser.add_argument('--num_workers', default=0, type=int, help='how many subprocesses to use for data loading. ')
+
+# net
+parser.add_argument('--net_name', default='mechanicsNN', type=str, help='Select model to train')
 parser.add_argument('--net_url', default='', type=str, help='Download net from Internet')
 parser.add_argument('--load_net_path', default='', type=str, help='The path to load the pretrained network')
-parser.add_argument('--num_workers', default=0, type=int, help='how many subprocesses to use for data loading. ')
 
 # For training settings
 parser.add_argument('--lr', default=1e-2, type=float, help='learning rate')
@@ -37,6 +41,7 @@ parser.add_argument('--iterations', default=20, type=int, help='end of training 
 parser.add_argument('--print_every', default=10, type=int, help='number of gradient steps between prints')
 
 # For other settings
+parser.add_argument('--download_data', default='False', type=str, help='Download dataset from Internet')
 parser.add_argument('--dtype', default='float', type=str, help='Types of data and models')
 
 parser.set_defaults(feature=True)
