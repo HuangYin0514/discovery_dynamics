@@ -232,7 +232,7 @@ def main():
 
     # plot results ----------------------------------------------------------------
     save_path = osp.join('./outputs/', args.taskname, 'fig-analyze.pdf')
-    fig, ax = plt.subplots(8, 1, figsize=(6, 24), dpi=300)
+    fig, ax = plt.subplots(8, 1, figsize=(6, 24), dpi=100)
 
     plot_trajectory(ax[0], true_q, pred_q, 'Trajectory')
 
