@@ -198,6 +198,7 @@ def plot_one_sample_energy(ax, dataclass, method_name, method_solution, dynamics
     ax.legend(fontsize=12)
 
 
+
 def draw_more_sample_error_curve(args, dataclass, method_solution, truth_t, save_path):
     method_solution = copy.deepcopy(method_solution)
 
