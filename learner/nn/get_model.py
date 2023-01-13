@@ -46,4 +46,4 @@ def get_model(taskname, net_name, obj, dim, net_url, load_net_path, device):
     elif len(load_net_path):
         print('Cannot find pretrained network at \'{}\''.format(load_net_path), flush=True)
 
-    return net
+    return net.to(device)
