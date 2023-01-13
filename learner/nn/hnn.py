@@ -35,8 +35,8 @@ class HNN(LossNN):
     def forward(self, t, x):
         h = self.baseline(x)
         gradH = dfx(h, x)
-        print(self.J.device)
-        print(gradH.device)
+        # print(self.J.device)
+        # print(gradH.device)
         dy = (self.J @ gradH.T).T  # dy shape is (bs, vector)
         return dy
 
