@@ -6,4 +6,4 @@ from . import metrics
 from . import scheduler
 from . import utils
 from .brain import Brain
-
+from .analyze_brain import AnalyzeBrain

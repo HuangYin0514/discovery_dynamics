@@ -14,15 +14,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch
 
-
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 PARENT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append('.')
 sys.path.append(PARENT_DIR)
 
 import learner as ln
-from learner.utils.analyze_utils import plot_energy, plot_compare_energy, plot_compare_state, plot_field
-
 
 parser = argparse.ArgumentParser(description=None)
 # For general settings
@@ -44,66 +41,11 @@ parser.add_argument('--num_workers', default=0, type=int, help='how many subproc
 parser.add_argument('--net_name', default='mechanicsNN', type=str, help='Select model to train')
 parser.add_argument('--net_url', default='', type=str, help='Download net from Internet')
 
+# For other settings
+parser.add_argument('--dtype', default='float', type=str, help='Types of data and models')
+
 parser.set_defaults(feature=True)
 args = parser.parse_args()
-
-def polar2xy(x):
-    """
-    Convert polar coordinates to x,y coordinates.
-
-    Parameters
-    ----------
-    x : float
-        Polar coordinates.
-    """
-
-    pos = np.zeros([x.shape[0], x.shape[1] * 2])
-    for i in range(x.shape[1]):
-        if i == 0:
-            pos[:, 2 * i:2 * (i + 1)] += np.concatenate([np.sin(x[:, i:i + 1]), -np.cos(x[:, i:i + 1])], 1)
-        else:
-            pos[:, 2 * i:2 * (i + 1)] += pos[:, 2 * (i - 1):2 * i] + np.concatenate(
-                [np.sin(x[:, i:i + 1]), -np.cos(x[:, i:i + 1])], 1)
-    return pos
-
-
-def plot_trajectory(ax, true_q, pred_q, title_label):
-    truth_pos = polar2xy(true_q)
-    net_pos = polar2xy(pred_q)
-
-    time = min(400, len(truth_pos) - 1)
-
-    ax.set_xlabel('$x$ ($m$)')
-    ax.set_ylabel('$y$ ($m$)')
-    for i in range(time - 2):
-        ax.plot(truth_pos[i:i + 2, 2], truth_pos[i:i + 2, 3], 'k-', label='_nolegend_', linewidth=2,
-                alpha=0.2 + 0.8 * (i + 1) / time)
-        ax.plot(net_pos[i:i + 2, 2], net_pos[i:i + 2, 3], 'r-', label='_nolegend_', linewidth=2,
-                alpha=0.2 + 0.8 * (i + 1) / time)  # net_pred
-        # if i % (time // 2) == 0:  # pendulum in the middle state
-        #     ax.plot([0, net_pos[i, 0]], [0, net_pos[i, 1]], color='brown', linewidth=2, label='_nolegend_',
-        #             alpha=0.2 + 0.8 * (i + 1) / time)
-        #     ax.plot([net_pos[i, 0], net_pos[i, 2]], [net_pos[i, 1], net_pos[i, 3]], 'o-',
-        #             color='brown', linewidth=2, label='_nolegend_', alpha=0.2 + 0.8 * (i + 1) / time)
-        #     ax.scatter(net_pos[i, 0], net_pos[i, 1], s=50, linewidths=2, facecolors='gray',
-        #                edgecolors='brown', label='_nolegend_', alpha=min(0.5 + 0.8 * (i + 1) / time, 1), zorder=3)
-        #     ax.scatter(net_pos[i, 2], net_pos[i, 3], s=50, linewidths=2, facecolors='gray',
-        #                edgecolors='brown', label='_nolegend_', alpha=min(0.5 + 0.8 * (i + 1) / time, 1), zorder=3)
-    last_time = time - 3
-    ax.plot(truth_pos[last_time - 2:last_time, 2], truth_pos[last_time - 2:last_time, 3], 'r-', label='Ground truth',
-            linewidth=2, alpha=1)
-    ax.plot(net_pos[last_time - 2:last_time, 2], net_pos[last_time - 2:last_time, 3], 'r-', label='Net Prediction',
-            linewidth=2, alpha=1)  # net_pred
-    # ax.plot([0, net_pos[last_time, 0]], [0, net_pos[last_time, 1]], color='brown', linewidth=2, label='_nolegend_')
-    # ax.plot([net_pos[last_time, 0], net_pos[last_time, 2]], [net_pos[last_time, 1], net_pos[last_time, 3]], 'o-',
-    #         color='brown', linewidth=2, label='Pendulum')
-    # ax.scatter(net_pos[last_time, 0], net_pos[last_time, 1], s=50, linewidths=2, facecolors='gray', edgecolors='brown',
-    #            label='_nolegend_', alpha=1, zorder=3)
-    # ax.scatter(net_pos[last_time, 2], net_pos[last_time, 3], s=50, linewidths=2, facecolors='gray', edgecolors='brown',
-    #            label='_nolegend_', alpha=1, zorder=3)
-    ax.legend(fontsize=12)
-    ax.set_title(title_label)
-
 
 
 def main():
@@ -114,7 +56,6 @@ def main():
     ln.utils.init_random_state(args.seed)
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     print('Using the device is:', device)
-
 
     # net ----------------------------------------------------------------
     arguments = {
@@ -141,79 +82,15 @@ def main():
     }
     data = ln.data.get_dataloader(**arguments)
 
-    dataset, train_loader, test_loader = data
-    energy_fn = dataset.energy_fn
-    kinetic_fn = dataset.kinetic
-    potential_fn = dataset.potential
-
-    test_data = next(iter(test_loader))  # get one data for test
-    inputs, labels = test_data
-    X, t = inputs
-    X, t = X.to(device), t.to(device)
-    labels = labels.to(device)
-
-    # pred ----------------------------------------------------------------
-    pred = net.integrate(X, t)  # (bs, T, states)
-
-    # error ----------------------------------------------------------------
-    err = ln.metrics.accuracy_fn(pred, labels, energy_fn)
-    mse_err, rel_err, eng_err = err
-
-    result = ('mse_err: {:.3e}'.format(mse_err)
-              + '\n'
-              + 'rel_err: {:.3e}'.format(rel_err)
-              + '\n'
-              + 'eng_err: {:.3e}'.format(eng_err))
-    print(result)
-
-    # solutions forms ----------------------------------------------------------------
-    ground_true = labels[0]
-    net_pred = pred[0]
-    true_q, true_p = ground_true.chunk(2, dim=-1)  # (T, states)
-    pred_q, pred_p = net_pred.chunk(2, dim=-1)  # (T, states)
-
-    true_eng = torch.stack([energy_fn(i) for i in ground_true])
-    true_kinetic_eng = torch.stack([kinetic_fn(i) for i in ground_true])
-    true_potential_eng = torch.stack([potential_fn(i) for i in ground_true])
-    pred_eng = torch.stack([energy_fn(i) for i in net_pred])
-    pred_kinetic_eng = torch.stack([kinetic_fn(i) for i in net_pred])
-    pred_potential_eng = torch.stack([potential_fn(i) for i in net_pred])
-
-    t = t.detach().cpu().numpy()
-
-    ground_true = ground_true.detach().cpu().numpy()
-    true_q = true_q.detach().cpu().numpy()
-    true_p = true_p.detach().cpu().numpy()
-    true_eng = true_eng.detach().cpu().numpy()
-    true_kinetic_eng = true_kinetic_eng.detach().cpu().numpy()
-    true_potential_eng = true_potential_eng.detach().cpu().numpy()
-
-    net_pred = net_pred.detach().cpu().numpy()
-    pred_q = pred_q.detach().cpu().numpy()
-    pred_p = pred_p.detach().cpu().numpy()
-    pred_eng = pred_eng.detach().cpu().numpy()
-    pred_kinetic_eng = pred_kinetic_eng.detach().cpu().numpy()
-    pred_potential_eng = pred_potential_eng.detach().cpu().numpy()
-
-    # plot results ----------------------------------------------------------------
-    save_path = osp.join('./outputs/', args.taskname, 'fig-analyze.pdf')
-    fig, ax = plt.subplots(8, 1, figsize=(6, 24), dpi=100)
-
-    plot_trajectory(ax[0], true_q, pred_q, 'Trajectory')
-
-    plot_energy(ax[1], t, true_eng, true_potential_eng, true_kinetic_eng, 'Ground Truth Energy')
-    plot_energy(ax[2], t, pred_eng, pred_potential_eng, pred_kinetic_eng, 'Prediction Energy')
-    plot_compare_energy(ax[3], t, true_eng, pred_eng, 'Compare Energy')
-
-    plot_compare_state(ax[4], t, true_q, pred_q, 'State $q$')
-    plot_compare_state(ax[5], t, true_p, pred_p, 'State $p$')
-
-    plot_field(ax[6], t, true_q, true_p, 'True Field')
-    plot_field(ax[7], t, pred_q, pred_p, 'Prediction Field')
-
-    plt.tight_layout()
-    fig.savefig(save_path, bbox_inches='tight')
-    plt.show()
+    arguments = {
+        'taskname': args.taskname,
+        'data': data,
+        'dtype': args.dtype,
+        'device': device,
+        'net': net
+    }
+    ln.AnalyzeBrain.Init(**arguments)
+    ln.AnalyzeBrain.Run()
 
 
 if __name__ == '__main__':
