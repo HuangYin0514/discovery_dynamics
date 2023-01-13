@@ -83,6 +83,7 @@ def main():
     }
     net = ln.nn.get_model(**arguments)
     net.device = device
+    net.device = "float"
 
     # data ----------------------------------------------------------------
     arguments = {
