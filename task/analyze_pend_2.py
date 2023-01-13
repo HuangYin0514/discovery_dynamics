@@ -14,12 +14,15 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch
 
+
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 PARENT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append('.')
 sys.path.append(PARENT_DIR)
 
 import learner as ln
+from learner.utils.analyze_utils import plot_energy, plot_compare_energy, plot_compare_state, plot_field
+
 
 parser = argparse.ArgumentParser(description=None)
 # For general settings
@@ -44,10 +47,6 @@ parser.add_argument('--net_url', default='', type=str, help='Download net from I
 parser.set_defaults(feature=True)
 args = parser.parse_args()
 
-LINE_WIDTH = 2
-LEGENDSIZE = 12
-
-
 def polar2xy(x):
     """
     Convert polar coordinates to x,y coordinates.
@@ -69,76 +68,42 @@ def polar2xy(x):
 
 
 def plot_trajectory(ax, true_q, pred_q, title_label):
-    truth_pos = ln.utils.polar2xy(true_q)
-    net_pos = ln.utils.polar2xy(pred_q)
+    truth_pos = polar2xy(true_q)
+    net_pos = polar2xy(pred_q)
 
     time = min(400, len(truth_pos) - 1)
 
     ax.set_xlabel('$x$ ($m$)')
     ax.set_ylabel('$y$ ($m$)')
-    for i in range(time - 3):
+    for i in range(time - 2):
         ax.plot(truth_pos[i:i + 2, 2], truth_pos[i:i + 2, 3], 'k-', label='_nolegend_', linewidth=2,
                 alpha=0.2 + 0.8 * (i + 1) / time)
         ax.plot(net_pos[i:i + 2, 2], net_pos[i:i + 2, 3], 'r-', label='_nolegend_', linewidth=2,
                 alpha=0.2 + 0.8 * (i + 1) / time)  # net_pred
-        if i % (time // 2) == 0:  # pendulum in the middle state
-            ax.plot([0, net_pos[i, 0]], [0, net_pos[i, 1]], color='brown', linewidth=2, label='_nolegend_',
-                    alpha=0.2 + 0.8 * (i + 1) / time)
-            ax.plot([net_pos[i, 0], net_pos[i, 2]], [net_pos[i, 1], net_pos[i, 3]], 'o-',
-                    color='brown', linewidth=2, label='_nolegend_', alpha=0.2 + 0.8 * (i + 1) / time)
-            ax.scatter(net_pos[i, 0], net_pos[i, 1], s=50, linewidths=2, facecolors='gray',
-                       edgecolors='brown', label='_nolegend_', alpha=min(0.5 + 0.8 * (i + 1) / time, 1), zorder=3)
-            ax.scatter(net_pos[i, 2], net_pos[i, 3], s=50, linewidths=2, facecolors='gray',
-                       edgecolors='brown', label='_nolegend_', alpha=min(0.5 + 0.8 * (i + 1) / time, 1), zorder=3)
-    ax.plot(truth_pos[time - 2:time, 2], truth_pos[time - 2:time, 3], 'k-', label='Ground truth', linewidth=2, alpha=1)
-    ax.plot(net_pos[time - 2:time, 2], net_pos[time - 2:time, 3], 'r-', label='Net Prediction',
+        # if i % (time // 2) == 0:  # pendulum in the middle state
+        #     ax.plot([0, net_pos[i, 0]], [0, net_pos[i, 1]], color='brown', linewidth=2, label='_nolegend_',
+        #             alpha=0.2 + 0.8 * (i + 1) / time)
+        #     ax.plot([net_pos[i, 0], net_pos[i, 2]], [net_pos[i, 1], net_pos[i, 3]], 'o-',
+        #             color='brown', linewidth=2, label='_nolegend_', alpha=0.2 + 0.8 * (i + 1) / time)
+        #     ax.scatter(net_pos[i, 0], net_pos[i, 1], s=50, linewidths=2, facecolors='gray',
+        #                edgecolors='brown', label='_nolegend_', alpha=min(0.5 + 0.8 * (i + 1) / time, 1), zorder=3)
+        #     ax.scatter(net_pos[i, 2], net_pos[i, 3], s=50, linewidths=2, facecolors='gray',
+        #                edgecolors='brown', label='_nolegend_', alpha=min(0.5 + 0.8 * (i + 1) / time, 1), zorder=3)
+    last_time = time - 3
+    ax.plot(truth_pos[last_time - 2:last_time, 2], truth_pos[last_time - 2:last_time, 3], 'r-', label='Ground truth',
+            linewidth=2, alpha=1)
+    ax.plot(net_pos[last_time - 2:last_time, 2], net_pos[last_time - 2:last_time, 3], 'r-', label='Net Prediction',
             linewidth=2, alpha=1)  # net_pred
-    ax.plot([0, net_pos[time, 0]], [0, net_pos[time, 1]], color='brown', linewidth=2, label='_nolegend_')
-    ax.plot([net_pos[time, 0], net_pos[time, 2]], [net_pos[time, 1], net_pos[time, 3]], 'o-',
-            color='brown', linewidth=2, label='Pendulum')
-    ax.scatter(net_pos[time, 0], net_pos[time, 1], s=50, linewidths=2, facecolors='gray', edgecolors='brown',
-               label='_nolegend_', alpha=1, zorder=3)
-    ax.scatter(net_pos[time, 2], net_pos[time, 3], s=50, linewidths=2, facecolors='gray', edgecolors='brown',
-               label='_nolegend_', alpha=1, zorder=3)
+    # ax.plot([0, net_pos[last_time, 0]], [0, net_pos[last_time, 1]], color='brown', linewidth=2, label='_nolegend_')
+    # ax.plot([net_pos[last_time, 0], net_pos[last_time, 2]], [net_pos[last_time, 1], net_pos[last_time, 3]], 'o-',
+    #         color='brown', linewidth=2, label='Pendulum')
+    # ax.scatter(net_pos[last_time, 0], net_pos[last_time, 1], s=50, linewidths=2, facecolors='gray', edgecolors='brown',
+    #            label='_nolegend_', alpha=1, zorder=3)
+    # ax.scatter(net_pos[last_time, 2], net_pos[last_time, 3], s=50, linewidths=2, facecolors='gray', edgecolors='brown',
+    #            label='_nolegend_', alpha=1, zorder=3)
     ax.legend(fontsize=12)
     ax.set_title(title_label)
 
-
-def plot_energy(ax, t, eng, potential_eng, kinetic_eng, title_label):
-    ax.set_xlabel('Time step $(s)$')
-    ax.set_ylabel('$E\;(J)$')
-    ax.plot(t, potential_eng, 'y:', label='potential', linewidth=2)
-    ax.plot(t, kinetic_eng, 'c-.', label='kinetic', linewidth=2)
-    ax.plot(t, eng, 'g--', label='total', linewidth=2)
-    ax.legend(fontsize=12)
-    ax.set_title(title_label)
-
-
-def plot_compare_energy(ax, t, true_eng, pred_eng, title_label):
-    ax.set_xlabel('Time step $(s)$')
-    ax.set_ylabel('$E\;(J)$')
-    ax.plot(t, true_eng, 'g--', label='True Energy', linewidth=2)
-    ax.plot(t, pred_eng, 'r--', label='Prediction Energy', linewidth=2)
-    ax.plot(t, (true_eng - pred_eng) ** 2, 'b--', label='Energy Error', linewidth=2)
-    ax.legend(fontsize=12)
-    ax.set_title(title_label)
-
-
-def plot_compare_state(ax, t, true_state, pred_state, title_label):
-    ax.set_xlabel('Time step $(s)$')
-    ax.set_ylabel('$State$')
-    ax.plot(t, true_state, 'g--', label='True state', linewidth=2)
-    ax.plot(t, pred_state, 'r--', label='Prediction state', linewidth=2)
-    ax.legend(['True state', 'Prediction state'],fontsize=12)
-    ax.set_title(title_label)
-
-
-def plot_field(ax, t, state_q, state_p, title_label):
-    ax.set_xlabel('state $q$')
-    ax.set_ylabel('state $p$')
-    ax.plot(state_q, state_p, 'g--', label='state', linewidth=2)
-    ax.legend(['state'],fontsize=12)
-    ax.set_title(title_label)
 
 
 def main():
