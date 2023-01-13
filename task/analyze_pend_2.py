@@ -127,6 +127,7 @@ def main():
         'device': device
     }
     net = ln.nn.get_model(**arguments)
+    net.device = device
 
     # data ----------------------------------------------------------------
     arguments = {
