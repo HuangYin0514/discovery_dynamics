@@ -7,9 +7,9 @@
 """
 
 
-def body_trajectory(ax, true_q, pred_q, title_label):
-    obj = len(true_q)
-
+def body3_trajectory(ax, true_q, pred_q, title_label, *args, **kwargs):
+    obj = 3
+    dim = 2
     ax.set_xlabel('$x\;(m)$')
     ax.set_ylabel('$y\;(m)$')
     for i in range(obj):

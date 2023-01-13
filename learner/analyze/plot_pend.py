@@ -28,7 +28,7 @@ def polar2xy(x):
     return pos
 
 
-def pend_trajectory(ax, true_q, pred_q, title_label):
+def pend_trajectory(ax, true_q, pred_q, title_label, *args, **kwargs):
     truth_pos = polar2xy(true_q)
     net_pos = polar2xy(pred_q)
 

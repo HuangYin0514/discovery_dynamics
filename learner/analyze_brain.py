@@ -15,7 +15,7 @@ from .nn.base_module import LossNN
 from .regularization import symplectic_prior_reg
 from .scheduler import lr_decay_scheduler, no_scheduler
 from .utils import timing
-from .analyze import plot_energy, plot_compare_energy, plot_compare_state, plot_field, get_plot_trajectory
+from .analyze import plot_energy, plot_compare_energy, plot_compare_state, plot_field, plot_trajectory
 
 
 class AnalyzeBrain:
@@ -104,7 +104,7 @@ class AnalyzeBrain:
         save_path = osp.join('./outputs/', self.taskname, 'fig-analyze.pdf')
         fig, ax = plt.subplots(8, 1, figsize=(6, 24), dpi=100)
 
-        get_plot_trajectory(self.data_name, ax[0], true_q, pred_q, 'Trajectory')
+        plot_trajectory(self.data_name, ax[0], true_q, pred_q, 'Trajectory')
 
         plot_energy(ax[1], t, true_eng, true_potential_eng, true_kinetic_eng, 'Ground Truth Energy')
         plot_energy(ax[2], t, pred_eng, pred_potential_eng, pred_kinetic_eng, 'Prediction Energy')
