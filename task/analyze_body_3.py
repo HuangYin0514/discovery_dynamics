@@ -81,7 +81,7 @@ def main():
         'load_net_path': osp.join('./outputs/', args.taskname, 'model-{}.pkl'.format(args.taskname)),
         'device': device
     }
-    net = ln.nn.get_model(**arguments).to(device)
+    net = ln.nn.get_model(**arguments)
 
     # data ----------------------------------------------------------------
     arguments = {
