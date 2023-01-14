@@ -107,9 +107,10 @@ class Pendulum2(BaseBodyDataset, nn.Module):
         return U
 
     def energy_fn(self, coords):
-        """能量函数"""
+        """energy function """
         assert len(coords) == self._dof * 2
-        H = self.kinetic(coords) + self.potential(coords)  # some error in this implementation
+        # H = self.kinetic(coords) + self.potential(coords)
+        H = self.L_kinetic(coords) + self.potential(coords)
         return H
 
     def random_config(self):
@@ -121,3 +122,21 @@ class Pendulum2(BaseBodyDataset, nn.Module):
             x0[i] = theta
             x0[i + self._obj] = momentum
         return x0.reshape(-1)
+
+    def L_kinetic(self, coords):
+        """
+        Coordinates consist of position and velocity -> (x, v)
+        """
+        assert len(coords) == self._dof * 2
+
+        x, p = torch.chunk(coords, 2, dim=0)
+        v = self.Minv(x) @ p
+        coords = torch.cat([x, v],dim=0)
+
+        T = 0.
+        vx, vy = 0., 0.
+        for i in range(self._dof):
+            vx = vx + self._l[i] * coords[self._dof + i] * torch.cos(coords[i])
+            vy = vy + self._l[i] * coords[self._dof + i] * torch.sin(coords[i])
+            T = T + 0.5 * self._m[i] * (torch.pow(vx, 2) + torch.pow(vy, 2))
+        return T
