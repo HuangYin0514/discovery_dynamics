@@ -16,7 +16,8 @@ def choose_model(net_name, obj, dim):
         net = Baseline(dim=input_dim, layers=1, width=200)
     elif net_name == 'mechanicsNN':
         input_dim = obj * dim * 2
-        net = MechanicsNN(dof=input_dim, layers=3, width=80)
+        # net = MechanicsNN(dof=input_dim, layers=1, width=200)
+        net = MechanicsNN(dof=input_dim, layers=3, width=100)
     else:
         raise ValueError('Model \'{}\' is not implemented'.format(net_name))
 
