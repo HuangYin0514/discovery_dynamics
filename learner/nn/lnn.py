@@ -34,6 +34,7 @@ class LNN(LossNN):
     def forward(self, t, data):
 
         bs = data.size(0)
+        device = data.device
         _dof = int(self.dim / 2)
 
         x, v = torch.chunk(data, 2, dim=1)
@@ -44,8 +45,8 @@ class LNN(LossNN):
         dvL = dfx(L.sum(), v)
         dxL = dfx(L.sum(), x)
 
-        dvdvL = torch.zeros((bs, _dof, _dof))
-        dxdvL = torch.zeros((bs, _dof, _dof))
+        dvdvL = torch.zeros((bs, _dof, _dof),device=device)
+        dxdvL = torch.zeros((bs, _dof, _dof),device=device)
 
         for i in range(_dof):
             dvidvL = dfx(dvL[:, i].sum(), v)
