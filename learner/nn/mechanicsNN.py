@@ -6,14 +6,13 @@
 @desc:
 """
 import torch
+from torch import Tensor
 from torch import nn
 
-from ..integrator import ODESolver
 from .base_module import LossNN
 from .fnn import FNN
-from torch import Tensor
-
 from .utils_nn import ReshapeNet, CosSinNet
+from ..integrator import ODESolver
 
 
 class MassNet(nn.Module):

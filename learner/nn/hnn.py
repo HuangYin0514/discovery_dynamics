@@ -4,7 +4,7 @@ import torch
 from .base_module import LossNN
 from .fnn import FNN
 from ..integrator import ODESolver
-from ..utils import lazy_property, dfx, ham_J
+from ..utils import lazy_property, dfx
 
 
 class HNN(LossNN):
