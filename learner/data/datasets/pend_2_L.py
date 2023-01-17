@@ -57,7 +57,6 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
     def forward(self, t, coords):
         assert len(coords) == self._dof * 2
 
-        # coords.requires_grad = True
         x, v = torch.chunk(coords, 2, dim=0)
 
         L = self.energy_fn(torch.cat([x, v], dim=0), L_constant=True)
@@ -84,8 +83,6 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
         """
           Coordinates consist of position and velocity -> (x, v)
         """
-        assert len(coords) == self._dof * 2
-
         T = 0.
         vx, vy = 0., 0.
         for i in range(self._dof):
@@ -95,8 +92,6 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
         return T
 
     def potential(self, coords):
-        assert len(coords) == self._dof * 2
-        g = self._g
         U = 0.
         y = 0.
         for i in range(self._obj):
