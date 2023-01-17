@@ -78,8 +78,8 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
 
         dvdvL_inv = torch.linalg.inv(dvdvL)
 
-        res = dvdvL_inv @ (dxL - dxdvL @ v)
-        return torch.cat([v, res], dim=0).detach().clone()
+        a = dvdvL_inv @ (dxL - dxdvL @ v)
+        return torch.cat([v, a], dim=0).detach().clone()
 
     def kinetic(self, coords):
         """

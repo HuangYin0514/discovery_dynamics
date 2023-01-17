@@ -31,32 +31,42 @@ class LNN(LossNN):
         baseline = FNN(self.dim, 1, self.layers, self.width)
         return baseline
 
-    def forward(self, t, coords):
+    def forward(self, t, data):
 
-        x, v = torch.chunk(coords, 2, dim=0)
+        bs = data.size(0)
+        _dof = int(self.dim / 2)
 
-        L = self.baseline(x)
+        x, v = torch.chunk(data, 2, dim=1)
+        input = torch.cat([x, v], dim=1)
+
+        L = self.baseline(input)
 
         dvL = dfx(L.sum(), v)
         dxL = dfx(L.sum(), x)
 
-        dvdvL = torch.zeros((self._dof, self._dof))
-        dxdvL = torch.zeros((self._dof, self._dof))
+        dvdvL = torch.zeros((bs, _dof, _dof))
+        dxdvL = torch.zeros((bs, _dof, _dof))
 
-        for i in range(self._dof):
-            dvidvL = dfx(dvL[i].sum(), v)
-            dvdvL[i] += dvidvL
+        for i in range(_dof):
+            dvidvL = dfx(dvL[:, i].sum(), v)
+            if dvidvL is None:
+                break
+            else:
+                dvdvL[:, i, :] += dvidvL
 
-        for i in range(self._dof):
-            dxidvL = dfx(dvL[i].sum(), x)
-            dxdvL[i] += dxidvL
+        for i in range(_dof):
+            dxidvL = dfx(dvL[:, i].sum(), x)
+            if dxidvL is None:
+                break
+            else:
+                dxdvL[:, i, :] += dxidvL
 
-        dvdvL_inv = torch.linalg.inv(dvdvL)
+        dvdvL_inv = torch.linalg.pinv(dvdvL)
 
-        res = dvdvL_inv @ (dxL - dxdvL @ v)
-
-        return torch.cat([v, res], dim=0)
+        a = dvdvL_inv @ (dxL.unsqueeze(2) - dxdvL @ v.unsqueeze(2))
+        a = a.squeeze(2)
+        return torch.cat([v, a], dim=1)
 
     def integrate(self, X, t):
-        out = ODESolver(self, X, t, method='dopri5').permute(1, 0, 2)  # (T, D)
+        out = ODESolver(self, X, t, method='rk4').permute(1, 0, 2)  # (T, D)
         return out
