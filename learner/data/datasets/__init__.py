@@ -8,3 +8,4 @@
 
 from .get_dataset import get_dataset
 from .pend_2 import Pendulum2
+from .pend_2_L import Pendulum2_L

@@ -13,11 +13,18 @@ import numpy as np
 from learner.utils import download_file_from_google_drive
 from .body3 import Body3
 from .pend_2 import Pendulum2
+from .pend_2_L import Pendulum2_L
 
 
 def choose_dataset(data_name, obj, dim, train_num, test_num):
     if data_name == 'Pendulum2':
         dataset = Pendulum2(train_num=train_num,
+                            test_num=test_num,
+                            obj=obj,
+                            dim=dim)
+
+    elif data_name == 'Pendulum2_L':
+        dataset = Pendulum2_L(train_num=train_num,
                             test_num=test_num,
                             obj=obj,
                             dim=dim)
