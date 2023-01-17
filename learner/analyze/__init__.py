@@ -11,7 +11,7 @@ from .analyze_utils import plot_energy, plot_compare_energy, plot_compare_state,
 
 __factory = {
     'Pendulum2': pend_trajectory,
-    # 'cuhk03': CUHK03,
+    'Pendulum2_L': pend_trajectory,
     'Body3': body3_trajectory,
 }
 
