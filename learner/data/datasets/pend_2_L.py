@@ -57,6 +57,8 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
     def forward(self, t, coords):
         assert len(coords) == self._dof * 2
 
+        coords = coords.clone().detach().requires_grad_(True)
+
         x, v = torch.chunk(coords, 2, dim=0)
 
         L = self.energy_fn(torch.cat([x, v], dim=0), L_constant=True)
@@ -117,4 +119,4 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
             momentum = (2 * torch.rand(1, ) - 1) * max_momentum  # [-1, 1]*max_momentum
             x0[i] = theta
             x0[i + self._obj] = momentum
-        return x0.requires_grad_(True)
+        return x0

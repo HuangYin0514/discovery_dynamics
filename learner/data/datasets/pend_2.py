@@ -10,6 +10,7 @@ import torch
 from torch import nn
 
 from .base_body_dataset import BaseBodyDataset
+from ...utils import lazy_property, dfx
 
 
 class Pendulum2(BaseBodyDataset, nn.Module):
@@ -53,6 +54,14 @@ class Pendulum2(BaseBodyDataset, nn.Module):
         _time_step = int((t_end - t0) / self.dt)
         self.test_t = torch.linspace(t0, t_end, _time_step)
 
+    @lazy_property
+    def J(self):
+        # [ 0, I]
+        # [-I, 0]
+        d = self._dof
+        res = np.eye(self._dof*2, k=d) - np.eye(self._dof*2, k=-d)
+        return torch.tensor(res).float()
+
     def forward(self, t, coords):
         assert len(coords) == self._dof * 2
         q1, q2, p1, p2 = torch.chunk(coords, 4, dim=0)
@@ -66,6 +75,13 @@ class Pendulum2(BaseBodyDataset, nn.Module):
             q1 - q2)) / (2 * b ** 2)
         dp1 = -(m1 + m2) * g * l1 * torch.sin(q1) - h1 + h2 * torch.sin(2 * (q1 - q2))
         dp2 = -m2 * g * l2 * torch.sin(q2) + h1 - h2 * torch.sin(2 * (q1 - q2))
+
+        # coords = coords.clone().detach().requires_grad_(True)
+        # h = self.energy_fn(coords)
+        # gradH = dfx(h, coords)
+        # dy = self.J @ gradH  # dy shape is (vector, )
+        # return dy
+
         return torch.cat([dq1, dq2, dp1, dp2], dim=0)
 
     def M(self, x):
@@ -110,7 +126,6 @@ class Pendulum2(BaseBodyDataset, nn.Module):
         """energy function """
         assert len(coords) == self._dof * 2
         H = self.kinetic(coords) + self.potential(coords)
-        # H = self.L_kinetic(coords) + self.potential(coords)
         return H
 
     def random_config(self):
@@ -121,22 +136,4 @@ class Pendulum2(BaseBodyDataset, nn.Module):
             momentum = (2 * torch.rand(1, ) - 1) * max_momentum  # [-1, 1]*max_momentum
             x0[i] = theta
             x0[i + self._obj] = momentum
-        return x0.reshape(-1)
-
-    def L_kinetic(self, coords):
-        """
-        Coordinates consist of position and velocity -> (x, v)
-        """
-        assert len(coords) == self._dof * 2
-
-        x, p = torch.chunk(coords, 2, dim=0)
-        v = self.Minv(x) @ p
-        coords = torch.cat([x, v],dim=0)
-
-        T = 0.
-        vx, vy = 0., 0.
-        for i in range(self._dof):
-            vx = vx + self._l[i] * coords[self._dof + i] * torch.cos(coords[i])
-            vy = vy + self._l[i] * coords[self._dof + i] * torch.sin(coords[i])
-            T = T + 0.5 * self._m[i] * (torch.pow(vx, 2) + torch.pow(vy, 2))
-        return T
+        return x0

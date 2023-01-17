@@ -29,7 +29,7 @@ parser.add_argument('--download_data', default='False', type=str, help='Download
 parser.add_argument('--num_workers', default=0, type=int, help='how many subprocesses to use for data loading. ')
 
 # net
-parser.add_argument('--net_name', default='mechanicsNN', type=str,
+parser.add_argument('--net_name', default='baseline', type=str,
                     help='Select model to train [baseline, hnn, mechanicsNN] ')
 parser.add_argument('--net_url', default='', type=str, help='Download net from Internet')
 parser.add_argument('--load_net_path', default='', type=str, help='The path to load the pretrained network')
