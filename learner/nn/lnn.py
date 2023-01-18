@@ -54,22 +54,25 @@ class MLP(nn.Module):
         def input_layer_init(m):
             classname = m.__class__.__name__
             if classname.find("Linear") != -1:  # find the linear layer class
-                a, b = m.weight.shape
-                m.weight.data.normal_(0, 2.2 / np.sqrt(b))
+                # a, b = m.weight.shape
+                # m.weight.data.normal_(0, 2.2 / np.sqrt(b))
+                nn.init.xavier_normal_(m.weight)
 
         def hidden_layer_init(m):
             classname = m.__class__.__name__
 
             if classname.find("Linear") != -1:  # find the linear layer class
-                a, b = m.weight.shape
-                i, n = 1, 3
-                m.weight.data.normal_(0, 0.58 * (i + 1) / np.sqrt((a + b) / 2))
+                # a, b = m.weight.shape
+                # i, n = 1, 3
+                # m.weight.data.normal_(0, 0.58 * (i + 1) / np.sqrt((a + b) / 2))
+                nn.init.xavier_normal_(m.weight)
 
         def output_layer_init(m):
             classname = m.__class__.__name__
             if classname.find("Linear") != -1:  # find the linear layer class
-                a, b = m.weight.shape
-                m.weight.data.normal_(0, np.sqrt(a))
+                # a, b = m.weight.shape
+                # m.weight.data.normal_(0, np.sqrt(a))
+                nn.init.xavier_normal_(m.weight)
 
         self.input_layer.apply(input_layer_init)
         self.hidden_layer.apply(hidden_layer_init)
