@@ -1,7 +1,7 @@
 from torch import nn
 
 from .base_module import StructureNN
-from ..utils import weights_init_xavier_normal
+from .utils_nn import weights_init_xavier_normal
 
 
 class FNN(StructureNN):
