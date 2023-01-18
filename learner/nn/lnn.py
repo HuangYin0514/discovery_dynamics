@@ -5,7 +5,7 @@
 @time: 2023/1/17 7:51 PM
 @desc:
 """
-
+import numpy as np
 import torch
 from torch import nn
 
@@ -28,12 +28,12 @@ class MLP(nn.Module):
 
         self.input_layer = nn.Sequential(
             nn.Linear(self.ind, self.width),
-            nn.Tanh()
+            nn.Softplus()
         )
 
         hidden_bock = nn.Sequential(
             nn.Linear(self.width, self.width),
-            nn.Tanh()
+            nn.Softplus()
         )
         self.hidden_layer = nn.ModuleList([hidden_bock for _ in range(self.layers)])
 
@@ -51,9 +51,29 @@ class MLP(nn.Module):
         return x
 
     def __initialize(self):
-        self.input_layer.apply(weights_init_xavier_normal)
-        self.hidden_layer.apply(weights_init_xavier_normal)
-        self.output_layer.apply(weights_init_xavier_normal)
+        def input_layer_init(m):
+            classname = m.__class__.__name__
+            if classname.find("Linear") != -1:  # find the linear layer class
+                a, b = m.weight.shape
+                m.weight.data.normal_(0, 2.2 / np.sqrt(b))
+
+        def hidden_layer_init(m):
+            classname = m.__class__.__name__
+
+            if classname.find("Linear") != -1:  # find the linear layer class
+                a, b = m.weight.shape
+                i, n = 1, 3
+                m.weight.data.normal_(0, 0.58 * (i + 1) / np.sqrt((a + b) / 2))
+
+        def output_layer_init(m):
+            classname = m.__class__.__name__
+            if classname.find("Linear") != -1:  # find the linear layer class
+                a, b = m.weight.shape
+                m.weight.data.normal_(0, np.sqrt(a))
+
+        self.input_layer.apply(input_layer_init)
+        self.hidden_layer.apply(hidden_layer_init)
+        self.output_layer.apply(output_layer_init)
 
 
 class LNN(LossNN):
