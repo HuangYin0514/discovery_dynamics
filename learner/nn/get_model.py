@@ -14,7 +14,7 @@ def choose_model(net_name, obj, dim):
         net = HNN(dim=input_dim, layers=1, width=200)
     elif net_name == 'lnn':
         input_dim = obj * dim * 2
-        net = LNN(dim=input_dim, layers=2, width=200)
+        net = LNN(dim=input_dim, layers=None, width=128)
     elif net_name == 'baseline':
         input_dim = obj * dim * 2
         net = Baseline(dim=input_dim, layers=1, width=200)

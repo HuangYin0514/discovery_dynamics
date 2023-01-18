@@ -19,64 +19,32 @@ class MLP(nn.Module):
     '''Fully connected neural networks.
     '''
 
-    def __init__(self, ind, outd, layers=1, width=200):
+    def __init__(self, ind, outd, width=200):
         super(MLP, self).__init__()
         self.ind = ind
         self.outd = outd
-        self.layers = layers
         self.width = width
 
-        self.input_layer = nn.Sequential(
-            nn.Linear(self.ind, self.width),
-            nn.Softplus()
-        )
-
-        hidden_bock = nn.Sequential(
-            nn.Linear(self.width, self.width),
-            nn.Softplus()
-        )
-        self.hidden_layer = nn.ModuleList([hidden_bock for _ in range(self.layers)])
-
-        self.output_layer = nn.Sequential(
-            nn.Linear(self.width, self.outd, bias=False)
+        self.lagrangian = nn.Sequential(
+            nn.Linear(ind, width),
+            nn.Softplus(),
+            nn.Linear(width, width),
+            nn.Softplus(),
+            nn.Linear(width, width),
+            nn.Softplus(),
+            nn.Linear(width, width),
+            nn.Softplus(),
+            nn.Linear(width, outd)
         )
 
         self.__initialize()
 
     def forward(self, x):
-        x = self.input_layer(x)
-        for layer in self.hidden_layer:
-            x = layer(x)
-        x = self.output_layer(x)
+        x = self.lagrangian(x)
         return x
 
     def __initialize(self):
-        def input_layer_init(m):
-            classname = m.__class__.__name__
-            if classname.find("Linear") != -1:  # find the linear layer class
-                # a, b = m.weight.shape
-                # m.weight.data.normal_(0, 2.2 / np.sqrt(b))
-                nn.init.xavier_normal_(m.weight)
-
-        def hidden_layer_init(m):
-            classname = m.__class__.__name__
-
-            if classname.find("Linear") != -1:  # find the linear layer class
-                # a, b = m.weight.shape
-                # i, n = 1, 3
-                # m.weight.data.normal_(0, 0.58 * (i + 1) / np.sqrt((a + b) / 2))
-                nn.init.xavier_normal_(m.weight)
-
-        def output_layer_init(m):
-            classname = m.__class__.__name__
-            if classname.find("Linear") != -1:  # find the linear layer class
-                # a, b = m.weight.shape
-                # m.weight.data.normal_(0, np.sqrt(a))
-                nn.init.xavier_normal_(m.weight)
-
-        self.input_layer.apply(input_layer_init)
-        self.hidden_layer.apply(hidden_layer_init)
-        self.output_layer.apply(output_layer_init)
+        self.lagrangian.apply(weights_init_xavier_normal)
 
 
 class LNN(LossNN):
@@ -93,7 +61,7 @@ class LNN(LossNN):
         self.baseline = self.__init_modules()
 
     def __init_modules(self):
-        baseline = MLP(self.dim, 1, self.layers, self.width)
+        baseline = MLP(self.dim, 1, self.width)
         return baseline
 
     def forward(self, t, data):
@@ -107,8 +75,8 @@ class LNN(LossNN):
 
         L = self.baseline(input)
 
-        dvL = dfx(L.sum(), v)
-        dxL = dfx(L.sum(), x)
+        dvL = dfx(L.sum(), v)  # (bs, v_dim)
+        dxL = dfx(L.sum(), x)  # (bs, x_dim)
 
         dvdvL = torch.zeros((bs, _dof, _dof), device=device)
         dxdvL = torch.zeros((bs, _dof, _dof), device=device)
@@ -129,7 +97,7 @@ class LNN(LossNN):
 
         dvdvL_inv = torch.linalg.pinv(dvdvL)
 
-        a = dvdvL_inv @ (dxL.unsqueeze(2) - dxdvL @ v.unsqueeze(2))
+        a = dvdvL_inv @ (dxL.unsqueeze(2) - dxdvL @ v.unsqueeze(2))  # (bs, a_dim, 1)
         a = a.squeeze(2)
         return torch.cat([v, a], dim=1)
 

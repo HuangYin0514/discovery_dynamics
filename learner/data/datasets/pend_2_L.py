@@ -5,6 +5,8 @@
 @time: 2023/1/3 3:50 PM
 @desc:
 """
+import math
+
 import numpy as np
 import torch
 from torch import nn
@@ -57,6 +59,34 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
     def forward(self, t, coords):
         assert len(coords) == self._dof * 2
 
+        res = self.derivative_analytical(coords)
+        # res = self.derivative_lagrangian(coords)
+        return res
+
+    def derivative_analytical(self, coords):
+        '''
+                double pendulum dynamics from https://github.com/MilesCranmer/lagrangian_nns/blob/master/experiment_dblpend/physics.py
+                :param state: the angles and angular velocities of the two masses
+                :param t: dummy variable for runge-kutta calculation
+                :returns: the angular velocities and accelerations of the two masses
+                '''
+
+        t1, t2, w1, w2 = torch.chunk(coords, 4, dim=0)
+        l1, l2, m1, m2 = self._l[0], self._l[1], self._m[0], self._m[1]
+        g = self._g
+
+        a1 = (l2 / l1) * (m2 / (m1 + m2)) * torch.cos(t1 - t2)
+        a2 = (l1 / l2) * torch.cos(t1 - t2)
+        f1 = -(l2 / l1) * (m2 / (m1 + m2)) * (w2 ** 2) * torch.sin(t1 - t2) - (g / l1) * torch.sin(t1)
+        f2 = (l1 / l2) * (w1 ** 2) * torch.sin(t1 - t2) - (g / l2) * torch.sin(t2)
+        g1 = (f1 - a1 * f2) / (1 - a1 * a2)
+        g2 = (f2 - a2 * f1) / (1 - a1 * a2)
+
+        # return derivative of state
+        return torch.cat([w1, w2, g1, g2], dim=0).float()
+
+    def derivative_lagrangian(self, coords):
+
         coords = coords.clone().detach().requires_grad_(True)
 
         x, v = torch.chunk(coords, 2, dim=0)
@@ -80,6 +110,17 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
 
         a = dvdvL_inv @ (dxL - dxdvL @ v)
         return torch.cat([v, a], dim=0).detach().clone()
+
+        # 暂未验证
+        # H = hessian(self.get_lagrangian, state)
+        # J = jacobian(self.get_lagrangian, state)
+        #
+        # A = J[:2]
+        # B = H[2:, 2:]
+        # C = H[2:, :2]
+        #
+        # q_tt = torch.linalg.pinv(B) @ (A - C @ state[2:])
+        # return torch.cat((state[2:], q_tt))
 
     def kinetic(self, coords):
         """
