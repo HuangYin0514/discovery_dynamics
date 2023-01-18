@@ -17,9 +17,10 @@ if __name__ == '__main__':
         model = ln.nn.FNN(4, 1, width=200)
         model = ln.nn.HNN(4, layers=1, width=200)
         model = ln.nn.MechanicsNN(4, layers=1, width=200)
-        
+        model = ln.nn.LNN(4, layers=1, width=200)
+
     '''
-    model = ln.nn.LNN(4, layers=1, width=200)
+    model = ln.nn.LNN(4, layers=3, width=200)
     model.device = "cpu"
     model.dtype = "float"
     print(model)
