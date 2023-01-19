@@ -18,7 +18,6 @@ import torch
 from torch import nn
 
 from .base_module import LossNN
-from .utils_nn import weights_init_xavier_normal
 from ..integrator import ODESolver
 from ..utils import dfx
 
