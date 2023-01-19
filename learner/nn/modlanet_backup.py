@@ -22,18 +22,22 @@ from ..integrator import ODESolver
 from ..utils import dfx
 
 
-class Lagrangian(nn.Module):
+class MLP(nn.Module):
     '''Fully connected neural networks.
     '''
 
     def __init__(self, ind, outd, width=200):
-        super(Lagrangian, self).__init__()
+        super(MLP, self).__init__()
         self.ind = ind
         self.outd = outd
         self.width = width
 
         self.mlp = nn.Sequential(
             nn.Linear(ind, width),
+            nn.Tanh(),
+            nn.Linear(width, width),
+            nn.Tanh(),
+            nn.Linear(width, width),
             nn.Tanh(),
             nn.Linear(width, width),
             nn.Tanh(),
@@ -54,7 +58,7 @@ class ModLaNet(LossNN):
     '''Hamiltonian neural networks.
     '''
 
-    def __init__(self, obj, dim):
+    def __init__(self, obj, dim, layers=1, width=200):
         super(ModLaNet, self).__init__()
 
         self.obj = obj
@@ -62,20 +66,48 @@ class ModLaNet(LossNN):
         self.dof = obj * dim
         self.input_dim = obj * dim * 2
 
+        self.layers = layers
+        self.width = width
+
         self.baseline = self.__init_modules()
 
     def __init_modules(self):
-        baseline = Lagrangian(self.input_dim, 1)
+        baseline = MLP(self.input_dim, 1, self.width)
         return baseline
 
     def forward(self, t, data):
 
-        bs = data.size(0)
+        bs = data.size(0) # (bs, states)
 
         x, v = torch.chunk(data, 2, dim=1)
 
         input = torch.cat([x, v], dim=1)
         L = self.baseline(input)
+        #
+        # x_global = x
+        # v_global = v
+        #
+        # # Calculate the potential energy for i-th element
+        #
+        # for i in range(self.obj):
+        #     U += self.co1 * self.mass(self.Potential1(x_global[:, i * self.dim: (i + 1) * self.dim]))
+        #
+        # for i in range(self.obj):
+        #     for j in range(i):
+        #         x_ij = torch.cat(
+        #             [x_global[:, i * self.dim: (i + 1) * self.dim], x_global[:, j * self.dim: (j + 1) * self.dim]],
+        #             dim=1)
+        #         x_ji = torch.cat(
+        #             [x_global[:, j * self.dim: (j + 1) * self.dim], x_global[:, i * self.dim: (i + 1) * self.dim]],
+        #             dim=1)
+        #         U += self.co2 * (0.5 * self.mass(self.Potential2(x_ij)) + 0.5 * self.mass(self.Potential2(x_ji)))
+        #
+        #     # Calculate the kinetic energy for i-th element
+        # for i in range(self.obj):
+        #     T += 0.5 * self.mass(v_global[:, (i) * self.dim: (i + 1) * self.dim].pow(2).sum(axis=1, keepdim=True))
+        #
+        #     # Construct Lagrangian
+        # L += (T - U)
 
         dvL = dfx(L.sum(), v)  # (bs, v_dim)
         dxL = dfx(L.sum(), x)  # (bs, x_dim)
