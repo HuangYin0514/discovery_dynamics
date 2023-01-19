@@ -58,9 +58,11 @@ class ModLaNet(LossNN):
     '''Hamiltonian neural networks.
     '''
 
-    def __init__(self, dim, layers=3, width=30):
+    def __init__(self, input_dim, obj ,dim ,layers=3, width=30):
         super(ModLaNet, self).__init__()
 
+        self.input_dim = input_dim
+        self.obj = obj
         self.dim = dim
         self.layers = layers
         self.width = width
@@ -75,12 +77,33 @@ class ModLaNet(LossNN):
 
         bs = data.size(0)
         device = data.device
-        _dof = int(self.dim / 2)
 
         x, v = torch.chunk(data, 2, dim=1)
-        input = torch.cat([x, v], dim=1)
+        # input = torch.cat([x, v], dim=1)
+        # L = self.baseline(input)
 
-        L = self.baseline(input)
+        x_global = x
+        v_global = v
+
+        # Calculate the potential energy for i-th element
+
+        for i in range(self.obj):
+            U += self.co1 * self.mass(self.Potential1(x_global[:, i * self.dim: (i + 1) * self.dim]))
+
+        for i in range(self.obj):
+            for j in range(i):
+                x_ij = torch.cat(
+                    [x_global[:, i * self.dim: (i + 1) * self.dim], x_global[:, j * self.dim: (j + 1) * self.dim]], dim=1)
+                x_ji = torch.cat(
+                    [x_global[:, j * self.dim: (j + 1) * self.dim], x_global[:, i * self.dim: (i + 1) * self.dim]], dim=1)
+                U += self.co2 * (0.5 * self.mass(self.Potential2(x_ij)) + 0.5 * self.mass(self.Potential2(x_ji)))
+
+            # Calculate the kinetic energy for i-th element
+        for i in range(self.obj):
+            T += 0.5 * self.mass(v_global[:, (i) * self.dim: (i + 1) * self.dim].pow(2).sum(axis=1, keepdim=True))
+
+            # Construct Lagrangian
+        L += (T - U)
 
         dvL = dfx(L.sum(), v)  # (bs, v_dim)
         dxL = dfx(L.sum(), x)  # (bs, x_dim)

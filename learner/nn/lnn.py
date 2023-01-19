@@ -51,7 +51,7 @@ class LNN(LossNN):
     '''Hamiltonian neural networks.
     '''
 
-    def __init__(self, dim, layers=3, width=30):
+    def __init__(self, dim, layers=3, width=128):
         super(LNN, self).__init__()
 
         self.dim = dim

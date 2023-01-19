@@ -12,21 +12,21 @@ from .modlanet import ModLaNet
 def choose_model(net_name, obj, dim):
     if net_name == 'hnn':
         input_dim = obj * dim * 2
-        net = HNN(dim=input_dim, layers=1, width=200)
+        net = HNN(dim=input_dim)
     elif net_name == 'lnn':
         input_dim = obj * dim * 2
-        net = LNN(dim=input_dim, layers=None, width=128)
+        net = LNN(dim=input_dim)
     elif net_name == 'baseline':
         input_dim = obj * dim * 2
-        net = Baseline(dim=input_dim, layers=1, width=200)
+        net = Baseline(dim=input_dim)
     elif net_name == 'mechanicsNN':
         input_dim = obj * dim * 2
         # net = MechanicsNN(dof=input_dim, layers=1, width=200)
-        net = MechanicsNN(dof=input_dim, layers=3, width=100)
+        net = MechanicsNN(dof=input_dim)
     elif net_name == 'modlanet':
         input_dim = obj * dim * 2
         # net = MechanicsNN(dof=input_dim, layers=1, width=200)
-        net = ModLaNet(dim=input_dim, layers=None, width=128)
+        net = ModLaNet(input_dim=input_dim, obj=obj, dim=dim)
     else:
         raise ValueError('Model \'{}\' is not implemented'.format(net_name))
 
