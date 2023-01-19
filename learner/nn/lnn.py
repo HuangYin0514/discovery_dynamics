@@ -44,7 +44,7 @@ class MLP(nn.Module):
         return x
 
     def __initialize(self):
-        self.lagrangian.apply(weights_init_xavier_normal)
+        self.mlp.apply(weights_init_xavier_normal)
 
 
 class LNN(LossNN):
