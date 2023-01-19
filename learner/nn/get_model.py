@@ -6,6 +6,7 @@ from .baseline import Baseline
 from .hnn import HNN
 from .lnn import LNN
 from .mechanicsNN import MechanicsNN
+from .modlanet import ModLaNet
 
 
 def choose_model(net_name, obj, dim):
@@ -22,6 +23,10 @@ def choose_model(net_name, obj, dim):
         input_dim = obj * dim * 2
         # net = MechanicsNN(dof=input_dim, layers=1, width=200)
         net = MechanicsNN(dof=input_dim, layers=3, width=100)
+    elif net_name == 'modlanet':
+        input_dim = obj * dim * 2
+        # net = MechanicsNN(dof=input_dim, layers=1, width=200)
+        net = ModLaNet(dim=input_dim, layers=None, width=128)
     else:
         raise ValueError('Model \'{}\' is not implemented'.format(net_name))
 
