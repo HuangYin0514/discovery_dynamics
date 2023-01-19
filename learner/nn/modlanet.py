@@ -22,12 +22,12 @@ from ..integrator import ODESolver
 from ..utils import dfx
 
 
-class LNN(LossNN):
+class ModLaNet(LossNN):
     '''Hamiltonian neural networks.
     '''
 
     def __init__(self, obj, dim):
-        super(LNN, self).__init__()
+        super(ModLaNet, self).__init__()
 
         self.obj = obj
         self.dim = dim

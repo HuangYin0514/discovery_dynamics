@@ -4,3 +4,4 @@ from .get_model import get_model
 from .hnn import HNN
 from .lnn import LNN
 from .mechanicsNN import MechanicsNN
+from .modlanet import ModLaNet
