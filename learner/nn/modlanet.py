@@ -58,13 +58,13 @@ class ModLaNet(LossNN):
     '''Hamiltonian neural networks.
     '''
 
-    def __init__(self,  obj, dim, layers=1, width=200):
+    def __init__(self, obj, dim, layers=1, width=200):
         super(ModLaNet, self).__init__()
 
         self.obj = obj
         self.dim = dim
         self.dof = obj * dim
-        self.input_dim = obj * dim*2
+        self.input_dim = obj * dim * 2
 
         self.layers = layers
         self.width = width
@@ -77,7 +77,7 @@ class ModLaNet(LossNN):
 
     def forward(self, t, data):
 
-        bs = data.size(0)
+        bs = data.size(0) # (bs, states)
 
         x, v = torch.chunk(data, 2, dim=1)
 

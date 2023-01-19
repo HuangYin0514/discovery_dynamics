@@ -22,22 +22,18 @@ from ..integrator import ODESolver
 from ..utils import dfx
 
 
-class MLP(nn.Module):
+class Lagrangian(nn.Module):
     '''Fully connected neural networks.
     '''
 
     def __init__(self, ind, outd, width=200):
-        super(MLP, self).__init__()
+        super(Lagrangian, self).__init__()
         self.ind = ind
         self.outd = outd
         self.width = width
 
         self.mlp = nn.Sequential(
             nn.Linear(ind, width),
-            nn.Tanh(),
-            nn.Linear(width, width),
-            nn.Tanh(),
-            nn.Linear(width, width),
             nn.Tanh(),
             nn.Linear(width, width),
             nn.Tanh(),
@@ -58,21 +54,18 @@ class LNN(LossNN):
     '''Hamiltonian neural networks.
     '''
 
-    def __init__(self,  obj, dim, layers=1, width=200):
+    def __init__(self, obj, dim):
         super(LNN, self).__init__()
 
         self.obj = obj
         self.dim = dim
         self.dof = obj * dim
-        self.input_dim = obj * dim*2
-
-        self.layers = layers
-        self.width = width
+        self.input_dim = obj * dim * 2
 
         self.baseline = self.__init_modules()
 
     def __init_modules(self):
-        baseline = MLP(self.input_dim, 1, self.width)
+        baseline = Lagrangian(self.input_dim, 1)
         return baseline
 
     def forward(self, t, data):
