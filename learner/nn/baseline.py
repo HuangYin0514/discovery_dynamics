@@ -9,7 +9,7 @@ class Baseline(LossNN):
     '''Hamiltonian neural networks.
     '''
 
-    def __init__(self, obj, dim, layers=1, width=200):
+    def __init__(self, obj, dim):
         super(Baseline, self).__init__()
 
         self.obj = obj
