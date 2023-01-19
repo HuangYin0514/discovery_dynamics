@@ -25,8 +25,9 @@ class HNN(LossNN):
     def J(self):
         # [ 0, I]
         # [-I, 0]
-        d = int(self.input_dim / 2)
-        res = np.eye(self.input_dim, k=d) - np.eye(self.input_dim, k=-d)
+        states_dim = self.obj * self.dim * 2
+        d = int(states_dim / 2)
+        res = np.eye(states_dim, k=d) - np.eye(states_dim, k=-d)
         return torch.tensor(res, dtype=self.Dtype, device=self.Device)
 
     def forward(self, t, x):
