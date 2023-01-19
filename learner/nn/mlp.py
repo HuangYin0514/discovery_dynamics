@@ -1,6 +1,5 @@
 from torch import nn
 
-from .base_module import StructureNN
 from .utils_nn import weights_init_xavier_normal
 
 

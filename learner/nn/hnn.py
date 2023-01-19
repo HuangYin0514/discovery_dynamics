@@ -3,7 +3,6 @@ import torch
 from torch import nn
 
 from .base_module import LossNN
-from .fnn import FNN
 from .mlp import MLP
 from ..integrator import ODESolver
 from ..utils import lazy_property, dfx

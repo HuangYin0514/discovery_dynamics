@@ -12,11 +12,10 @@
 @time: 2023/1/17 7:51 PM
 @desc:
 """
-import numpy as np
 import torch
 from torch import nn
 
-from .base_module import LossNN, StructureNN
+from .base_module import LossNN
 from .utils_nn import weights_init_xavier_normal
 from ..integrator import ODESolver
 from ..utils import dfx

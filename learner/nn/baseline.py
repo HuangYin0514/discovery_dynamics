@@ -1,5 +1,7 @@
+from torch import nn
+
 from .base_module import LossNN
-from .fnn import FNN
+from .mlp import MLP
 from ..integrator import ODESolver
 
 
@@ -12,16 +14,9 @@ class Baseline(LossNN):
 
         self.obj = obj
         self.dim = dim
-        self.input_dim = obj * dim * 2
 
-        self.layers = layers
-        self.width = width
-
-        self.baseline = self.__init_modules()
-
-    def __init_modules(self):
-        baseline = FNN(self.input_dim, self.input_dim, self.layers, self.width)
-        return baseline
+        self.baseline = MLP(input_dim=obj * dim * 2, hidden_dim=200, output_dim=obj * dim * 2, num_layers=1,
+                            act=nn.Tanh)
 
     def forward(self, t, x):
         out = self.baseline(x)

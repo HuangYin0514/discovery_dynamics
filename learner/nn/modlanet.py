@@ -5,7 +5,6 @@
 @time: 2023/1/18 4:41 PM
 @desc:
 """
-from .fnn import FNN
 from .mlp import MLP
 
 # encoding: utf-8
@@ -15,12 +14,10 @@ from .mlp import MLP
 @time: 2023/1/17 7:51 PM
 @desc:
 """
-import numpy as np
 import torch
 from torch import nn
 
-from .base_module import LossNN, StructureNN
-from .utils_nn import weights_init_xavier_normal
+from .base_module import LossNN
 from ..integrator import ODESolver
 from ..utils import dfx
 
