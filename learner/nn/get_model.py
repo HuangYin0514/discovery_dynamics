@@ -15,16 +15,13 @@ def choose_model(net_name, obj, dim):
     elif net_name == 'lnn':
         net = LNN(obj, dim)
     elif net_name == 'baseline':
-        input_dim = obj * dim * 2
         net = Baseline(obj, dim)
     elif net_name == 'mechanicsNN':
-        input_dim = obj * dim * 2
         # net = MechanicsNN(dof=input_dim, layers=1, width=200)
         net = MechanicsNN(obj, dim)
     elif net_name == 'modlanet':
-        input_dim = obj * dim * 2
         # net = MechanicsNN(dof=input_dim, layers=1, width=200)
-        net = ModLaNet(input_dim=input_dim, obj=obj, dim=dim)
+        net = ModLaNet(obj, dim)
     else:
         raise ValueError('Model \'{}\' is not implemented'.format(net_name))
 

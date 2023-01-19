@@ -58,67 +58,71 @@ class ModLaNet(LossNN):
     '''Hamiltonian neural networks.
     '''
 
-    def __init__(self, input_dim, obj ,dim ,layers=3, width=30):
+    def __init__(self,  obj, dim, layers=1, width=200):
         super(ModLaNet, self).__init__()
 
-        self.input_dim = input_dim
         self.obj = obj
         self.dim = dim
+        self.dof = obj * dim
+        self.input_dim = obj * dim*2
+
         self.layers = layers
         self.width = width
 
         self.baseline = self.__init_modules()
 
     def __init_modules(self):
-        baseline = MLP(self.dim, 1, self.width)
+        baseline = MLP(self.input_dim, 1, self.width)
         return baseline
 
     def forward(self, t, data):
 
         bs = data.size(0)
-        device = data.device
 
         x, v = torch.chunk(data, 2, dim=1)
-        # input = torch.cat([x, v], dim=1)
-        # L = self.baseline(input)
 
-        x_global = x
-        v_global = v
-
-        # Calculate the potential energy for i-th element
-
-        for i in range(self.obj):
-            U += self.co1 * self.mass(self.Potential1(x_global[:, i * self.dim: (i + 1) * self.dim]))
-
-        for i in range(self.obj):
-            for j in range(i):
-                x_ij = torch.cat(
-                    [x_global[:, i * self.dim: (i + 1) * self.dim], x_global[:, j * self.dim: (j + 1) * self.dim]], dim=1)
-                x_ji = torch.cat(
-                    [x_global[:, j * self.dim: (j + 1) * self.dim], x_global[:, i * self.dim: (i + 1) * self.dim]], dim=1)
-                U += self.co2 * (0.5 * self.mass(self.Potential2(x_ij)) + 0.5 * self.mass(self.Potential2(x_ji)))
-
-            # Calculate the kinetic energy for i-th element
-        for i in range(self.obj):
-            T += 0.5 * self.mass(v_global[:, (i) * self.dim: (i + 1) * self.dim].pow(2).sum(axis=1, keepdim=True))
-
-            # Construct Lagrangian
-        L += (T - U)
+        input = torch.cat([x, v], dim=1)
+        L = self.baseline(input)
+        #
+        # x_global = x
+        # v_global = v
+        #
+        # # Calculate the potential energy for i-th element
+        #
+        # for i in range(self.obj):
+        #     U += self.co1 * self.mass(self.Potential1(x_global[:, i * self.dim: (i + 1) * self.dim]))
+        #
+        # for i in range(self.obj):
+        #     for j in range(i):
+        #         x_ij = torch.cat(
+        #             [x_global[:, i * self.dim: (i + 1) * self.dim], x_global[:, j * self.dim: (j + 1) * self.dim]],
+        #             dim=1)
+        #         x_ji = torch.cat(
+        #             [x_global[:, j * self.dim: (j + 1) * self.dim], x_global[:, i * self.dim: (i + 1) * self.dim]],
+        #             dim=1)
+        #         U += self.co2 * (0.5 * self.mass(self.Potential2(x_ij)) + 0.5 * self.mass(self.Potential2(x_ji)))
+        #
+        #     # Calculate the kinetic energy for i-th element
+        # for i in range(self.obj):
+        #     T += 0.5 * self.mass(v_global[:, (i) * self.dim: (i + 1) * self.dim].pow(2).sum(axis=1, keepdim=True))
+        #
+        #     # Construct Lagrangian
+        # L += (T - U)
 
         dvL = dfx(L.sum(), v)  # (bs, v_dim)
         dxL = dfx(L.sum(), x)  # (bs, x_dim)
 
-        dvdvL = torch.zeros((bs, _dof, _dof), device=device)
-        dxdvL = torch.zeros((bs, _dof, _dof), device=device)
+        dvdvL = torch.zeros((bs, self.dof, self.dof), dtype=self.Dtype, device=self.Device)
+        dxdvL = torch.zeros((bs, self.dof, self.dof), dtype=self.Dtype, device=self.Device)
 
-        for i in range(_dof):
+        for i in range(self.dof):
             dvidvL = dfx(dvL[:, i].sum(), v)
             if dvidvL is None:
                 break
             else:
                 dvdvL[:, i, :] += dvidvL
 
-        for i in range(_dof):
+        for i in range(self.dof):
             dxidvL = dfx(dvL[:, i].sum(), x)
             if dxidvL is None:
                 break
