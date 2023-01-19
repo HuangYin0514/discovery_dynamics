@@ -11,18 +11,16 @@ from .modlanet import ModLaNet
 
 def choose_model(net_name, obj, dim):
     if net_name == 'hnn':
-        input_dim = obj * dim * 2
-        net = HNN(dim=input_dim)
+        net = HNN(obj, dim)
     elif net_name == 'lnn':
-        input_dim = obj * dim * 2
-        net = LNN(dim=input_dim)
+        net = LNN(obj, dim)
     elif net_name == 'baseline':
         input_dim = obj * dim * 2
-        net = Baseline(dim=input_dim)
+        net = Baseline(obj, dim)
     elif net_name == 'mechanicsNN':
         input_dim = obj * dim * 2
         # net = MechanicsNN(dof=input_dim, layers=1, width=200)
-        net = MechanicsNN(dof=input_dim)
+        net = MechanicsNN(obj, dim)
     elif net_name == 'modlanet':
         input_dim = obj * dim * 2
         # net = MechanicsNN(dof=input_dim, layers=1, width=200)

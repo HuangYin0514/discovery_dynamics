@@ -11,25 +11,27 @@ class HNN(LossNN):
     '''Hamiltonian neural networks.
     '''
 
-    def __init__(self, dim, layers=3, width=200):
+    def __init__(self, obj, dim, layers=3, width=200):
         super(HNN, self).__init__()
 
+        self.obj = obj
         self.dim = dim
+        self.input_dim = obj * dim * 2
         self.layers = layers
         self.width = width
 
         self.baseline = self.__init_modules()
 
     def __init_modules(self):
-        baseline = FNN(self.dim, 1, self.layers, self.width)
+        baseline = FNN(self.input_dim, 1, self.layers, self.width)
         return baseline
 
     @lazy_property
     def J(self):
         # [ 0, I]
         # [-I, 0]
-        d = int(self.dim / 2)
-        res = np.eye(self.dim, k=d) - np.eye(self.dim, k=-d)
+        d = int(self.input_dim / 2)
+        res = np.eye(self.input_dim, k=d) - np.eye(self.input_dim, k=-d)
         return torch.tensor(res, dtype=self.Dtype, device=self.Device)
 
     def forward(self, t, x):

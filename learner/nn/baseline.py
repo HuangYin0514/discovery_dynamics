@@ -7,17 +7,20 @@ class Baseline(LossNN):
     '''Hamiltonian neural networks.
     '''
 
-    def __init__(self, dim, layers=1, width=200):
+    def __init__(self, obj, dim, layers=1, width=200):
         super(Baseline, self).__init__()
 
+        self.obj = obj
         self.dim = dim
+        self.input_dim = obj * dim * 2
+
         self.layers = layers
         self.width = width
 
         self.baseline = self.__init_modules()
 
     def __init_modules(self):
-        baseline = FNN(self.dim, self.dim, self.layers, self.width)
+        baseline = FNN(self.input_dim, self.input_dim, self.layers, self.width)
         return baseline
 
     def forward(self, t, x):

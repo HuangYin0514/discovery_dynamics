@@ -51,24 +51,27 @@ class LNN(LossNN):
     '''Hamiltonian neural networks.
     '''
 
-    def __init__(self, dim, layers=3, width=128):
+    def __init__(self, obj, dim, layers=3, width=128):
         super(LNN, self).__init__()
 
+        self.obj = obj
         self.dim = dim
+        self.input_dim = obj * dim * 2
+
         self.layers = layers
         self.width = width
 
         self.baseline = self.__init_modules()
 
     def __init_modules(self):
-        baseline = MLP(self.dim, 1, self.width)
+        baseline = MLP(self.input_dim, 1, self.width)
         return baseline
 
     def forward(self, t, data):
 
         bs = data.size(0)
         device = data.device
-        _dof = int(self.dim / 2)
+        _dof = int(self.input_dim / 2)
 
         x, v = torch.chunk(data, 2, dim=1)
         input = torch.cat([x, v], dim=1)
@@ -78,8 +81,8 @@ class LNN(LossNN):
         dvL = dfx(L.sum(), v)  # (bs, v_dim)
         dxL = dfx(L.sum(), x)  # (bs, x_dim)
 
-        dvdvL = torch.zeros((bs, _dof, _dof), device=device)
-        dxdvL = torch.zeros((bs, _dof, _dof), device=device)
+        dvdvL = torch.zeros((bs, _dof, _dof), dtype=self.Dtype, device=self.Device)
+        dxdvL = torch.zeros((bs, _dof, _dof), dtype=self.Dtype, device=self.Device)
 
         for i in range(_dof):
             dvidvL = dfx(dvL[:, i].sum(), v)

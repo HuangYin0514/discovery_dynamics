@@ -53,11 +53,11 @@ class MechanicsNN(LossNN):
     Mechanics neural networks.
     """
 
-    def __init__(self, dof, layers=1, width=200):
+    def __init__(self, obj, dim, layers=1, width=200):
         super(MechanicsNN, self).__init__()
 
-        q_dim = int(dof // 2)
-        p_dim = int(dof // 2)
+        q_dim = int(obj * dim)
+        p_dim = int(obj * dim)
 
         self.mass_net = MassNet(q_dim=q_dim, layers=layers, width=width)
         self.dynamics_net = DynamicsNet(q_dim=q_dim, p_dim=p_dim, layers=layers, width=width)
