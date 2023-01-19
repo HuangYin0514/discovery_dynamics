@@ -21,7 +21,6 @@ class MassNet(nn.Module):
 
         self.cos_sin_net = CosSinNet()
         self.net = nn.Sequential(
-            # FNN(q_dim * 2, q_dim * q_dim, num_layers, hidden_dim),
             MLP(input_dim=q_dim * 2, hidden_dim=hidden_dim, output_dim=q_dim * q_dim, num_layers=num_layers,
                 act=nn.Tanh),
             ReshapeNet(-1, q_dim, q_dim)
