@@ -2,6 +2,13 @@
 """
 @author: Yin Huang
 @contact: hy1071324110@gmail.com
+@time: 2023/1/18 4:41 PM
+@desc:
+"""
+# encoding: utf-8
+"""
+@author: Yin Huang
+@contact: hy1071324110@gmail.com
 @time: 2023/1/17 7:51 PM
 @desc:
 """
@@ -51,12 +58,13 @@ class LNN(LossNN):
     '''Hamiltonian neural networks.
     '''
 
-    def __init__(self, obj, dim, layers=3, width=128):
+    def __init__(self,  obj, dim, layers=1, width=200):
         super(LNN, self).__init__()
 
         self.obj = obj
         self.dim = dim
-        self.input_dim = obj * dim * 2
+        self.dof = obj * dim
+        self.input_dim = obj * dim*2
 
         self.layers = layers
         self.width = width
@@ -70,28 +78,26 @@ class LNN(LossNN):
     def forward(self, t, data):
 
         bs = data.size(0)
-        device = data.device
-        _dof = int(self.input_dim / 2)
 
         x, v = torch.chunk(data, 2, dim=1)
-        input = torch.cat([x, v], dim=1)
 
+        input = torch.cat([x, v], dim=1)
         L = self.baseline(input)
 
         dvL = dfx(L.sum(), v)  # (bs, v_dim)
         dxL = dfx(L.sum(), x)  # (bs, x_dim)
 
-        dvdvL = torch.zeros((bs, _dof, _dof), dtype=self.Dtype, device=self.Device)
-        dxdvL = torch.zeros((bs, _dof, _dof), dtype=self.Dtype, device=self.Device)
+        dvdvL = torch.zeros((bs, self.dof, self.dof), dtype=self.Dtype, device=self.Device)
+        dxdvL = torch.zeros((bs, self.dof, self.dof), dtype=self.Dtype, device=self.Device)
 
-        for i in range(_dof):
+        for i in range(self.dof):
             dvidvL = dfx(dvL[:, i].sum(), v)
             if dvidvL is None:
                 break
             else:
                 dvdvL[:, i, :] += dvidvL
 
-        for i in range(_dof):
+        for i in range(self.dof):
             dxidvL = dfx(dvL[:, i].sum(), x)
             if dxidvL is None:
                 break
