@@ -5,6 +5,9 @@
 @time: 2023/1/18 4:41 PM
 @desc:
 """
+from .fnn import FNN
+from .mlp import MLP
+
 # encoding: utf-8
 """
 @author: Yin Huang
@@ -22,34 +25,6 @@ from ..integrator import ODESolver
 from ..utils import dfx
 
 
-class Lagrangian(nn.Module):
-    '''Fully connected neural networks.
-    '''
-
-    def __init__(self, ind, outd, width=200):
-        super(Lagrangian, self).__init__()
-        self.ind = ind
-        self.outd = outd
-        self.width = width
-
-        self.mlp = nn.Sequential(
-            nn.Linear(ind, width),
-            nn.Tanh(),
-            nn.Linear(width, width),
-            nn.Tanh(),
-            nn.Linear(width, outd)
-        )
-
-        self.__initialize()
-
-    def forward(self, x):
-        x = self.mlp(x)
-        return x
-
-    def __initialize(self):
-        self.mlp.apply(weights_init_xavier_normal)
-
-
 class ModLaNet(LossNN):
     '''Hamiltonian neural networks.
     '''
@@ -65,7 +40,7 @@ class ModLaNet(LossNN):
         self.baseline = self.__init_modules()
 
     def __init_modules(self):
-        baseline = Lagrangian(self.input_dim, 1)
+        baseline = MLP(input_dim=self.input_dim, hidden_dim=200, output_dim=1, num_layers=1, act=nn.Tanh)
         return baseline
 
     def forward(self, t, data):

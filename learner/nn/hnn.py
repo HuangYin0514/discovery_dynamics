@@ -1,8 +1,10 @@
 import numpy as np
 import torch
+from torch import nn
 
 from .base_module import LossNN
 from .fnn import FNN
+from .mlp import MLP
 from ..integrator import ODESolver
 from ..utils import lazy_property, dfx
 
@@ -11,20 +13,13 @@ class HNN(LossNN):
     '''Hamiltonian neural networks.
     '''
 
-    def __init__(self, obj, dim, layers=3, width=200):
+    def __init__(self, obj, dim):
         super(HNN, self).__init__()
 
         self.obj = obj
         self.dim = dim
-        self.input_dim = obj * dim * 2
-        self.layers = layers
-        self.width = width
 
-        self.baseline = self.__init_modules()
-
-    def __init_modules(self):
-        baseline = FNN(self.input_dim, 1, self.layers, self.width)
-        return baseline
+        self.baseline = MLP(input_dim=obj * dim * 2, hidden_dim=200, output_dim=1, num_layers=1, act=nn.Tanh)
 
     @lazy_property
     def J(self):
@@ -37,8 +32,6 @@ class HNN(LossNN):
     def forward(self, t, x):
         h = self.baseline(x)
         gradH = dfx(h, x)
-        # print(self.J.device)
-        # print(gradH.device)
         dy = (self.J @ gradH.T).T  # dy shape is (bs, vector)
         return dy
 
