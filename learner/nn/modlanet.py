@@ -18,27 +18,24 @@ import torch
 from torch import nn
 
 from .base_module import LossNN
+from .utils_nn import weights_init_xavier_normal
 from ..integrator import ODESolver
 from ..utils import dfx
 
 
-class ModLaNet(LossNN):
+class LNN(LossNN):
     '''Hamiltonian neural networks.
     '''
 
     def __init__(self, obj, dim):
-        super(ModLaNet, self).__init__()
+        super(LNN, self).__init__()
 
         self.obj = obj
         self.dim = dim
         self.dof = obj * dim
-        self.input_dim = obj * dim * 2
 
-        self.baseline = self.__init_modules()
-
-    def __init_modules(self):
-        baseline = MLP(input_dim=self.input_dim, hidden_dim=200, output_dim=1, num_layers=1, act=nn.Tanh)
-        return baseline
+        self.baseline = MLP(input_dim=obj * dim * 2, hidden_dim=200, output_dim=1, num_layers=1,
+                            act=nn.Tanh)
 
     def forward(self, t, data):
 
