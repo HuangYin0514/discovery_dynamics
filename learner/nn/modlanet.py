@@ -32,26 +32,26 @@ class MLP(nn.Module):
         self.outd = outd
         self.width = width
 
-        self.lagrangian = nn.Sequential(
+        self.mlp = nn.Sequential(
             nn.Linear(ind, width),
-            nn.Softplus(),
+            nn.Tanh(),
             nn.Linear(width, width),
-            nn.Softplus(),
+            nn.Tanh(),
             nn.Linear(width, width),
-            nn.Softplus(),
+            nn.Tanh(),
             nn.Linear(width, width),
-            nn.Softplus(),
+            nn.Tanh(),
             nn.Linear(width, outd)
         )
 
         self.__initialize()
 
     def forward(self, x):
-        x = self.lagrangian(x)
+        x = self.mlp(x)
         return x
 
     def __initialize(self):
-        self.lagrangian.apply(weights_init_xavier_normal)
+        self.mlp.apply(weights_init_xavier_normal)
 
 
 class ModLaNet(LossNN):
