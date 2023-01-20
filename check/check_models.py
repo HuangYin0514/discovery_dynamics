@@ -20,7 +20,7 @@ if __name__ == '__main__':
         model = ln.nn.LNN(4, layers=3, width=200)
 
     '''
-    model = ln.nn.ModLaNet(4, layers=3, width=200)
+    model = ln.nn.ModLaNet(2, 1)
     model.device = "cpu"
     model.dtype = "float"
     print(model)

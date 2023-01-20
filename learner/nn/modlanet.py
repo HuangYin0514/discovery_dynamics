@@ -6,6 +6,7 @@
 @desc:
 """
 from .mlp import MLP
+from .utils_nn import identity
 
 # encoding: utf-8
 """
@@ -22,6 +23,44 @@ from ..integrator import ODESolver
 from ..utils import dfx
 
 
+class GlobalPositionTransform(nn.Module):
+    """Doing coordinate transformation using a MLP"""
+
+    def __init__(self, input_dim, hidden_dim, output_dim, num_layers=1, act=nn.Tanh):
+        super(GlobalPositionTransform, self).__init__()
+        self.mlp = MLP(input_dim=input_dim, hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers,
+                       act=act)
+
+    def forward(self, x, x_0):
+        y = self.mlp(x) + x_0
+        return y
+
+
+class GlobalVelocityTransform(nn.Module):
+    """Doing coordinate transformation using a MLP"""
+
+    def __init__(self, input_dim, hidden_dim, output_dim, num_layers=1, act=nn.Tanh):
+        super(GlobalVelocityTransform, self).__init__()
+        self.mlp = MLP(input_dim=input_dim, hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers,
+                       act=act)
+
+    def forward(self, x, v):
+        y = self.mlp(x) * v + v
+        return y
+
+
+class PotentialEnergyCell(nn.Module):
+    def __init__(self, input_dim, hidden_dim, output_dim, num_layers=1, act=nn.Tanh):
+        super(PotentialEnergyCell, self).__init__()
+
+        self.mlp = MLP(input_dim=input_dim, hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers,
+                       act=act)
+
+    def forward(self, x):
+        y = self.mlp(x)
+        return y
+
+
 class ModLaNet(LossNN):
     '''Hamiltonian neural networks.
     '''
@@ -33,17 +72,80 @@ class ModLaNet(LossNN):
         self.dim = dim
         self.dof = obj * dim
 
-        self.baseline = MLP(input_dim=obj * dim * 2, hidden_dim=200, output_dim=1, num_layers=1,
-                            act=nn.Tanh)
+        self.global_dim = 2
+        self.global_dof = obj * self.global_dim
+
+        # self.baseline = MLP(input_dim=obj * dim * 2, hidden_dim=200, output_dim=1, num_layers=1,
+        #                     act=nn.Tanh)
+        self.global4x = GlobalPositionTransform(input_dim=self.dim,
+                                                hidden_dim=16,
+                                                output_dim=self.global_dim,
+                                                num_layers=1, act=nn.Tanh)
+        self.global4v = GlobalVelocityTransform(input_dim=self.dim,
+                                                hidden_dim=16,
+                                                output_dim=self.global_dim,
+                                                num_layers=1, act=nn.Tanh)
+        self.Potential1 = PotentialEnergyCell(input_dim=self.global_dim,
+                                              hidden_dim=50,
+                                              output_dim=1,
+                                              num_layers=1, act=identity)
+        self.Potential2 = PotentialEnergyCell(input_dim=self.global_dim * 2,
+                                              hidden_dim=50,
+                                              output_dim=1,
+                                              num_layers=1, act=identity)
+
+        self.co1 = torch.nn.Parameter(torch.ones(1, dtype=self.Dtype, device=self.Device) * 0.5)
+        self.co2 = torch.nn.Parameter(torch.ones(1, dtype=self.Dtype, device=self.Device) * 0.5)
+
+        self.mass = torch.nn.Linear(1, 1, bias=False)
+        torch.nn.init.ones_(self.mass.weight)
+
+        self.transform = 'local'
 
     def forward(self, t, data):
 
         bs = data.size(0)
-
         x, v = torch.chunk(data, 2, dim=1)
 
-        input = torch.cat([x, v], dim=1)
-        L = self.baseline(input)
+        L, T, U = 0., 0., 0.
+
+        x_global = torch.zeros((bs, self.global_dof), dtype=self.Dtype, device=self.Device)
+        v_global = torch.zeros((bs, self.global_dof), dtype=self.Dtype, device=self.Device)
+        if self.transform == 'local':
+            for i in range(self.obj):
+                x_origin = x[:, (i) * self.dim: (i + 1) * self.dim]
+                v_origin = v[:, (i) * self.dim: (i + 1) * self.dim]
+
+                x_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = self.global4x(x_origin, x_origin)
+                v_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = self.global4v(x_origin, v_origin)
+
+        else:
+            x_global = x
+            v_global = v
+
+        # Calculate the potential energy for i-th element
+        for i in range(self.obj):
+            U += self.co1 * self.mass(self.Potential1(x_global[:, i * self.global_dim: (i + 1) * self.global_dim]))
+
+        for i in range(self.obj):
+            for j in range(i):
+                x_ij = torch.cat(
+                    [x_global[:, i * self.global_dim: (i + 1) * self.global_dim],
+                     x_global[:, j * self.global_dim: (j + 1) * self.global_dim]],
+                    dim=1)
+                x_ji = torch.cat(
+                    [x_global[:, j * self.global_dim: (j + 1) * self.global_dim],
+                     x_global[:, i * self.global_dim: (i + 1) * self.global_dim]],
+                    dim=1)
+                U += self.co2 * (0.5 * self.mass(self.Potential2(x_ij)) + 0.5 * self.mass(self.Potential2(x_ji)))
+
+        # Calculate the kinetic energy for i-th element
+        for i in range(self.obj):
+            T += 0.5 * self.mass(
+                v_global[:, (i) * self.global_dim: (i + 1) * self.global_dim].pow(2).sum(axis=1, keepdim=True))
+
+        # Construct Lagrangian
+        L += (T - U)
 
         dvL = dfx(L.sum(), v)  # (bs, v_dim)
         dxL = dfx(L.sum(), x)  # (bs, x_dim)

@@ -6,8 +6,7 @@
 @desc:
 """
 import torch
-from torch import nn
-
+from torch import nn, Tensor
 
 
 def weights_init_xavier_normal(m):
@@ -43,3 +42,11 @@ class CosSinNet(nn.Module):
         cos_ang_q, sin_ang_q = torch.cos(x), torch.sin(x)
         q = torch.cat([cos_ang_q, sin_ang_q], dim=-1)
         return q
+
+
+class identity(nn.Module):
+    def __init__(self):
+        super(identity, self).__init__()
+
+    def forward(self, input: Tensor) -> Tensor:
+        return input
