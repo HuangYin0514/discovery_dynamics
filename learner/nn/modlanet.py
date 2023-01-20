@@ -120,6 +120,7 @@ class ModLaNet(LossNN):
                 v_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = self.global4v(x_origin, v_origin)
 
         else:
+            # error context for gradient
             x_global = x
             v_global = v
 
