@@ -32,7 +32,8 @@ class GlobalPositionTransform(nn.Module):
                        act=act)
 
     def forward(self, x, x_0):
-        y = self.mlp(x) + x_0
+        # y = self.mlp(x) + x_0
+        y = self.mlp(x)
         return y
 
 
@@ -45,7 +46,8 @@ class GlobalVelocityTransform(nn.Module):
                        act=act)
 
     def forward(self, x, v):
-        y = self.mlp(x) * v + v
+        # y = self.mlp(x) * v + v
+        y = self.mlp(x) * v
         return y
 
 
