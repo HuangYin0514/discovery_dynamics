@@ -39,10 +39,10 @@ parser.add_argument('--net_url', default='', type=str, help='Download net from I
 parser.add_argument('--load_net_path', default='', type=str, help='The path to load the pretrained network')
 
 # For training settings
-parser.add_argument('--lr', default=1e-2, type=float, help='learning rate')
+parser.add_argument('--lr', default=0.9, type=float, help='learning rate')
 parser.add_argument('--criterion', default='L2_loss', type=str, help='Select criterion to learn')
 parser.add_argument('--optimizer', default='adam', type=str, help='Select optimizer to learn')
-parser.add_argument('--scheduler', default='MultiStepLR', type=str, help='Select scheduler to learn')
+parser.add_argument('--scheduler', default='LambdaLR', type=str, help='Select scheduler to learn')
 parser.add_argument('--iterations', default=20, type=int, help='end of training epoch')
 parser.add_argument('--print_every', default=10, type=int, help='number of gradient steps between prints')
 
