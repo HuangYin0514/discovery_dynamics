@@ -113,18 +113,13 @@ class ModLaNet(LossNN):
 
         x_global = torch.zeros((bs, self.global_dof), dtype=self.Dtype, device=self.Device)
         v_global = torch.zeros((bs, self.global_dof), dtype=self.Dtype, device=self.Device)
-        if self.transform == 'local':
-            for i in range(self.obj):
-                x_origin = x[:, (i) * self.dim: (i + 1) * self.dim]
-                v_origin = v[:, (i) * self.dim: (i + 1) * self.dim]
 
-                x_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = self.global4x(x_origin, x_origin)
-                v_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = self.global4v(x_origin, v_origin)
+        for i in range(self.obj):
+            x_origin = x[:, (i) * self.dim: (i + 1) * self.dim]
+            v_origin = v[:, (i) * self.dim: (i + 1) * self.dim]
 
-        else:
-            # error context for gradient
-            x_global = x
-            v_global = v
+            x_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = self.global4x(x_origin, x_origin)
+            v_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = self.global4v(x_origin, v_origin)
 
         # Calculate the potential energy for i-th element
         for i in range(self.obj):
@@ -158,17 +153,11 @@ class ModLaNet(LossNN):
 
         for i in range(self.dof):
             dvidvL = dfx(dvL[:, i].sum(), v)
-            if dvidvL is None:
-                break
-            else:
-                dvdvL[:, i, :] += dvidvL
+            dvdvL[:, i, :] += dvidvL
 
         for i in range(self.dof):
             dxidvL = dfx(dvL[:, i].sum(), x)
-            if dxidvL is None:
-                break
-            else:
-                dxdvL[:, i, :] += dxidvL
+            dxdvL[:, i, :] += dxidvL
 
         dvdvL_inv = torch.linalg.pinv(dvdvL)
 
