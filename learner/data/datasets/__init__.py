@@ -9,3 +9,5 @@
 from .get_dataset import get_dataset
 from .pend_2 import Pendulum2
 from .pend_2_L import Pendulum2_L
+from .body3 import Body3
+from .body3_L import Body3_L

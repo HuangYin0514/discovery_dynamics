@@ -86,9 +86,7 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
         return torch.cat([w1, w2, g1, g2], dim=0).float()
 
     def derivative_lagrangian(self, coords):
-
         coords = coords.clone().detach().requires_grad_(True)
-
         x, v = torch.chunk(coords, 2, dim=0)
 
         L = self.energy_fn(torch.cat([x, v], dim=0), L_constant=True)
@@ -111,16 +109,6 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
         a = dvdvL_inv @ (dxL - dxdvL @ v)
         return torch.cat([v, a], dim=0).detach().clone()
 
-        # 暂未验证
-        # H = hessian(self.get_lagrangian, state)
-        # J = jacobian(self.get_lagrangian, state)
-        #
-        # A = J[:2]
-        # B = H[2:, 2:]
-        # C = H[2:, :2]
-        #
-        # q_tt = torch.linalg.pinv(B) @ (A - C @ state[2:])
-        # return torch.cat((state[2:], q_tt))
 
     def kinetic(self, coords):
         """

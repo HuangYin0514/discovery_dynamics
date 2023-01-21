@@ -23,7 +23,7 @@ import learner as ln
 
 parser = argparse.ArgumentParser(description=None)
 # For general settings
-parser.add_argument('--taskname', default='test_poor', type=str, help='Task name')
+parser.add_argument('--taskname', default='pend_2_task', type=str, help='Task name')
 parser.add_argument('--seed', default=0, type=int, help='random seed')
 
 # For task

@@ -13,17 +13,17 @@ import learner as ln
 
 parser = argparse.ArgumentParser(description=None)
 # For general settings
-parser.add_argument('--taskname', default='test_poor', type=str, help='Task name')
+parser.add_argument('--taskname', default='pend_2_task', type=str, help='Task name')
 parser.add_argument('--seed', default=0, type=int, help='random seed')
 
 # For task
-parser.add_argument('--obj', default=2, type=int, help='number of objects')
-parser.add_argument('--dim', default=1, type=int, help='coordinate dimension')
+parser.add_argument('--obj', default=3, type=int, help='number of objects')
+parser.add_argument('--dim', default=2, type=int, help='coordinate dimension')
 
 # data
-parser.add_argument('--data_name', default='Pendulum2_L', type=str,
+parser.add_argument('--data_name', default='Body3_L', type=str,
                     help='choose dataset '
-                         '[Pendulum2, Pendulum2_L, Body3 ] '
+                         '[Pendulum2 Pendulum2_L Body3 Body3_L ] '
                     )
 parser.add_argument('--train_num', default=2, type=int, help='the number of train sampling trajectories')
 parser.add_argument('--test_num', default=1, type=int, help='the number of test sampling trajectories')

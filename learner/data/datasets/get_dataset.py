@@ -12,6 +12,7 @@ import numpy as np
 
 from learner.utils import download_file_from_google_drive
 from .body3 import Body3
+from .body3_L import Body3_L
 from .pend_2 import Pendulum2
 from .pend_2_L import Pendulum2_L
 
@@ -30,6 +31,11 @@ def choose_dataset(data_name, obj, dim, train_num, test_num):
                             dim=dim)
     elif data_name == 'Body3':
         dataset = Body3(train_num=train_num,
+                        test_num=test_num,
+                        obj=obj,
+                        dim=dim)
+    elif data_name == 'Body3_L':
+        dataset = Body3_L(train_num=train_num,
                         test_num=test_num,
                         obj=obj,
                         dim=dim)
