@@ -13,6 +13,7 @@ __factory = {
     'Pendulum2': pend_trajectory,
     'Pendulum2_L': pend_trajectory,
     'Body3': body3_trajectory,
+    'Body3_L': body3_trajectory,
 }
 
 
