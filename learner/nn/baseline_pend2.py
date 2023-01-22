@@ -23,12 +23,11 @@ class Baseline_pend2(LossNN):
         # TODO pendulum
         data = x.clone().detach()
         data[..., :int(data.shape[-1] // 2)] %= 2 * torch.pi  # pendulum
-        data = data.clone().detach().requires_grad_(True)
 
         out = self.baseline(data)
         return out
 
     def integrate(self, X, t):
-        out = ODESolver(self, X, t, method='dopri5').permute(1, 0, 2)  # (T, D)
+        out = ODESolver(self, X, t, method='rk4').permute(1, 0, 2)  # (T, D)
         out[..., :int(out.shape[-1] // 2)] %= 2 * torch.pi  # TODO pendulum
         return out
