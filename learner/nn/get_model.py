@@ -3,6 +3,7 @@ import os.path as osp
 
 from learner.utils import timing, count_parameters, download_file_from_google_drive, load_network
 from .baseline import Baseline
+from .baseline_pend2 import Baseline_pend2
 from .hnn import HNN
 from .lnn import LNN
 from .mechanicsNN import MechanicsNN
@@ -16,11 +17,11 @@ def choose_model(net_name, obj, dim):
         net = LNN(obj, dim)
     elif net_name == 'baseline':
         net = Baseline(obj, dim)
+    elif net_name == 'baseline_pend2':
+        net = Baseline_pend2(obj, dim)
     elif net_name == 'mechanicsNN':
-        # net = MechanicsNN(dof=input_dim, layers=1, width=200)
         net = MechanicsNN(obj, dim)
     elif net_name == 'modlanet':
-        # net = MechanicsNN(dof=input_dim, layers=1, width=200)
         net = ModLaNet(obj, dim)
     else:
         raise ValueError('Model \'{}\' is not implemented'.format(net_name))
