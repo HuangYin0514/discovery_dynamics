@@ -33,7 +33,7 @@ class GlobalPositionTransform(nn.Module):
 
     def forward(self, x, x_0):
         # y = self.mlp(x) + x_0
-        y = self.mlp(x)
+        y = self.mlp(x) + x_0
         return y
 
 
@@ -45,9 +45,9 @@ class GlobalVelocityTransform(nn.Module):
         self.mlp = MLP(input_dim=input_dim, hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers,
                        act=act)
 
-    def forward(self, x, v):
-        # y = self.mlp(x) * v + v
-        y = self.mlp(x) * v
+    def forward(self, x, v, v0):
+        y = self.mlp(x) * v + v0
+        # y = self.mlp(x) * v
         return y
 
 
@@ -103,6 +103,7 @@ class ModLaNet(LossNN):
         self.transform = 'local'
 
     def forward(self, t, data):
+        # TODO pendulum
         data = data.clone().detach()
         data[..., :int(data.shape[-1] // 2)] %= 2 * torch.pi  # pendulum
         data = data.clone().detach().requires_grad_(True)
@@ -115,15 +116,30 @@ class ModLaNet(LossNN):
         x_global = torch.zeros((bs, self.global_dof), dtype=self.Dtype, device=self.Device)
         v_global = torch.zeros((bs, self.global_dof), dtype=self.Dtype, device=self.Device)
 
+        # TODO pendulum
+        x_origin = torch.zeros((bs, self.global_dof), dtype=self.Dtype, device=self.Device)
+        v_origin = torch.zeros((bs, self.global_dof), dtype=self.Dtype, device=self.Device)
+
         for i in range(self.obj):
+            for j in range(i):
+                x_origin += x_global[:, (j) * self.dim: (j + 1) * self.dim]
+                v_origin += v_global[:, (j) * self.dim: (j + 1) * self.dim]
+
+            x_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = self.global4x(
+                x[:, (i) * self.dim: (i + 1) * self.dim],
+                x_origin[:, (i) * self.dim: (i + 1) * self.dim])
+            v_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = self.global4v(
+                x[:, (i) * self.dim: (i + 1) * self.dim],
+                v[:, (i) * self.dim: (i + 1) * self.dim],
+                x_origin[:, (i) * self.dim: (i + 1) * self.dim])
+
+
+        """for i in range(self.obj):
             x_origin = x[:, (i) * self.dim: (i + 1) * self.dim]
             v_origin = v[:, (i) * self.dim: (i + 1) * self.dim]
 
-            x_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = self.global4x(x_origin, x_origin)
-            v_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = self.global4v(x_origin, v_origin)
-
-            # x_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = x_origin
-            # v_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = x_origin * 0 + v_origin
+            x_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = x_origin
+            v_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = x_origin * 0 + v_origin"""
 
         # Calculate the potential energy for i-th element
         for i in range(self.obj):
@@ -171,4 +187,5 @@ class ModLaNet(LossNN):
 
     def integrate(self, X, t):
         out = ODESolver(self, X, t, method='rk4').permute(1, 0, 2)  # (T, D)
+        out[..., :int(out.shape[-1] // 2)] %= 2 * torch.pi  # TODO pendulum
         return out
