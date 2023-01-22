@@ -12,6 +12,7 @@ def train_collate_fn(batch):
     x0, t, h, X, y, E = zip(*batch)
 
     X = torch.stack(X, dim=0).float()
+    X[..., :int(X.shape[-1] // 2)] %= 2 * torch.pi  # TODO pendulum
     t = torch.stack(t, dim=0).float()
     y = torch.stack(y, dim=0).float()
 
@@ -31,6 +32,7 @@ def val_collate_fn(batch):
     x0, t, h, X, y, E = zip(*batch)
 
     X = torch.stack(X, dim=0).float()
+    X[..., :int(X.shape[-1] // 2)] %= 2 * torch.pi  # TODO pendulum
     t = torch.stack(t, dim=0).float()
     y = torch.stack(y, dim=0).float()
 
