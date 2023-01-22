@@ -126,12 +126,12 @@ class AnalyzeBrain:
         self.__init_net()
 
     def __init_data(self):
-        dataset, train_loader, test_loader = self.data
+        dataset, train_loader, val_loader, test_loader = self.data
 
         self.data_name = dataset.__class__.__name__
         # dataloader
-        self.train_loader = train_loader
         self.test_loader = test_loader
+
         # energy function
         self.energy_fn = dataset.energy_fn
         self.kinetic_fn = dataset.kinetic

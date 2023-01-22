@@ -107,22 +107,19 @@ class Brain:
             #  test ---------------------------------------------------------------
             if i % self.print_every == 0 or i == self.iterations:
 
-                for data in self.test_loader:
+                for data in self.val_loader:
                     inputs, labels = data
                     X, t = inputs
                     X, t = X.to(self.device), t.to(self.device)
                     labels = labels.to(self.device)
 
-                    pred = self.net.integrate(X, t)
-                    err = accuracy_fn(pred, labels, self.energy_fn)
-                    mse_err, rel_err, eng_err = err
+                    pred = self.net(t, X)  # self.net.integrate(X, t)
+                    test_loss = self.__criterion(pred, labels)
 
-                loss_history.append([i, loss.item(), mse_err.item(), rel_err.item(), eng_err.item()])
+                loss_history.append([i, loss.item(), test_loss.item(), self.__optimizer.param_groups[0]['lr']])
                 postfix = {
                     'Train_loss': '{:.3e}'.format(loss.item()),
-                    'mse_err': '{:.3e}'.format(mse_err.item()),
-                    'rel_err': '{:.3e}'.format(rel_err.item()),
-                    'eng_err': '{:.3e}'.format(eng_err.item()),
+                    'Test_loss': '{:.3e}'.format(test_loss.item()),
                     'lr': self.__optimizer.param_groups[0]['lr']
                 }
                 pbar.set_postfix(postfix)
@@ -149,9 +146,8 @@ class Brain:
 
             iteration = int(self.loss_history[best_loss_index, 0])
             loss_train = self.loss_history[best_loss_index, 1]
-            mse_err = self.loss_history[best_loss_index, 2]
-            rel_err = self.loss_history[best_loss_index, 3]
-            eng_err = self.loss_history[best_loss_index, 4]
+            loss_test = self.loss_history[best_loss_index, 2]
+
 
             path = './outputs/' + self.taskname
             if not os.path.isdir('./outputs/' + self.taskname): os.makedirs('./outputs/' + self.taskname)
@@ -167,11 +163,7 @@ class Brain:
                         + '\n'
                         + 'Train loss: {:.3e}'.format(loss_train)
                         + '\n'
-                        + 'mse_err: {:.3e}'.format(mse_err)
-                        + '\n'
-                        + 'rel_err: {:.3e}'.format(rel_err)
-                        + '\n'
-                        + 'eng_err: {:.3e}'.format(eng_err)
+                        + 'Train loss: {:.3e}'.format(loss_test)
                         )
             f = open(path + '/output.txt', mode='a')
             f.write(contents)
@@ -211,10 +203,8 @@ class Brain:
             ax1.legend(loc=1)
             ax1.set_ylabel('train loss')
             ax2 = ax1.twinx()  # this is the important function
-            # ax2.semilogy(self.loss_history[:, 0], self.loss_history[:, 2], 'r', label='mse_err')
-            ax2.semilogy(self.loss_history[:, 0], self.loss_history[:, 3], 'g', label='rel_err')
-            ax2.semilogy(self.loss_history[:, 0], self.loss_history[:, 4], 'y', label='eng_err')
-            ax2.set_ylabel('ERROR')
+            ax2.semilogy(self.loss_history[:, 0], self.loss_history[:, 2], 'g', label='test loss')
+            ax2.set_ylabel('test loss')
             ax2.set_xlabel('EPOCHS')
             ax2.legend(loc=2)
             plt.tight_layout()
@@ -241,10 +231,10 @@ class Brain:
         self.__init_criterion()
 
     def __init_data(self):
-        dataset, train_loader, test_loader = self.data
+        dataset, train_loader, val_loader, test_loader = self.data
         # dataloader
         self.train_loader = train_loader
-        self.test_loader = test_loader
+        self.val_loader = val_loader
         # energy function
         self.energy_fn = dataset.energy_fn
 

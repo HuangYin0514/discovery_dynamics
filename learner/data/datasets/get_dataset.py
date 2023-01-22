@@ -60,12 +60,14 @@ def get_dataset(data_name, taskname, obj, dim, download_data=False, **kwargs):
 
     if os.path.exists(filename):
         print('=> Start loading dataset from {} .'.format(filename))
+        # dataset.Init_data()
         dataset = np.load(filename, allow_pickle=True).item()
     else:
         print('=> Start generating dataset.')
         dataset.Init_data()
         os.makedirs(data_path) if not os.path.exists(data_path) else None
         np.save(filename, dataset)
+
 
     print("=> {} loaded".format(data_name))
     dataset.print_dataset_statistics(dataset.train, dataset.test)
