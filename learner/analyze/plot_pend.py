@@ -32,7 +32,7 @@ def pend_trajectory(ax, true_q, pred_q, title_label, *args, **kwargs):
     truth_pos = polar2xy(true_q)
     net_pos = polar2xy(pred_q)
 
-    time = min(400, len(truth_pos) - 1)
+    time = min(100, len(truth_pos) - 1)
 
     ax.set_xlabel('$x$ ($m$)')
     ax.set_ylabel('$y$ ($m$)')
