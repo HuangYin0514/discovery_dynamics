@@ -22,7 +22,6 @@ def rel_err_fn(x, y):
     return loggeomean_rel_err
 
 
-# TODO
 def energy_err_fn(x, y, energy_function):
     err_list = []
     for x_, y_ in zip(x, y):
