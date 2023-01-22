@@ -77,8 +77,6 @@ class ModLaNet(LossNN):
         self.global_dim = 2
         self.global_dof = obj * self.global_dim
 
-        # self.baseline = MLP(input_dim=obj * dim * 2, hidden_dim=200, output_dim=1, num_layers=1,
-        #                     act=nn.Tanh)
         self.global4x = GlobalPositionTransform(input_dim=self.dim,
                                                 hidden_dim=16,
                                                 output_dim=self.global_dim,
@@ -118,8 +116,11 @@ class ModLaNet(LossNN):
             x_origin = x[:, (i) * self.dim: (i + 1) * self.dim]
             v_origin = v[:, (i) * self.dim: (i + 1) * self.dim]
 
-            x_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = self.global4x(x_origin, x_origin)
-            v_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = self.global4v(x_origin, v_origin)
+            # x_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = self.global4x(x_origin, x_origin)
+            # v_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = self.global4v(x_origin, v_origin)
+
+            x_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = x_origin
+            v_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = x_origin * 0 + v_origin
 
         # Calculate the potential energy for i-th element
         for i in range(self.obj):
