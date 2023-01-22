@@ -131,7 +131,7 @@ class ModLaNet(LossNN):
             v_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = self.global4v(
                 x[:, (i) * self.dim: (i + 1) * self.dim],
                 v[:, (i) * self.dim: (i + 1) * self.dim],
-                x_origin[:, (i) * self.dim: (i + 1) * self.dim])
+                v_origin[:, (i) * self.dim: (i + 1) * self.dim])
 
 
         """for i in range(self.obj):
