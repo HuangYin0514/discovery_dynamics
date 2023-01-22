@@ -103,6 +103,9 @@ class ModLaNet(LossNN):
         self.transform = 'local'
 
     def forward(self, t, data):
+        data = data.clone().detach()
+        data[..., :int(data.shape[-1] // 2)] %= 2 * torch.pi  # pendulum
+        data = data.clone().detach().requires_grad_(True)
 
         bs = data.size(0)
         x, v = torch.chunk(data, 2, dim=1)
@@ -116,11 +119,11 @@ class ModLaNet(LossNN):
             x_origin = x[:, (i) * self.dim: (i + 1) * self.dim]
             v_origin = v[:, (i) * self.dim: (i + 1) * self.dim]
 
-            # x_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = self.global4x(x_origin, x_origin)
-            # v_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = self.global4v(x_origin, v_origin)
+            x_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = self.global4x(x_origin, x_origin)
+            v_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = self.global4v(x_origin, v_origin)
 
-            x_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = x_origin
-            v_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = x_origin * 0 + v_origin
+            # x_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = x_origin
+            # v_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = x_origin * 0 + v_origin
 
         # Calculate the potential energy for i-th element
         for i in range(self.obj):
