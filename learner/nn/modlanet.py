@@ -100,7 +100,6 @@ class ModLaNet(LossNN):
         self.mass = torch.nn.Linear(1, 1, bias=False)
         torch.nn.init.ones_(self.mass.weight)
 
-        self.transform = 'local'
 
     def forward(self, t, data):
         # TODO pendulum
@@ -122,8 +121,8 @@ class ModLaNet(LossNN):
 
         for i in range(self.obj):
             for j in range(i):
-                x_origin += x_global[:, (j) * self.dim: (j + 1) * self.dim]
-                v_origin += v_global[:, (j) * self.dim: (j + 1) * self.dim]
+                x_origin[:, (i) * self.dim: (i + 1) * self.dim] += x_global[:, (j) * self.dim: (j + 1) * self.dim]
+                v_origin[:, (i) * self.dim: (i + 1) * self.dim] += v_global[:, (j) * self.dim: (j + 1) * self.dim]
 
             x_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = self.global4x(
                 x[:, (i) * self.dim: (i + 1) * self.dim],
