@@ -44,9 +44,9 @@ class CosSinNet(nn.Module):
         return q
 
 
-class identity(nn.Module):
+class Identity(nn.Module):
     def __init__(self):
-        super(identity, self).__init__()
+        super(Identity, self).__init__()
 
     def forward(self, input: Tensor) -> Tensor:
         return input
