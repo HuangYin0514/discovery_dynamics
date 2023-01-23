@@ -16,7 +16,7 @@ class Baseline_pend2(LossNN):
         self.obj = obj
         self.dim = dim
 
-        self.baseline = MLP(input_dim=obj * dim * 2, hidden_dim=200, output_dim=obj * dim * 2, num_layers=1,
+        self.baseline = MLP(input_dim=obj * dim * 2, hidden_dim=200, output_dim=obj * dim * 2, num_layers=3,
                             act=nn.Tanh)
 
     def forward(self, t, x):
