@@ -108,6 +108,21 @@ class ModLaNet(LossNN):
         x_origin = torch.zeros((bs, self.global_dof), dtype=self.Dtype, device=self.Device)
         v_origin = torch.zeros((bs, self.global_dof), dtype=self.Dtype, device=self.Device)
 
+        # for i in range(self.obj):
+        #     for j in range(i):
+        #         x_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim] += x_global[:, (j) * self.global_dim:
+        #                                                                                      (j + 1) * self.global_dim]
+        #         v_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim] += v_global[:, (j) * self.global_dim:
+        #                                                                                      (j + 1) * self.global_dim]
+        #
+        #     x_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = self.global4x(
+        #         x[:, (i) * self.dim: (i + 1) * self.dim],
+        #         x_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim])
+        #     v_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = self.global4v(
+        #         x[:, (i) * self.dim: (i + 1) * self.dim],
+        #         v[:, (i) * self.dim: (i + 1) * self.dim],
+        #         v_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim])
+
         for i in range(self.obj):
             for j in range(i):
                 x_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim] += x_global[:, (j) * self.global_dim:
@@ -115,13 +130,23 @@ class ModLaNet(LossNN):
                 v_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim] += v_global[:, (j) * self.global_dim:
                                                                                              (j + 1) * self.global_dim]
 
-            x_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = self.global4x(
-                x[:, (i) * self.dim: (i + 1) * self.dim],
-                x_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim])
-            v_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = self.global4v(
-                x[:, (i) * self.dim: (i + 1) * self.dim],
-                v[:, (i) * self.dim: (i + 1) * self.dim],
-                v_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim])
+            x_global[:, (i) * self.dim: (i + 1) * self.dim] = \
+                x_origin[:, (i) * self.dim: (i + 1) * self.dim] + torch.cos(
+                    x[:, (i) * self.dim: (i + 1) * self.dim]
+                )
+            x_global[:, (i) * self.dim + 1: (i + 1) * self.dim + 1] = \
+                x_origin[:, (i) * self.dim + 1: (i + 1) * self.dim + 1] - torch.sin(
+                    x[:, (i) * self.dim: (i + 1) * self.dim]
+                )
+            v_global[:, (i) * self.dim: (i + 1) * self.dim] = \
+                v_origin[:, (i) * self.dim: (i + 1) * self.dim] + v[:, (i) * self.dim: (i + 1) * self.dim] * torch.cos(
+                    x[:, (i) * self.dim: (i + 1) * self.dim]
+                )
+            v_global[:, (i) * self.dim + 1: (i + 1) * self.dim + 1] = \
+                v_origin[:, (i) * self.dim: (i + 1) * self.dim] + v[:, (i) * self.dim: (i + 1) * self.dim] * torch.sin(
+                    x[:, (i) * self.dim: (i + 1) * self.dim]
+                )
+            # v_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] =
 
         # Calculate the potential energy for i-th element
         for i in range(self.obj):
@@ -138,7 +163,6 @@ class ModLaNet(LossNN):
                      x_global[:, i * self.global_dim: (i + 1) * self.global_dim]],
                     dim=1)
                 U += self.co2 * (0.5 * self.mass(self.Potential2(x_ij)) + 0.5 * self.mass(self.Potential2(x_ji)))
-
 
         # Calculate the kinetic energy for i-th element
         T = 0.
