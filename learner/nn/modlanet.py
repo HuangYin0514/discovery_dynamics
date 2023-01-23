@@ -141,7 +141,7 @@ class ModLaNet(LossNN):
             T = T + 0.5 * (torch.pow(vx, 2) + torch.pow(vy, 2))
 
         # Construct Lagrangian
-        L += (T - U)
+        L = (T - U)
 
         dvL = dfx(L.sum(), v)  # (bs, v_dim)
         dxL = dfx(L.sum(), x)  # (bs, x_dim)
