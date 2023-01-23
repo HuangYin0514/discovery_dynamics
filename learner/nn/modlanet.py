@@ -99,7 +99,7 @@ class ModLaNet(LossNN):
         bs = data.size(0)
         x, v = torch.chunk(data, 2, dim=1)
 
-        L, T, U = 0., 0., 0.
+        L, T, U = 0., 0., torch.zeros((x.shape[0], 1), dtype=self.Dtype, device=self.Device)
 
         x_global = torch.zeros((bs, self.global_dof), dtype=self.Dtype, device=self.Device)
         v_global = torch.zeros((bs, self.global_dof), dtype=self.Dtype, device=self.Device)
