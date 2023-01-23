@@ -129,27 +129,36 @@ class ModLaNet(LossNN):
                                                                                              (j + 1) * self.global_dim]
                 v_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim] += v_global[:, (j) * self.global_dim:
                                                                                              (j + 1) * self.global_dim]
+            #
+            # x_global[:, (i) * self.dim: (i + 1) * self.dim] = \
+            #     x_origin[:, (i) * self.dim: (i + 1) * self.dim] + torch.cos(
+            #         x[:, (i) * self.dim: (i + 1) * self.dim]
+            #     )
+            # x_global[:, (i) * self.dim + 1: (i + 1) * self.dim + 1] = \
+            #     x_origin[:, (i) * self.dim + 1: (i + 1) * self.dim + 1] - torch.sin(
+            #         x[:, (i) * self.dim: (i + 1) * self.dim]
+            #     )
+            # v_global[:, (i) * self.dim: (i + 1) * self.dim] = \
+            #     v_origin[:, (i) * self.dim: (i + 1) * self.dim] + v[:, (i) * self.dim: (i + 1) * self.dim] * torch.cos(
+            #         x[:, (i) * self.dim: (i + 1) * self.dim]
+            #     )
+            # v_global[:, (i) * self.dim + 1: (i + 1) * self.dim + 1] = \
+            #     v_origin[:, (i) * self.dim + 1: (i + 1) * self.dim + 1] + \
+            #     v[:, (i) * self.dim: (i + 1) * self.dim] * torch.sin(
+            #         x[:, (i) * self.dim: (i + 1) * self.dim]
+            #     )
 
-            x_global[:, (i) * self.dim: (i + 1) * self.dim] = \
-                x_origin[:, (i) * self.dim: (i + 1) * self.dim] + torch.cos(
-                    x[:, (i) * self.dim: (i + 1) * self.dim]
-                )
-            x_global[:, (i) * self.dim + 1: (i + 1) * self.dim + 1] = \
-                x_origin[:, (i) * self.dim + 1: (i + 1) * self.dim + 1] - torch.sin(
-                    x[:, (i) * self.dim: (i + 1) * self.dim]
-                )
-            v_global[:, (i) * self.dim: (i + 1) * self.dim] = \
-                v_origin[:, (i) * self.dim: (i + 1) * self.dim] + \
-                v[:, (i) * self.dim: (i + 1) * self.dim] * torch.cos(
-                    x[:, (i) * self.dim: (i + 1) * self.dim]
-                )
-            v_global[:, (i) * self.dim + 1: (i + 1) * self.dim + 1] = \
-                v_origin[:, (i) * self.dim + 1: (i + 1) * self.dim + 1] + \
-                v[:, (i) * self.dim: (i + 1) * self.dim] * torch.sin(
-                    x[:, (i) * self.dim: (i + 1) * self.dim]
-                )
-            # v_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] =
-
+            x_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = \
+                x_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim] + torch.cat([
+                    -torch.cos(x[:, (i) * self.dim: (i + 1) * self.dim]),
+                    torch.sin(x[:, (i) * self.dim: (i + 1) * self.dim])
+                ], dim=1)
+            v_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = \
+                v_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim] + \
+                v[:, (i) * self.dim: (i + 1) * self.dim] * torch.cat([
+                    torch.cos(x[:, (i) * self.dim: (i + 1) * self.dim]),
+                    torch.sin(x[:, (i) * self.dim: (i + 1) * self.dim])
+                ], dim=1)
         # Calculate the potential energy for i-th element
         for i in range(self.obj):
             U += self.co1 * self.mass(self.Potential1(x_global[:, i * self.global_dim: (i + 1) * self.global_dim]))
