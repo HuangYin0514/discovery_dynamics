@@ -46,8 +46,6 @@ def val_collate_fn(batch):
     return input, output
 
 
-
-
 def test_collate_fn(batch):
     x0, t, h, X, y, E = zip(*batch)
 
