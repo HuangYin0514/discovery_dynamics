@@ -75,7 +75,7 @@ class ModLaNet(LossNN):
                                                 hidden_dim=16,
                                                 output_dim=self.global_dim,
                                                 num_layers=1, act=nn.Tanh)
-        self.Potential1 = PotentialEnergyCell(input_dim=1,
+        self.Potential1 = PotentialEnergyCell(input_dim=self.global_dim,
                                               hidden_dim=50,
                                               output_dim=1,
                                               num_layers=1, act=nn.Tanh)
@@ -130,7 +130,7 @@ class ModLaNet(LossNN):
 
         for i in range(self.obj):
             # U += (9.8 * x_global[:, (i) * self.global_dim + 1: (i + 1) * self.global_dim])
-            U += (9.8 * self.mass(x_global[:, i * self.global_dim + 1: (i + 1) * self.global_dim]))
+            U += (9.8 * self.mass(self.Potential1(x_global[:, i * self.global_dim : (i + 1) * self.global_dim])))
 
         # Calculate the kinetic energy for i-th element
         T = 0.
