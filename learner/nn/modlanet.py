@@ -37,7 +37,6 @@ class GlobalVelocityTransform(nn.Module):
 
     def forward(self, x, v, v0):
         y = self.mlp(x) * v + v0
-        # y = self.mlp(x) * v
         return y
 
 
