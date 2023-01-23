@@ -37,13 +37,13 @@ class BaseBodyDataset(BaseDynamicsDataset):
             y = torch.stack(list(map(lambda x: self(None, x), X)))  # (T, D)
             E = torch.stack([self.energy_fn(y) for y in X])
             dataset.append((x0, t, self.dt, X, y, E))
-            # from matplotlib import pyplot as plt
-            # plt.plot(E.detach().numpy() )
-            # plt.show()
+            from matplotlib import pyplot as plt
+            plt.plot(E.detach().numpy() )
+            plt.show()
         return dataset
 
     def __generate(self, x0, t):
-        x = ODESolver(self, x0, t, method='rk4')  # (T, D) dopri5
+        x = ODESolver(self, x0, t, method='dopri5')  # (T, D) dopri5 rk4
         return x
 
     @abc.abstractmethod
