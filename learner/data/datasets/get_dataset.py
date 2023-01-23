@@ -60,7 +60,6 @@ def get_dataset(data_name, taskname, obj, dim, download_data=False, **kwargs):
 
     if os.path.exists(filename):
         print('=> Start loading dataset from {} .'.format(filename))
-        # dataset.Init_data()
         dataset = np.load(filename, allow_pickle=True).item()
     else:
         print('=> Start generating dataset.')

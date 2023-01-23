@@ -45,7 +45,7 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
         self._dim = dim
         self._dof = self._obj * self._dim  # degree of freedom
 
-        self.dt = 0.1
+        self.dt = 0.01
 
         t0 = 0.
         t_end = 10.
@@ -140,7 +140,7 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
         return eng
 
     def random_config(self):
-        max_momentum = 1.
+        max_momentum = 0.
         x0 = torch.zeros(self._obj * 2)
         for i in range(self._obj):
             theta = (2 * np.pi - 0) * torch.rand(1, ) + 0  # [0, 2pi]
