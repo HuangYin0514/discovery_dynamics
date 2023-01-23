@@ -143,7 +143,8 @@ class ModLaNet(LossNN):
                     x[:, (i) * self.dim: (i + 1) * self.dim]
                 )
             v_global[:, (i) * self.dim + 1: (i + 1) * self.dim + 1] = \
-                v_origin[:, (i) * self.dim: (i + 1) * self.dim] + v[:, (i) * self.dim: (i + 1) * self.dim] * torch.sin(
+                v_origin[:, (i) * self.dim + 1: (i + 1) * self.dim + 1] + \
+                v[:, (i) * self.dim: (i + 1) * self.dim] * torch.sin(
                     x[:, (i) * self.dim: (i + 1) * self.dim]
                 )
             # v_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] =
