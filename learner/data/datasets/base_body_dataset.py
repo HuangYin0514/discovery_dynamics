@@ -38,7 +38,7 @@ class BaseBodyDataset(BaseDynamicsDataset):
             E = torch.stack([self.energy_fn(y) for y in X])
             dataset.append((x0, t, self.dt, X, y, E))
             # from matplotlib import pyplot as plt
-            # plt.plot(E.detach().numpy() )
+            # plt.plot(E.detach().numpy())
             # plt.show()
         return dataset
 
