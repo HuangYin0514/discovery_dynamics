@@ -53,17 +53,11 @@ class LNN(LossNN):
 
         for i in range(self.dof):
             dvidvL = dfx(dvL[:, i].sum(), v)
-            if dvidvL is None:
-                break
-            else:
-                dvdvL[:, i, :] += dvidvL
+            dvdvL[:, i, :] += dvidvL
 
         for i in range(self.dof):
             dxidvL = dfx(dvL[:, i].sum(), x)
-            if dxidvL is None:
-                break
-            else:
-                dxdvL[:, i, :] += dxidvL
+            dxdvL[:, i, :] += dxidvL
 
         dvdvL_inv = torch.linalg.pinv(dvdvL)
 
