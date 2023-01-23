@@ -132,8 +132,9 @@ class ModLaNet(LossNN):
 
         # Calculate the potential energy for i-th element
         for i in range(self.obj):
-            U += self.co1 * self.mass(self.Potential1(x_global[:, i * self.global_dim: (i + 1) * self.global_dim]))
-        #
+            # U += self.co1 * self.mass(self.Potential1(x_global[:, i * self.global_dim: (i + 1) * self.global_dim]))
+            U += 9.8 * x_global[:, i * self.global_dim +1 : (i + 1) * self.global_dim]
+
         # for i in range(self.obj):
         #     for j in range(i):
         #         x_ij = torch.cat(
