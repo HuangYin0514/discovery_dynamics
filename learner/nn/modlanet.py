@@ -75,7 +75,7 @@ class ModLaNet(LossNN):
                                                 hidden_dim=16,
                                                 output_dim=self.global_dim,
                                                 num_layers=1, act=nn.Tanh)
-        self.Potential1 = PotentialEnergyCell(input_dim=self.global_dim,
+        self.Potential1 = PotentialEnergyCell(input_dim=1,
                                               hidden_dim=50,
                                               output_dim=1,
                                               num_layers=1, act=nn.Tanh)
