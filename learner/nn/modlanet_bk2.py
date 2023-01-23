@@ -124,29 +124,15 @@ class ModLaNet(LossNN):
                 v_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim])
 
         # Calculate the potential energy for i-th element
+        y = 0
         for i in range(self.obj):
-            U += self.co1 * self.mass(self.Potential1(x_global[:, i * self.global_dim: (i + 1) * self.global_dim]))
-
-        for i in range(self.obj):
-            for j in range(i):
-                x_ij = torch.cat(
-                    [x_global[:, i * self.global_dim: (i + 1) * self.global_dim],
-                     x_global[:, j * self.global_dim: (j + 1) * self.global_dim]],
-                    dim=1)
-                x_ji = torch.cat(
-                    [x_global[:, j * self.global_dim: (j + 1) * self.global_dim],
-                     x_global[:, i * self.global_dim: (i + 1) * self.global_dim]],
-                    dim=1)
-                U += self.co2 * (0.5 * self.mass(self.Potential2(x_ij)) + 0.5 * self.mass(self.Potential2(x_ji)))
-
+            y = y - torch.cos(x[:, i:i + 1])
+            U += (9.8 * y)
 
         # Calculate the kinetic energy for i-th element
-        T = 0.
-        vx, vy = 0., 0.
         for i in range(self.obj):
-            vx = vx + v[:, i] * torch.cos(x[:, i])
-            vy = vy + v[:, i] * torch.sin(x[:, i])
-            T = T + 0.5 * (torch.pow(vx, 2) + torch.pow(vy, 2))
+            T += 0.5 * self.mass(
+                v_global[:, (i) * self.global_dim: (i + 1) * self.global_dim].pow(2).sum(axis=1, keepdim=True))
 
         # Construct Lagrangian
         L += (T - U)
