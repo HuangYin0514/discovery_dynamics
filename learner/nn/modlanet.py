@@ -5,19 +5,11 @@
 @time: 2023/1/18 4:41 PM
 @desc:
 """
-from .mlp import MLP
-
-# encoding: utf-8
-"""
-@author: Yin Huang
-@contact: hy1071324110@gmail.com
-@time: 2023/1/17 7:51 PM
-@desc:
-"""
 import torch
 from torch import nn
 
 from .base_module import LossNN
+from .mlp import MLP
 from ..integrator import ODESolver
 from ..utils import dfx
 
