@@ -131,9 +131,11 @@ class ModLaNet(LossNN):
             v_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = x_origin * 0 + v_origin"""
 
         # Calculate the potential energy for i-th element
+        y = 0
         for i in range(self.obj):
+            y = y - x_global[:, i * self.global_dim + 1: (i + 1) * self.global_dim]
             # U += self.co1 * self.mass(self.Potential1(x_global[:, i * self.global_dim: (i + 1) * self.global_dim]))
-            U += 9.8 * x_global[:, i * self.global_dim +1 : (i + 1) * self.global_dim]
+            U += 9.8 * y
 
         # for i in range(self.obj):
         #     for j in range(i):
