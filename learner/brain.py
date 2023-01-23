@@ -163,7 +163,7 @@ class Brain:
                         + '\n'
                         + 'Train loss: {:.3e}'.format(loss_train)
                         + '\n'
-                        + 'Train loss: {:.3e}'.format(loss_test)
+                        + 'Test loss: {:.3e}'.format(loss_test)
                         )
             f = open(path + '/output.txt', mode='a')
             f.write(contents)
