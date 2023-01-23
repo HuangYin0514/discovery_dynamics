@@ -64,13 +64,64 @@ class ModLaNet(LossNN):
         self.dim = dim
         self.dof = obj * dim
 
+        self.global_dim = 2
+        self.global_dof = obj * self.global_dim
+
+        self.global4x = GlobalPositionTransform(input_dim=self.dim,
+                                                hidden_dim=16,
+                                                output_dim=self.global_dim,
+                                                num_layers=1, act=nn.Tanh)
+        self.global4v = GlobalVelocityTransform(input_dim=self.dim,
+                                                hidden_dim=16,
+                                                output_dim=self.global_dim,
+                                                num_layers=1, act=nn.Tanh)
+        self.Potential1 = PotentialEnergyCell(input_dim=self.global_dim,
+                                              hidden_dim=50,
+                                              output_dim=1,
+                                              num_layers=1, act=Identity)
+        self.Potential2 = PotentialEnergyCell(input_dim=self.global_dim * 2,
+                                              hidden_dim=50,
+                                              output_dim=1,
+                                              num_layers=1, act=Identity)
+
+        self.co1 = torch.nn.Parameter(torch.ones(1, dtype=self.Dtype, device=self.Device) * 0.5)
+        self.co2 = torch.nn.Parameter(torch.ones(1, dtype=self.Dtype, device=self.Device) * 0.5)
+
         self.mass = torch.nn.Linear(1, 1, bias=False)
+        torch.nn.init.ones_(self.mass.weight)
 
     def forward(self, t, data):
+        # TODO pendulum
+        data = data.clone().detach()
+        data[..., :int(data.shape[-1] // 2)] %= 2 * torch.pi  # pendulum
+        data = data.clone().detach().requires_grad_(True)
+
         bs = data.size(0)
         x, v = torch.chunk(data, 2, dim=1)
 
         L, T, U = 0., 0., torch.zeros((x.shape[0], 1), dtype=self.Dtype, device=self.Device)
+
+        # x_global = torch.zeros((bs, self.global_dof), dtype=self.Dtype, device=self.Device)
+        # v_global = torch.zeros((bs, self.global_dof), dtype=self.Dtype, device=self.Device)
+        #
+        # # TODO pendulum
+        # x_origin = torch.zeros((bs, self.global_dof), dtype=self.Dtype, device=self.Device)
+        # v_origin = torch.zeros((bs, self.global_dof), dtype=self.Dtype, device=self.Device)
+        #
+        # for i in range(self.obj):
+        #     for j in range(i):
+        #         x_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim] += x_global[:, (j) * self.global_dim:
+        #                                                                                      (j + 1) * self.global_dim]
+        #         v_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim] += v_global[:, (j) * self.global_dim:
+        #                                                                                      (j + 1) * self.global_dim]
+        #
+        #     x_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = self.global4x(
+        #         x[:, (i) * self.dim: (i + 1) * self.dim],
+        #         x_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim])
+        #     v_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = self.global4v(
+        #         x[:, (i) * self.dim: (i + 1) * self.dim],
+        #         v[:, (i) * self.dim: (i + 1) * self.dim],
+        #         v_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim])
 
         # Calculate the potential energy for i-th element
         y = 0
@@ -82,12 +133,12 @@ class ModLaNet(LossNN):
         T = 0.
         vx, vy = 0., 0.
         for i in range(self.obj):
-            vx = vx + v[:,i] * torch.cos(x[:,i])
-            vy = vy + v[:,i] * torch.sin(x[:,i])
+            vx = vx + v[i] * torch.cos(x[i])
+            vy = vy + v[i] * torch.sin(x[i])
             T = T + 0.5 * (torch.pow(vx, 2) + torch.pow(vy, 2))
 
         # Construct Lagrangian
-        L = (T - U)
+        L += (T - U)
 
         dvL = dfx(L.sum(), v)  # (bs, v_dim)
         dxL = dfx(L.sum(), x)  # (bs, x_dim)
@@ -107,18 +158,6 @@ class ModLaNet(LossNN):
 
         a = dvdvL_inv @ (dxL.unsqueeze(2) - dxdvL @ v.unsqueeze(2))  # (bs, a_dim, 1)
         a = a.squeeze(2)
-
-        t1, t2, w1, w2 = x[:, 0:1], x[:, 1:2], v[:, 0:1], v[:, 1:2]
-        l1, l2, m1, m2 = 1, 1, 1, 1
-        g = 9.8
-
-        a1 = (l2 / l1) * (m2 / (m1 + m2)) * torch.cos(t1 - t2)
-        a2 = (l1 / l2) * torch.cos(t1 - t2)
-        f1 = -(l2 / l1) * (m2 / (m1 + m2)) * (w2 ** 2) * torch.sin(t1 - t2) - (g / l1) * torch.sin(t1)
-        f2 = (l1 / l2) * (w1 ** 2) * torch.sin(t1 - t2) - (g / l2) * torch.sin(t2)
-        g1 = (f1 - a1 * f2) / (1 - a1 * a2)
-        g2 = (f2 - a2 * f1) / (1 - a1 * a2)
-
         return torch.cat([v, a], dim=1)
 
     def integrate(self, X, t):
