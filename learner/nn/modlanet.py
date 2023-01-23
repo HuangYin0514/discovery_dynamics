@@ -132,7 +132,6 @@ class ModLaNet(LossNN):
             # U += (9.8 * x_global[:, (i) * self.global_dim + 1: (i + 1) * self.global_dim])
             U += (9.8 * self.mass(self.Potential1(x_global[:, i * self.global_dim+ 1: (i + 1) * self.global_dim])))
 
-
         # Calculate the kinetic energy for i-th element
         T = 0.
         vx, vy = 0., 0.
