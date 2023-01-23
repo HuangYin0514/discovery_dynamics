@@ -139,7 +139,8 @@ class ModLaNet(LossNN):
                     x[:, (i) * self.dim: (i + 1) * self.dim]
                 )
             v_global[:, (i) * self.dim: (i + 1) * self.dim] = \
-                v_origin[:, (i) * self.dim: (i + 1) * self.dim] + v[:, (i) * self.dim: (i + 1) * self.dim] * torch.cos(
+                v_origin[:, (i) * self.dim: (i + 1) * self.dim] + \
+                v[:, (i) * self.dim: (i + 1) * self.dim] * torch.cos(
                     x[:, (i) * self.dim: (i + 1) * self.dim]
                 )
             v_global[:, (i) * self.dim + 1: (i + 1) * self.dim + 1] = \
