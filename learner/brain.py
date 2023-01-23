@@ -8,9 +8,7 @@ from matplotlib import pyplot as plt
 from torch.optim import lr_scheduler
 from tqdm import tqdm
 
-from .metrics import accuracy_fn
 from .nn.base_module import LossNN
-from .regularization import symplectic_prior_reg
 from .scheduler import lr_decay_scheduler, no_scheduler
 from .utils import timing
 
@@ -148,7 +146,6 @@ class Brain:
             iteration = int(self.loss_history[best_loss_index, 0])
             loss_train = self.loss_history[best_loss_index, 1]
             loss_test = self.loss_history[best_loss_index, 2]
-
 
             path = './outputs/' + self.taskname
             if not os.path.isdir('./outputs/' + self.taskname): os.makedirs('./outputs/' + self.taskname)

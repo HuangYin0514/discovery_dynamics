@@ -10,7 +10,8 @@ from .odeint import SOLVERS, odeint
 class OdeintAdjointMethod(torch.autograd.Function):
 
     @staticmethod
-    def forward(ctx, shapes, func, y0, t, rtol, atol, method, options, event_fn, adjoint_rtol, adjoint_atol, adjoint_method,
+    def forward(ctx, shapes, func, y0, t, rtol, atol, method, options, event_fn, adjoint_rtol, adjoint_atol,
+                adjoint_method,
                 adjoint_options, t_requires_grad, *adjoint_params):
 
         ctx.shapes = shapes
@@ -156,8 +157,8 @@ class OdeintAdjointMethod(torch.autograd.Function):
 
 
 def odeint_adjoint(func, y0, t, *, rtol=1e-7, atol=1e-9, method=None, options=None, event_fn=None,
-                   adjoint_rtol=None, adjoint_atol=None, adjoint_method=None, adjoint_options=None, adjoint_params=None):
-
+                   adjoint_rtol=None, adjoint_atol=None, adjoint_method=None, adjoint_options=None,
+                   adjoint_params=None):
     # We need this in order to access the variables inside this module,
     # since we have no other way of getting variables along the execution path.
     if adjoint_params is None and not isinstance(func, nn.Module):
@@ -199,13 +200,16 @@ def odeint_adjoint(func, y0, t, *, rtol=1e-7, atol=1e-9, method=None, options=No
                           "excluded from the adjoint pass, and will not appear as a tensor in the adjoint norm.")
 
     # Convert to flattened state.
-    shapes, func, y0, t, rtol, atol, method, options, event_fn, decreasing_time = _check_inputs(func, y0, t, rtol, atol, method, options, event_fn, SOLVERS)
+    shapes, func, y0, t, rtol, atol, method, options, event_fn, decreasing_time = _check_inputs(func, y0, t, rtol, atol,
+                                                                                                method, options,
+                                                                                                event_fn, SOLVERS)
 
     # Handle the adjoint norm function.
     state_norm = options["norm"]
     handle_adjoint_norm_(adjoint_options, shapes, state_norm)
 
-    ans = OdeintAdjointMethod.apply(shapes, func, y0, t, rtol, atol, method, options, event_fn, adjoint_rtol, adjoint_atol,
+    ans = OdeintAdjointMethod.apply(shapes, func, y0, t, rtol, atol, method, options, event_fn, adjoint_rtol,
+                                    adjoint_atol,
                                     adjoint_method, adjoint_options, t.requires_grad, *adjoint_params)
 
     if event_fn is None:
@@ -226,7 +230,6 @@ def odeint_adjoint(func, y0, t, *, rtol=1e-7, atol=1e-9, method=None, options=No
 
 
 def find_parameters(module):
-
     assert isinstance(module, nn.Module)
 
     # If called within DataParallel, parameters won't appear in module.parameters().
@@ -270,6 +273,7 @@ def handle_adjoint_norm_(adjoint_options, shapes, state_norm):
                     t, y, adj_y, *adj_params = tensor_tuple
                     # (If the state is actually a flattened tuple then this will be unpacked again in state_norm.)
                     return max(t.abs(), state_norm(y), state_norm(adj_y))
+
                 adjoint_options['norm'] = adjoint_seminorm
             else:
                 # And they're using their own custom norm.
@@ -287,4 +291,5 @@ def handle_adjoint_norm_(adjoint_options, shapes, state_norm):
                         y = _flat_to_shape(y, (), shapes)
                         adj_y = _flat_to_shape(adj_y, (), shapes)
                         return adjoint_norm((t, *y, *adj_y, *adj_params))
+
                     adjoint_options['norm'] = _adjoint_norm

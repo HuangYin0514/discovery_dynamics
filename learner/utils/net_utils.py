@@ -2,7 +2,6 @@ import warnings
 from collections import OrderedDict
 
 import torch
-from torch import nn
 
 
 def load_network(network, file_path, device):

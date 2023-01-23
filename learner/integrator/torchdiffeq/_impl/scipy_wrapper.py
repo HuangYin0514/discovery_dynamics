@@ -44,14 +44,13 @@ class ScipyWrapperODESolver(metaclass=abc.ABCMeta):
         sol = torch.tensor(sol.y).T.to(self.device, self.dtype)
         sol = sol.reshape(-1, *self.shape)
         return sol
-        
+
     @classmethod
     def valid_callbacks(cls):
         return set()
 
 
 def convert_func_to_numpy(func, shape, device, dtype):
-
     def np_func(t, y):
         t = torch.tensor(t).to(device, dtype)
         y = torch.reshape(torch.tensor(y).to(device, dtype), shape)

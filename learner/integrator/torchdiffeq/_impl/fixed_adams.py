@@ -208,7 +208,8 @@ class AdamsBashforthMoulton(FixedGridODESolver):
             # Adams-Moulton corrector.
             if self.implicit:
                 moulton_coeffs = self.moulton[order + 1]
-                delta = dt * _dot_product(moulton_coeffs[1:], self.prev_f).type_as(y0)  # moulton is float64 so cast back
+                delta = dt * _dot_product(moulton_coeffs[1:], self.prev_f).type_as(
+                    y0)  # moulton is float64 so cast back
                 converged = False
                 for _ in range(self.max_iters):
                     dy_old = dy

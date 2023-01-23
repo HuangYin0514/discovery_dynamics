@@ -45,7 +45,6 @@ class FNN(StructureNN):
         self.output_layer = nn.Sequential()
         self.output_layer.add_module('output', nn.Linear(self.width, self.outd, bias=False))
 
-
     def __initialize(self):
         self.input_layer.apply(weights_init_xavier_normal)
         self.hidden_layer.apply(weights_init_xavier_normal)

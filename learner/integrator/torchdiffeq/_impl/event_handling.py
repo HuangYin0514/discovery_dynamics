@@ -5,7 +5,6 @@ import torch
 
 def find_event(interp_fn, sign0, t0, t1, event_fn, tol):
     with torch.no_grad():
-
         # Num iterations for the secant method until tolerance is within target.
         nitrs = torch.ceil(torch.log((t1 - t0) / tol) / math.log(2.0))
 

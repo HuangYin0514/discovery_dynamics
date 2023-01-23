@@ -5,9 +5,9 @@
 @time: 2023/1/13 12:12 PM
 @desc:
 """
+from .analyze_utils import plot_energy, plot_compare_energy, plot_compare_state, plot_field
 from .plot_body import body3_trajectory
 from .plot_pend import pend_trajectory
-from .analyze_utils import plot_energy, plot_compare_energy, plot_compare_state, plot_field
 
 __factory = {
     'Pendulum2': pend_trajectory,

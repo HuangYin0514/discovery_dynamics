@@ -1,14 +1,14 @@
 - [1. double pend](#1-double-pend)
-  - [1.1. hnn](#11-hnn)
+    - [1.1. hnn](#11-hnn)
 - [2. three body](#2-three-body)
-  - [2.1. hnn](#21-hnn)
-
+    - [2.1. hnn](#21-hnn)
 
 ---
 
 # 1. double pend
 
 ## 1.1. hnn
+
 ``` 
 %run  ./task/train.py \
     --taskname pend_2_task \
@@ -41,6 +41,7 @@
 # 2. three body
 
 ## 2.1. hnn
+
 ```
 %run  ./task/train.py \
     --taskname body_3_task \

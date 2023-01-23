@@ -5,12 +5,10 @@
 @time: 2023/1/3 3:50 PM
 @desc:
 """
-from functools import partial
 
 import numpy as np
 import torch
 from torch import nn
-from torch.autograd.functional import hessian, jacobian
 
 from .base_body_dataset import BaseBodyDataset
 from ...utils import dfx
@@ -77,7 +75,6 @@ class Body3_L(BaseBodyDataset, nn.Module):
         #
         # q_tt = torch.linalg.pinv(B) @ (A - C @ coords[self._dof:])
         # return torch.cat((coords[self._dof:], q_tt))
-
 
         x, v = torch.chunk(coords, 2, dim=0)
 

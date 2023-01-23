@@ -10,7 +10,7 @@ import torch
 from torch import nn
 
 from .base_body_dataset import BaseBodyDataset
-from ...utils import lazy_property, dfx
+from ...utils import lazy_property
 
 
 class Pendulum2(BaseBodyDataset, nn.Module):
@@ -59,7 +59,7 @@ class Pendulum2(BaseBodyDataset, nn.Module):
         # [ 0, I]
         # [-I, 0]
         d = self._dof
-        res = np.eye(self._dof*2, k=d) - np.eye(self._dof*2, k=-d)
+        res = np.eye(self._dof * 2, k=d) - np.eye(self._dof * 2, k=-d)
         return torch.tensor(res).float()
 
     def forward(self, t, coords):

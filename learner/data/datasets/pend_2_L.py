@@ -5,7 +5,6 @@
 @time: 2023/1/3 3:50 PM
 @desc:
 """
-import math
 
 import numpy as np
 import torch
@@ -49,11 +48,11 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
 
         t0 = 0.
         t_end = 10.
-        _time_step = int((t_end - t0) / self.dt )
+        _time_step = int((t_end - t0) / self.dt)
         self.t = torch.linspace(t0, t_end, _time_step)
 
         t_end = 15.
-        _time_step = int((t_end - t0) / self.dt )
+        _time_step = int((t_end - t0) / self.dt)
         self.test_t = torch.linspace(t0, t_end, _time_step)
 
     def forward(self, t, coords):

@@ -13,8 +13,9 @@ from .solvers import AdaptiveStepsizeEventODESolver
 
 _ButcherTableau = collections.namedtuple('_ButcherTableau', 'alpha, beta, c_sol, c_error')
 
-
 _RungeKuttaState = collections.namedtuple('_RungeKuttaState', 'y1, f1, t0, t1, dt, interp_coeff')
+
+
 # Saved state of the Runge Kutta solver.
 #
 # Attributes:

@@ -26,9 +26,9 @@ def choose_dataset(data_name, obj, dim, train_num, test_num):
 
     elif data_name == 'Pendulum2_L':
         dataset = Pendulum2_L(train_num=train_num,
-                            test_num=test_num,
-                            obj=obj,
-                            dim=dim)
+                              test_num=test_num,
+                              obj=obj,
+                              dim=dim)
     elif data_name == 'Body3':
         dataset = Body3(train_num=train_num,
                         test_num=test_num,
@@ -36,9 +36,9 @@ def choose_dataset(data_name, obj, dim, train_num, test_num):
                         dim=dim)
     elif data_name == 'Body3_L':
         dataset = Body3_L(train_num=train_num,
-                        test_num=test_num,
-                        obj=obj,
-                        dim=dim)
+                          test_num=test_num,
+                          obj=obj,
+                          dim=dim)
     else:
         raise NotImplementedError('{} not implemented'.format(data_name))
     return dataset
@@ -66,7 +66,6 @@ def get_dataset(data_name, taskname, obj, dim, download_data=False, **kwargs):
         dataset.Init_data()
         os.makedirs(data_path) if not os.path.exists(data_path) else None
         np.save(filename, dataset)
-
 
     print("=> {} loaded".format(data_name))
     dataset.print_dataset_statistics(dataset.train, dataset.test)

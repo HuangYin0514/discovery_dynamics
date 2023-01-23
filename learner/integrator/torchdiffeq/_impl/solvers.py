@@ -54,7 +54,8 @@ class AdaptiveStepsizeEventODESolver(AdaptiveStepsizeODESolver, metaclass=abc.AB
 class FixedGridODESolver(metaclass=abc.ABCMeta):
     order: int
 
-    def __init__(self, func, y0, step_size=None, grid_constructor=None, interp="linear", perturb=False, **unused_kwargs):
+    def __init__(self, func, y0, step_size=None, grid_constructor=None, interp="linear", perturb=False,
+                 **unused_kwargs):
         self.atol = unused_kwargs.pop('atol')
         unused_kwargs.pop('rtol', None)
         unused_kwargs.pop('norm', None)
@@ -95,6 +96,7 @@ class FixedGridODESolver(metaclass=abc.ABCMeta):
             t_infer[-1] = t[-1]
 
             return t_infer
+
         return _grid_constructor
 
     @abc.abstractmethod

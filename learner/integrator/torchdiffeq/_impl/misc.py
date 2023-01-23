@@ -10,6 +10,7 @@ _all_callback_names = ['callback_step', 'callback_accept_step', 'callback_reject
 _all_adjoint_callback_names = [name + '_adjoint' for name in _all_callback_names]
 _null_callback = lambda *args, **kwargs: None
 
+
 def _handle_unused_kwargs(solver, unused_kwargs):
     if len(unused_kwargs) > 0:
         warnings.warn('{}: Unexpected arguments {}'.format(solver.__class__.__name__, unused_kwargs))
@@ -194,7 +195,6 @@ class _PerturbFunc(torch.nn.Module):
 
 
 def _check_inputs(func, y0, t, rtol, atol, method, options, event_fn, SOLVERS):
-
     if event_fn is not None:
         if len(t) != 2:
             raise ValueError(f"We require len(t) == 2 when in event handling mode, but got len(t)={len(t)}.")
@@ -248,6 +248,7 @@ def _check_inputs(func, y0, t, rtol, atol, method, options, event_fn, SOLVERS):
         def _norm(tensor):
             y = _flat_to_shape(tensor, (), shapes)
             return norm(y)
+
         options['norm'] = _norm
 
     else:

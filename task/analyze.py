@@ -10,8 +10,6 @@ import os
 import os.path as osp
 import sys
 
-import matplotlib.pyplot as plt
-import numpy as np
 import torch
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))

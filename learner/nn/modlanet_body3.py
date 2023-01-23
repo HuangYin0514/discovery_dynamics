@@ -6,7 +6,6 @@
 @desc:
 """
 from .mlp import MLP
-from .utils_nn import Identity
 
 # encoding: utf-8
 """
