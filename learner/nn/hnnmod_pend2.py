@@ -101,7 +101,10 @@ class HnnMod_pend2(LossNN):
 
     def forward(self, t, data):
         bs = data.size(0)
-        x, v = torch.chunk(data, 2, dim=1)
+        x, p = torch.chunk(data, 2, dim=1)
+
+        # dq_dt = v = Minv @ p
+        v = self.Minv(x).matmul(p.unsqueeze(-1)).squeeze(-1)
 
         L, T, U = 0., 0., torch.zeros((x.shape[0], 1), dtype=self.Dtype, device=self.Device)
 
