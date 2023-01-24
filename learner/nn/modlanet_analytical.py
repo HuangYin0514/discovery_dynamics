@@ -10,7 +10,6 @@ from torch import nn
 
 from .base_module import LossNN
 from .mlp import MLP
-from .utils_nn import Identity
 from ..integrator import ODESolver
 from ..utils import dfx
 
@@ -130,7 +129,7 @@ class ModLaNet(LossNN):
 
         for i in range(self.obj):
             # U += (9.8 * x_global[:, (i) * self.global_dim + 1: (i + 1) * self.global_dim])
-            U += (9.8 * self.mass(self.Potential1(x_global[:, i * self.global_dim : (i + 1) * self.global_dim])))
+            U += (9.8 * self.mass(self.Potential1(x_global[:, i * self.global_dim: (i + 1) * self.global_dim])))
 
         # Calculate the kinetic energy for i-th element
         T = 0.
