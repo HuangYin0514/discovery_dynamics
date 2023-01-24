@@ -160,6 +160,15 @@ class ModLaNet_pend2(LossNN):
         a = a.squeeze(2)
         return torch.cat([v, a], dim=1)
 
+    def integrate_fun(self, t, data):
+        data = data.clone().detach()
+        divmod_value = torch.sign(data[..., :int(data.shape[-1] // 2)]) * 2 * torch.pi  # pendulum
+        data[..., :int(data.shape[-1] // 2)] %= divmod_value # pendulum
+        # data[..., :int(data.shape[-1] // 2)] %= 2 * torch.pi
+        data = data.clone().detach().requires_grad_(True)
+        res = self(t, data)
+        return res
+
     def integrate(self, X, t):
-        out = ODESolver(self, X, t, method='rk4').permute(1, 0, 2)  # (T, D)
+        out = ODESolver(self.integrate_fun, X, t, method='rk4').permute(1, 0, 2)  # (T, D)
         return out
