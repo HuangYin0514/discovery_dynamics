@@ -15,7 +15,7 @@ def choose_model(net_name, obj, dim):
         net = HNN(obj, dim)
     elif net_name == 'lnn':
         net = LNN(obj, dim)
-    elif net_name == 'baseline':
+    elif net_name == 'Baseline':
         net = Baseline(obj, dim)
     elif net_name == 'mechanicsNN':
         net = MechanicsNN(obj, dim)
