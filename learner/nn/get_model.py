@@ -11,7 +11,7 @@ from .modlanet_pend2 import ModLaNet_pend2
 
 
 def choose_model(net_name, obj, dim):
-    if net_name == 'hnn':
+    if net_name == 'HNN':
         net = HNN(obj, dim)
     elif net_name == 'LNN':
         net = LNN(obj, dim)
