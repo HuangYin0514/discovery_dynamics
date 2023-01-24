@@ -164,7 +164,6 @@ class ModLaNet_pend2(LossNN):
         data = data.clone().detach()
         divmod_value = torch.sign(data[..., :int(data.shape[-1] // 2)]) * 2 * torch.pi  # pendulum
         data[..., :int(data.shape[-1] // 2)] %= divmod_value # pendulum
-        # data[..., :int(data.shape[-1] // 2)] %= 2 * torch.pi
         data = data.clone().detach().requires_grad_(True)
         res = self(t, data)
         return res
