@@ -108,26 +108,6 @@ class ModLaNet(LossNN):
         x_origin = torch.zeros((bs, self.global_dof), dtype=self.Dtype, device=self.Device)
         v_origin = torch.zeros((bs, self.global_dof), dtype=self.Dtype, device=self.Device)
 
-        # for i in range(self.obj):
-        #     for j in range(i):
-        #         x_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim] += x_global[:, (j) * self.global_dim:
-        #                                                                                      (j + 1) * self.global_dim]
-        #         v_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim] += v_global[:, (j) * self.global_dim:
-        #                                                                                      (j + 1) * self.global_dim]
-        #
-        #     x_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = \
-        #         x_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim] + torch.cat([
-        #             torch.sin(x[:, (i) * self.dim: (i + 1) * self.dim]),
-        #             -torch.cos(x[:, (i) * self.dim: (i + 1) * self.dim])
-        #         ], dim=1)
-        #
-        #     v_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = \
-        #         v_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim] + \
-        #         v[:, (i) * self.dim: (i + 1) * self.dim] * torch.cat([
-        #             torch.cos(x[:, (i) * self.dim: (i + 1) * self.dim]),
-        #             torch.sin(x[:, (i) * self.dim: (i + 1) * self.dim])
-        #         ], dim=1)
-
         for i in range(self.obj):
             for j in range(i):
                 x_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim] += x_global[:, (j) * self.global_dim:
