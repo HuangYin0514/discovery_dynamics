@@ -130,8 +130,6 @@ class ModLaNet(LossNN):
 
         # Calculate the potential energy for i-th element
         for i in range(self.obj):
-            # U += (9.8 * x_global[:, (i) * self.global_dim + 1: (i + 1) * self.global_dim])
-            # U += (9.8 * self.mass(self.Potential1(x_global[:, i * self.global_dim : (i + 1) * self.global_dim])))
             U += self.co1 * self.mass(self.Potential1(x_global[:, i * self.global_dim: (i + 1) * self.global_dim]))
 
         for i in range(self.obj):
@@ -152,14 +150,6 @@ class ModLaNet(LossNN):
             T += 0.5 * self.mass(
                 v_global[:, (i) * self.global_dim: (i + 1) * self.global_dim].pow(2).sum(axis=1, keepdim=True))
 
-
-        # # Calculate the kinetic energy for i-th element
-        # T = 0.
-        # vx, vy = 0., 0.
-        # for i in range(self.obj):
-        #     vx = vx + v[:, i] * torch.cos(x[:, i])
-        #     vy = vy + v[:, i] * torch.sin(x[:, i])
-        #     T = T + 0.5 * (torch.pow(vx, 2) + torch.pow(vy, 2))
 
         # Construct Lagrangian
         L = (T - U)
