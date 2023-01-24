@@ -62,12 +62,12 @@ class PotentialEnergyCell(nn.Module):
         return y
 
 
-class ModLaNet(LossNN):
+class ModLaNet_body3(LossNN):
     '''Hamiltonian neural networks.
     '''
 
     def __init__(self, obj, dim):
-        super(ModLaNet, self).__init__()
+        super(ModLaNet_body3, self).__init__()
 
         self.obj = obj
         self.dim = dim
