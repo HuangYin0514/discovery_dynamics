@@ -91,10 +91,6 @@ class ModLaNet(LossNN):
         torch.nn.init.ones_(self.mass.weight)
 
     def forward(self, t, data):
-        # data = data.clone().detach()
-        # data[..., :int(data.shape[-1] // 2)] %= 2 * torch.pi  # pendulum
-        # data = data.clone().detach().requires_grad_(True)
-
         bs = data.size(0)
         x, v = torch.chunk(data, 2, dim=1)
 
