@@ -4,6 +4,7 @@ import os.path as osp
 from learner.utils import timing, count_parameters, download_file_from_google_drive, load_network
 from .baseline import Baseline
 from .hnn import HNN
+from .hnnmod_pend2 import HnnMod_pend2
 from .lnn import LNN
 from .mechanicsNN import MechanicsNN
 from .modlanet_body3 import ModLaNet_body3
@@ -23,6 +24,8 @@ def choose_model(net_name, obj, dim):
         net = ModLaNet_pend2(obj, dim)
     elif net_name == 'ModLaNet_body3':
         net = ModLaNet_body3(obj, dim)
+    elif net_name == 'HnnMod_pend2':
+        net = HnnMod_pend2(obj, dim)
     else:
         raise ValueError('Model \'{}\' is not implemented'.format(net_name))
 
