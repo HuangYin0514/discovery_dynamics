@@ -104,7 +104,6 @@ class ModLaNet(LossNN):
         x_global = torch.zeros((bs, self.global_dof), dtype=self.Dtype, device=self.Device)
         v_global = torch.zeros((bs, self.global_dof), dtype=self.Dtype, device=self.Device)
 
-        # TODO pendulum
         x_origin = torch.zeros((bs, self.global_dof), dtype=self.Dtype, device=self.Device)
         v_origin = torch.zeros((bs, self.global_dof), dtype=self.Dtype, device=self.Device)
 
