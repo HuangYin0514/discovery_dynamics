@@ -98,6 +98,7 @@ class HnnMod_pend2(LossNN):
         d = int(states_dim / 2)
         res = np.eye(states_dim, k=d) - np.eye(states_dim, k=-d)
         return torch.tensor(res, dtype=self.Dtype, device=self.Device)
+
     def forward(self, t, data):
         bs = data.size(0)
         x, v = torch.chunk(data, 2, dim=1)
@@ -156,7 +157,7 @@ class HnnMod_pend2(LossNN):
     def integrate_fun(self, t, data):
         data = data.clone().detach()
         divmod_value = torch.sign(data[..., :int(data.shape[-1] // 2)]) * 2 * torch.pi  # pendulum
-        data[..., :int(data.shape[-1] // 2)] %= divmod_value # pendulum
+        data[..., :int(data.shape[-1] // 2)] %= divmod_value  # pendulum
         data = data.clone().detach().requires_grad_(True)
         res = self(t, data)
         return res
