@@ -150,7 +150,6 @@ class ModLaNet(LossNN):
             T += 0.5 * self.mass(
                 v_global[:, (i) * self.global_dim: (i + 1) * self.global_dim].pow(2).sum(axis=1, keepdim=True))
 
-
         # Construct Lagrangian
         L = (T - U)
 
