@@ -47,7 +47,7 @@ class BaseBodyDataset(BaseDynamicsDataset):
         return x
 
     @abc.abstractmethod
-    def random_config(self, num):
+    def random_config(self):
         pass
 
     @abc.abstractmethod
