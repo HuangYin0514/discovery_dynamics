@@ -22,7 +22,6 @@ class Baseline_pend2(LossNN):
     def forward(self, t, x):
         data = x.clone().detach()
         data[..., :int(data.shape[-1] // 2)] %= 2 * torch.pi  # pendulum
-
         out = self.baseline(data)
         return out
 
