@@ -50,7 +50,6 @@ def test_collate_fn(batch):
     x0, t, h, X, y, E = zip(*batch)
 
     X = torch.stack(X, dim=0).float()
-    X[..., :int(X.shape[-1] // 2)] %= 2 * torch.pi  # TODO pendulum
 
     x0 = torch.stack(x0, dim=0).float()  # (bs, D)
     x0.requires_grad = True
