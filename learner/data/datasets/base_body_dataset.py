@@ -43,7 +43,7 @@ class BaseBodyDataset(BaseDynamicsDataset):
         return dataset
 
     def __generate(self, x0, t):
-        x = ODESolver(self, x0, t, method='rk4')  # (T, D) dopri5 rk4
+        x = ODESolver(self, x0, t, method='dopri5')  # (T, D) dopri5 rk4
         return x
 
     @abc.abstractmethod
