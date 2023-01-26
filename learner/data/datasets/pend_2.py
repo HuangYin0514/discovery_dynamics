@@ -110,11 +110,23 @@ class Pendulum2(BaseBodyDataset, nn.Module):
         assert len(coords) == self._dof * 2
         x, p = torch.chunk(coords, 2, dim=0)
         T = torch.sum(0.5 * p @ self.Minv(x) @ p)
+
+        # for i in range(self._obj):
+        #     coords[self._dof + i] = coords[self._dof + i] / (self._m[i] * self._l[i] ** 2)
+        # T2 = 0.
+        # vx, vy = 0., 0.
+        # for i in range(self._obj):
+        #     vx = vx + self._l[i] * coords[self._dof + i] * np.cos(coords[i])
+        #     vy = vy + self._l[i] * coords[self._dof + i] * np.sin(coords[i])
+        #     T2 = T2 + 0.5 * self._m[i] * (np.power(vx, 2) + np.power(vy, 2))
+        #
+        # T3 = 0.
+        # for i in range(self._obj):
+        #     T3 = T3 + 0.5 * coords[self._dof + i] * coords[self._dof + i] / self._m[i]
         return T
 
     def potential(self, coords):
         assert len(coords) == self._dof * 2
-        g = self._g
         U = 0.
         y = 0.
         for i in range(self._obj):
@@ -137,4 +149,3 @@ class Pendulum2(BaseBodyDataset, nn.Module):
             x0[i] = theta
             x0[i + self._obj] = momentum
         return x0
-
