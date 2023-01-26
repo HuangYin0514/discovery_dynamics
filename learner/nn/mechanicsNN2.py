@@ -16,6 +16,7 @@ from ..integrator import ODESolver
 from ..utils import dfx, lazy_property
 
 
+
 class MassNet(nn.Module):
     def __init__(self, q_dim, num_layers=3, hidden_dim=30):
         super(MassNet, self).__init__()
@@ -50,7 +51,6 @@ class DynamicsNet(nn.Module):
         out = self.dynamics_net(x)
         return out
 
-
 class HnnMod_body3(LossNN):
     """
     Mechanics neural networks.
@@ -62,12 +62,8 @@ class HnnMod_body3(LossNN):
         q_dim = int(obj * dim)
         p_dim = int(obj * dim)
 
-        self.obj = obj
-        self.dim = dim
-        self.dof = int(obj * dim)
-
         self.mass_net = MassNet(q_dim=q_dim, num_layers=num_layers, hidden_dim=hidden_dim)
-        self.dynamics_net = DynamicsNet(q_dim=dim, p_dim=dim, num_layers=num_layers, hidden_dim=hidden_dim)
+        self.dynamics_net = DynamicsNet(q_dim=q_dim, p_dim=p_dim, num_layers=num_layers, hidden_dim=hidden_dim)
 
     def tril_Minv(self, q):
         """
@@ -117,21 +113,13 @@ class HnnMod_body3(LossNN):
             Loss.
         """
         assert (x.ndim == 2)
-
-        bs = x.size(0)
-
         q, p = x.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
-
         Minv = self.Minv(q)
-        dq_dt = Minv.matmul(p.unsqueeze(-1)).squeeze(-1)  # dq_dt = v = Minv @ p
+        # dq_dt = v = Minv @ p
+        dq_dt = Minv.matmul(p.unsqueeze(-1)).squeeze(-1)
+        # dp_dt = A(q, v)
 
-        dp_dt = torch.zeros((bs, self.dof), dtype=self.Dtype, device=self.Device)
-
-        for i in range(self.obj):
-            # dp_dt = A(q, v)
-            dp_dt[:, i * self.dim:(i + 1) * self.dim] = self.dynamics_net(q[:, i * self.dim:(i + 1) * self.dim],
-                                                                          dq_dt[:, i * self.dim:(i + 1) * self.dim])
-
+        dp_dt = self.dynamics_net(q, dq_dt)
         dz_dt = torch.cat([dq_dt, dp_dt], dim=-1)
         return dz_dt
 
