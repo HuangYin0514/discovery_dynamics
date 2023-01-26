@@ -56,7 +56,7 @@ class HnnMod_body3(LossNN):
     Mechanics neural networks.
     """
 
-    def __init__(self, obj, dim, num_layers=1, hidden_dim=200):
+    def __init__(self, obj, dim, num_layers=None, hidden_dim=None):
         super(HnnMod_body3, self).__init__()
 
         q_dim = int(obj * dim)
@@ -66,8 +66,8 @@ class HnnMod_body3(LossNN):
         self.dim = dim
         self.dof = int(obj * dim)
 
-        self.mass_net = MassNet(q_dim=dim, num_layers=num_layers, hidden_dim=hidden_dim)
-        self.dynamics_net = DynamicsNet(q_dim=dim, p_dim=dim, num_layers=num_layers, hidden_dim=hidden_dim)
+        self.mass_net = MassNet(q_dim=dim, num_layers=1, hidden_dim=50)
+        self.dynamics_net = DynamicsNet(q_dim=dim, p_dim=dim, num_layers=2, hidden_dim=50)
 
     def tril_Minv(self, q):
         """
