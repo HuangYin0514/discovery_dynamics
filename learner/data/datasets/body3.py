@@ -30,7 +30,7 @@ class Body3(BaseBodyDataset, nn.Module):
 
         self.train_num = train_num
         self.test_num = test_num
-        self.dataset_url = 'https://drive.google.com/file/d/1C91C1C8HR8Ryu0MO1Z_0kTpAXXm3sf8L/view?usp=share_link'
+        self.dataset_url = 'https://drive.google.com/file/d/1rZDGAaeuJYnIvfvwEX1WtwlKLWjeRW1D/view?usp=share_link'
 
         self.__init_dynamic_variable(obj, dim)
 
