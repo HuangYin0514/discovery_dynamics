@@ -51,7 +51,6 @@ class DynamicsNet(nn.Module):
         return out
 
 
-
 class PotentialEnergyCell(nn.Module):
     def __init__(self, input_dim, hidden_dim, output_dim, num_layers=1, act=nn.Tanh):
         super(PotentialEnergyCell, self).__init__()
@@ -62,6 +61,7 @@ class PotentialEnergyCell(nn.Module):
     def forward(self, x):
         y = self.mlp(x)
         return y
+
 
 class HnnMod_body3(LossNN):
     """
@@ -78,10 +78,7 @@ class HnnMod_body3(LossNN):
         self.dim = dim
         self.dof = int(obj * dim)
 
-        self.global_dim =2
-        # self.mass_net = MassNet(q_dim=dim, num_layers=1, hidden_dim=50)
-        # self.dynamics_net = DynamicsNet(q_dim=q_dim, p_dim=p_dim, num_layers=1, hidden_dim=200)
-        self.dynamics_net = DynamicsNet(q_dim=dim, p_dim=dim, num_layers=1, hidden_dim=50)
+        self.global_dim = 2
 
         self.Potential1 = PotentialEnergyCell(input_dim=self.global_dim,
                                               hidden_dim=50,
@@ -161,7 +158,7 @@ class HnnMod_body3(LossNN):
                      x_global[:, i * self.global_dim: (i + 1) * self.global_dim]],
                     dim=1)
                 U += self.co2 * (
-                            0.5 * self.mass(self.Potential2(x_ij)) + 0.5 * self.mass(self.Potential2(x_ji)))
+                        0.5 * self.mass(self.Potential2(x_ij)) + 0.5 * self.mass(self.Potential2(x_ji)))
 
         dqH = dfx(U.sum(), q)
 
