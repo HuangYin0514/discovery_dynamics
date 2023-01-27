@@ -60,8 +60,8 @@ class Body3(BaseBodyDataset, nn.Module):
         assert len(coords) == self._dof * 2
         coords = coords.clone().detach().requires_grad_(True)
         grad_ham = dfx(self.energy_fn(coords), coords)
-        q, p = grad_ham[self._dof:], -grad_ham[:self._dof]
-        return torch.cat([q, p], dim=0).clone().detach()
+        dq, dp = grad_ham[self._dof:], -grad_ham[:self._dof]
+        return torch.cat([dq, dp], dim=0).clone().detach()
 
     def kinetic(self, coords):
         assert len(coords) == self._dof * 2

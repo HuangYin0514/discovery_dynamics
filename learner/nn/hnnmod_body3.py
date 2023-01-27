@@ -39,14 +39,14 @@ class DynamicsNet(nn.Module):
         self.cos_sin_net = CosSinNet()
 
         self.dynamics_net = nn.Sequential(
-            MLP(input_dim=q_dim * 3 + p_dim+q_dim, hidden_dim=hidden_dim, output_dim=p_dim, num_layers=num_layers,
+            MLP(input_dim=q_dim * 3 + p_dim + q_dim, hidden_dim=hidden_dim, output_dim=p_dim, num_layers=num_layers,
                 act=nn.Tanh),
             ReshapeNet(-1, p_dim)
         )
 
-    def forward(self, q, p,dqH):
+    def forward(self, q, p, dqH):
         cos_sin_q = self.cos_sin_net(q)
-        x = torch.cat([cos_sin_q, q, p,dqH], dim=1)
+        x = torch.cat([cos_sin_q, q, p, dqH], dim=1)
         out = self.dynamics_net(x)
         return out
 
@@ -142,9 +142,10 @@ class HnnMod_body3(LossNN):
             # dp_dt = A(q, v)
             # dp_dt[:, i * self.dim:(i + 1) * self.dim] = self.dynamics_net(q[:, i * self.dim:(i + 1) * self.dim],
             #                                                               p[:, i * self.dim:(i + 1) * self.dim])
-            dp_dt[:, i * self.dim:(i + 1) * self.dim] = self.dynamics_net(q[:, i * self.dim:(i + 1) * self.dim],
-                                                                          p[:, i * self.dim:(i + 1) * self.dim],
-                                                                          dqH[:, i * self.dim:(i + 1) * self.dim])
+            # dp_dt[:, i * self.dim:(i + 1) * self.dim] = self.dynamics_net(q[:, i * self.dim:(i + 1) * self.dim],
+            #                                                               p[:, i * self.dim:(i + 1) * self.dim],
+            #                                                               dqH[:, i * self.dim:(i + 1) * self.dim])
+            dp_dt[:, i * self.dim:(i + 1) * self.dim] = -dqH[:, i * self.dim:(i + 1) * self.dim]
             # dp_dt = self.dynamics_net(q, p)
             dz_dt = torch.cat([dq_dt, dp_dt], dim=-1)
         return dz_dt
