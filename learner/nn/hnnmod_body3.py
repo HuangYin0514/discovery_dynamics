@@ -121,7 +121,6 @@ class HnnMod_body3(LossNN):
                 U += self.co2 * (
                         0.5 * self.mass(self.Potential2(x_ij)) + 0.5 * self.mass(self.Potential2(x_ji)))
 
-
         dqH = dfx(U.sum(), q)
 
         # Calculate the Derivative
