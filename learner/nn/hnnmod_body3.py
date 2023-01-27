@@ -39,14 +39,14 @@ class DynamicsNet(nn.Module):
         self.cos_sin_net = CosSinNet()
 
         self.dynamics_net = nn.Sequential(
-            MLP(input_dim=q_dim * 2 + p_dim, hidden_dim=hidden_dim, output_dim=p_dim, num_layers=num_layers,
+            MLP(input_dim=q_dim * 3 + p_dim, hidden_dim=hidden_dim, output_dim=p_dim, num_layers=num_layers,
                 act=nn.Tanh),
             ReshapeNet(-1, p_dim)
         )
 
     def forward(self, q, p):
-        q = self.cos_sin_net(q)
-        x = torch.cat([q, p], dim=1)
+        cos_sin_q = self.cos_sin_net(q)
+        x = torch.cat([cos_sin_q, q, p], dim=1)
         out = self.dynamics_net(x)
         return out
 
@@ -66,9 +66,9 @@ class HnnMod_body3(LossNN):
         self.dim = dim
         self.dof = int(obj * dim)
 
-        self.mass_net = MassNet(q_dim=dim, num_layers=1, hidden_dim=50)
-        self.dynamics_net = DynamicsNet(q_dim=q_dim, p_dim=p_dim, num_layers=1, hidden_dim=200)
-        # self.dynamics_net = DynamicsNet(q_dim=dim, p_dim=dim, nuzm_layers=1, hidden_dim=200)
+        # self.mass_net = MassNet(q_dim=dim, num_layers=1, hidden_dim=50)
+        # self.dynamics_net = DynamicsNet(q_dim=q_dim, p_dim=p_dim, num_layers=1, hidden_dim=200)
+        self.dynamics_net = DynamicsNet(q_dim=dim, p_dim=dim, num_layers=1, hidden_dim=200)
 
     def tril_Minv(self, q):
         """
@@ -128,15 +128,14 @@ class HnnMod_body3(LossNN):
 
         for i in range(self.obj):
             # Minv = self.Minv(q[:, i * self.dim:(i + 1) * self.dim])
-            dq_dt[:, i * self.dim:(i + 1) * self.dim] = p[:,  i * self.dim:
-                                                              (i + 1) * self.dim]/1  # dq_dt = v = Minv @ p
+            # dq_dt = v = Minv @ p
+            dq_dt[:, i * self.dim:(i + 1) * self.dim] = p[:, i * self.dim:  (i + 1) * self.dim] / 1
             # dp_dt = A(q, v)
             # dp_dt[:, i * self.dim:(i + 1) * self.dim] = self.dynamics_net(q[:, i * self.dim:(i + 1) * self.dim],
             #                                                               p[:, i * self.dim:(i + 1) * self.dim])
-            # dp_dt[:, i * self.dim:(i + 1) * self.dim] = self.dynamics_net(q[:, i * self.dim:(i + 1) * self.dim],
-            #                                                               p[:, i * self.dim:(i + 1) * self.dim])
-        dp_dt = self.dynamics_net(q,
-                                                                      p)
+            dp_dt[:, i * self.dim:(i + 1) * self.dim] = self.dynamics_net(q[:, i * self.dim:(i + 1) * self.dim],
+                                                                          p[:, i * self.dim:(i + 1) * self.dim])
+        # dp_dt = self.dynamics_net(q, p)
         dz_dt = torch.cat([dq_dt, dp_dt], dim=-1)
         return dz_dt
 
