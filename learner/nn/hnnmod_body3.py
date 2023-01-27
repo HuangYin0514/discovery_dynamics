@@ -51,6 +51,18 @@ class DynamicsNet(nn.Module):
         return out
 
 
+
+class PotentialEnergyCell(nn.Module):
+    def __init__(self, input_dim, hidden_dim, output_dim, num_layers=1, act=nn.Tanh):
+        super(PotentialEnergyCell, self).__init__()
+
+        self.mlp = MLP(input_dim=input_dim, hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers,
+                       act=act)
+
+    def forward(self, x):
+        y = self.mlp(x)
+        return y
+
 class HnnMod_body3(LossNN):
     """
     Mechanics neural networks.
@@ -66,9 +78,25 @@ class HnnMod_body3(LossNN):
         self.dim = dim
         self.dof = int(obj * dim)
 
+        self.global_dim =2
         # self.mass_net = MassNet(q_dim=dim, num_layers=1, hidden_dim=50)
         # self.dynamics_net = DynamicsNet(q_dim=q_dim, p_dim=p_dim, num_layers=1, hidden_dim=200)
         self.dynamics_net = DynamicsNet(q_dim=dim, p_dim=dim, num_layers=1, hidden_dim=50)
+
+        self.Potential1 = PotentialEnergyCell(input_dim=self.global_dim,
+                                              hidden_dim=50,
+                                              output_dim=1,
+                                              num_layers=1, act=nn.Tanh)
+        self.Potential2 = PotentialEnergyCell(input_dim=self.global_dim * 2,
+                                              hidden_dim=50,
+                                              output_dim=1,
+                                              num_layers=1, act=nn.Tanh)
+
+        self.co1 = torch.nn.Parameter(torch.ones(1, dtype=self.Dtype, device=self.Device) * 0.5)
+        self.co2 = torch.nn.Parameter(torch.ones(1, dtype=self.Dtype, device=self.Device) * 0.5)
+
+        self.mass = torch.nn.Linear(1, 1, bias=False)
+        torch.nn.init.ones_(self.mass.weight)
 
     def tril_Minv(self, q):
         """
