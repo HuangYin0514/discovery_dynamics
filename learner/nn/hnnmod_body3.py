@@ -104,19 +104,6 @@ class HnnMod_body3(LossNN):
         return Minv
 
     def forward(self, t, x):
-        """
-        Parameters
-        ----------
-        t : torch.Tensor
-            Time.
-        x : torch.Tensor
-            State.
-
-        Returns
-        -------
-        torch.Tensor
-            Loss.
-        """
         assert (x.ndim == 2)
 
         bs = x.size(0)
@@ -136,20 +123,15 @@ class HnnMod_body3(LossNN):
         dp_dt = torch.zeros((bs, self.dof), dtype=self.Dtype, device=self.Device)
 
         for i in range(self.obj):
-            # Minv = self.Minv(q[:, i * self.dim:(i + 1) * self.dim])
             # dq_dt = v = Minv @ p
             dq_dt[:, i * self.dim:(i + 1) * self.dim] = p[:, i * self.dim:  (i + 1) * self.dim] / 1
             # dp_dt = A(q, v)
             # dp_dt[:, i * self.dim:(i + 1) * self.dim] = self.dynamics_net(q[:, i * self.dim:(i + 1) * self.dim],
-            #                                                               p[:, i * self.dim:(i + 1) * self.dim])
-            # dp_dt[:, i * self.dim:(i + 1) * self.dim] = self.dynamics_net(q[:, i * self.dim:(i + 1) * self.dim],
             #                                                               p[:, i * self.dim:(i + 1) * self.dim],
             #                                                               dqH[:, i * self.dim:(i + 1) * self.dim])
             dp_dt[:, i * self.dim:(i + 1) * self.dim] = -dqH[:, i * self.dim:(i + 1) * self.dim]
-            # dp_dt = self.dynamics_net(q, p)
 
         dz_dt = torch.cat([dq_dt, dp_dt], dim=-1)
-        print('i am expecting')
         return dz_dt
 
     def integrate(self, X0, t):
