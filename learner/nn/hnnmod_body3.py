@@ -145,7 +145,7 @@ class HnnMod_body3(LossNN):
             # dp_dt[:, i * self.dim:(i + 1) * self.dim] = self.dynamics_net(q[:, i * self.dim:(i + 1) * self.dim],
             #                                                               p[:, i * self.dim:(i + 1) * self.dim],
             #                                                               dqH[:, i * self.dim:(i + 1) * self.dim])
-            dp_dt[:, i * self.dim:(i + 1) * self.dim] = -dqH[:, i * self.dim:(i + 1) * self.dim]
+            dp_dt[:, i * self.dim:(i + 1) * self.dim] = dqH[:, i * self.dim:(i + 1) * self.dim]
             # dp_dt = self.dynamics_net(q, p)
             dz_dt = torch.cat([dq_dt, dp_dt], dim=-1)
         return dz_dt
