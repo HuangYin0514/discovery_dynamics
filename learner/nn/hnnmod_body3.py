@@ -67,7 +67,8 @@ class HnnMod_body3(LossNN):
         self.dof = int(obj * dim)
 
         self.mass_net = MassNet(q_dim=dim, num_layers=1, hidden_dim=50)
-        self.dynamics_net = DynamicsNet(q_dim=dim, p_dim=dim, num_layers=1, hidden_dim=200)
+        self.dynamics_net = DynamicsNet(q_dim=q_dim, p_dim=p_dim, num_layers=1, hidden_dim=200)
+        # self.dynamics_net = DynamicsNet(q_dim=dim, p_dim=dim, nuzm_layers=1, hidden_dim=200)
 
     def tril_Minv(self, q):
         """
@@ -130,9 +131,12 @@ class HnnMod_body3(LossNN):
             dq_dt[:, i * self.dim:(i + 1) * self.dim] = p[:,  i * self.dim:
                                                               (i + 1) * self.dim]/1  # dq_dt = v = Minv @ p
             # dp_dt = A(q, v)
-            dp_dt[:, i * self.dim:(i + 1) * self.dim] = self.dynamics_net(q[:, i * self.dim:(i + 1) * self.dim],
-                                                                          p[:, i * self.dim:(i + 1) * self.dim])
-
+            # dp_dt[:, i * self.dim:(i + 1) * self.dim] = self.dynamics_net(q[:, i * self.dim:(i + 1) * self.dim],
+            #                                                               p[:, i * self.dim:(i + 1) * self.dim])
+            # dp_dt[:, i * self.dim:(i + 1) * self.dim] = self.dynamics_net(q[:, i * self.dim:(i + 1) * self.dim],
+            #                                                               p[:, i * self.dim:(i + 1) * self.dim])
+        dp_dt = self.dynamics_net(q,
+                                                                      p)
         dz_dt = torch.cat([dq_dt, dp_dt], dim=-1)
         return dz_dt
 
