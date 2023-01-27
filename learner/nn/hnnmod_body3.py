@@ -105,7 +105,9 @@ class HnnMod_body3(LossNN):
         # Calculate the potential energy for i-th element
         U = 0.
         for i in range(self.obj):
-            U += self.co1 * self.mass(
+            # U += self.co1 * self.mass(
+            #     self.Potential1(x_global[:, i * self.global_dim: (i + 1) * self.global_dim]))
+            U += self.co1 * (
                 self.Potential1(x_global[:, i * self.global_dim: (i + 1) * self.global_dim]))
 
         for i in range(self.obj):
@@ -118,8 +120,10 @@ class HnnMod_body3(LossNN):
                     [x_global[:, j * self.global_dim: (j + 1) * self.global_dim],
                      x_global[:, i * self.global_dim: (i + 1) * self.global_dim]],
                     dim=1)
+                # U += self.co2 * (
+                #         0.5 * self.mass(self.Potential2(x_ij)) + 0.5 * self.mass(self.Potential2(x_ji)))
                 U += self.co2 * (
-                        0.5 * self.mass(self.Potential2(x_ij)) + 0.5 * self.mass(self.Potential2(x_ji)))
+                        0.5 * (self.Potential2(x_ij)) + 0.5 * self.mass(self.Potential2(x_ji)))
 
         dqH = dfx(U.sum(), q)
 
@@ -128,7 +132,7 @@ class HnnMod_body3(LossNN):
         dp_dt = torch.zeros((bs, self.dof), dtype=self.Dtype, device=self.Device)
         for i in range(self.obj):
             # dq_dt = v = Minv @ p
-            dq_dt[:, i * self.dim:(i + 1) * self.dim] = self.mass(v_global[:, i * self.dim:  (i + 1) * self.dim])
+            dq_dt[:, i * self.dim:(i + 1) * self.dim] = v_global[:, i * self.dim:  (i + 1) * self.dim]
             # dp_dt = A(q, v)
             dp_dt[:, i * self.dim:(i + 1) * self.dim] = -dqH[:, i * self.dim:(i + 1) * self.dim]
         dz_dt = torch.cat([dq_dt, dp_dt], dim=-1)
