@@ -5,7 +5,6 @@
 @time: 2023/1/18 4:41 PM
 @desc:
 """
-import numpy as np
 import torch
 from torch import nn, Tensor
 
@@ -13,8 +12,6 @@ from .base_module import LossNN
 from .mlp import MLP
 from .utils_nn import CosSinNet, ReshapeNet
 from ..integrator import ODESolver
-from ..utils import dfx, lazy_property
-
 
 
 class MassNet(nn.Module):
