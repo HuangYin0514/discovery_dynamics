@@ -114,8 +114,8 @@ class HnnMod_body3(LossNN):
         for i in range(self.obj):
             for j in range(i):
                 U = U - 1 / (
-                        (q[2 * i] - q[2 * j]) ** 2 +
-                        (q[2 * i + 1] - q[2 * j + 1]) ** 2) ** 0.5
+                        (q[:, 2 * i] - q[:, 2 * j]) ** 2 +
+                        (q[:, 2 * i + 1] - q[:, 2 * j + 1]) ** 2) ** 0.5
 
         dqH = dfx(U.sum(), q)
 
