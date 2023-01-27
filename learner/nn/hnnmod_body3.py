@@ -149,6 +149,7 @@ class HnnMod_body3(LossNN):
             # dp_dt = self.dynamics_net(q, p)
 
         dz_dt = torch.cat([dq_dt, dp_dt], dim=-1)
+        print('i am expecting')
         return dz_dt
 
     def integrate(self, X0, t):
