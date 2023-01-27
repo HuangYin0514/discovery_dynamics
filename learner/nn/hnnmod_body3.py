@@ -67,7 +67,7 @@ class HnnMod_body3(LossNN):
         self.dof = int(obj * dim)
 
         self.mass_net = MassNet(q_dim=dim, num_layers=1, hidden_dim=50)
-        self.dynamics_net = DynamicsNet(q_dim=dim, p_dim=dim, num_layers=2, hidden_dim=50)
+        self.dynamics_net = DynamicsNet(q_dim=dim, p_dim=dim, num_layers=1, hidden_dim=200)
 
     def tril_Minv(self, q):
         """
