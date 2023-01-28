@@ -76,6 +76,12 @@ class Pendulum2(BaseBodyDataset, nn.Module):
         dp1 = -(m1 + m2) * g * l1 * torch.sin(q1) - h1 + h2 * torch.sin(2 * (q1 - q2))
         dp2 = -m2 * g * l2 * torch.sin(q2) + h1 - h2 * torch.sin(2 * (q1 - q2))
 
+        # coords = coords.clone().detach().requires_grad_(True)
+        # h = self.energy_fn(coords)
+        # gradH = dfx(h, coords)
+        # dy = self.J @ gradH  # dy shape is (vector, )
+        # return dy
+
         return torch.cat([dq1, dq2, dp1, dp2], dim=0)
 
     def M(self, x):
