@@ -78,8 +78,9 @@ class HnnMod_pend2(LossNN):
         self.dof = int(obj * dim)
 
         self.global_dim = 2
+        self.global_dof = int(obj * self.global_dim)
 
-        self.mass_net = MassNet(q_dim=q_dim, num_layers=num_layers, hidden_dim=hidden_dim)
+        self.mass_net = MassNet(q_dim=self.dof, num_layers=1, hidden_dim=200)
 
         self.Potential1 = PotentialEnergyCell(input_dim=self.global_dim,
                                               hidden_dim=50,
@@ -95,13 +96,8 @@ class HnnMod_pend2(LossNN):
 
         self.mass = torch.nn.Linear(1, 1, bias=False)
         torch.nn.init.ones_(self.mass.weight)
+
     def tril_Minv(self, q):
-        """
-        Computes the inverse of a matrix M^{-1}(q)
-        But only get the lower triangle of the inverse matrix  M^{-1}(q)
-        to get lower triangle of  M^{-1}(q)  = [x, 0]
-                                               [x, x]
-        """
         mass_net_q = self.mass_net(q)
         res = torch.triu(mass_net_q, diagonal=1)
         res = res + torch.diag_embed(
@@ -113,14 +109,6 @@ class HnnMod_pend2(LossNN):
         return res
 
     def Minv(self, q: Tensor, eps=1e-4) -> Tensor:
-        """Compute the learned inverse mass matrix M^{-1}(q)
-            M = LU
-            M^{-1} = (LU)^{-1} = U^{-1} @ L^{-1}
-            M^{-1}(q) = [x, 0] @ [x, x]
-                        [x, x]   [0, x]
-        Args:
-            q: bs x D Tensor representing the position
-        """
         assert q.ndim == 2
         lower_triangular = self.tril_Minv(q)
         assert lower_triangular.ndim == 3
@@ -130,12 +118,22 @@ class HnnMod_pend2(LossNN):
 
     def forward(self, t, x):
         bs = x.size(0)
-        q, p = x.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
+        x, p = x.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
 
-        x_global = q
-        v_global = p
+        # position transformations ----------------------------------------------------------------
+        x_global = torch.zeros((bs, self.global_dof), dtype=self.Dtype, device=self.Device)
+        x_origin = torch.zeros((bs, self.global_dof), dtype=self.Dtype, device=self.Device)
+        for i in range(self.obj):
+            for j in range(i):
+                x_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim] += x_global[:, (j) * self.global_dim:
+                                                                                             (j + 1) * self.global_dim]
+            x_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = \
+                x_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim] + torch.cat([
+                    torch.sin(x[:, (i) * self.dim: (i + 1) * self.dim]),
+                    -torch.cos(x[:, (i) * self.dim: (i + 1) * self.dim])
+                ], dim=1)
 
-        # Calculate the potential energy for i-th element
+        # Calculate the potential energy for i-th element ------------------------------------------------------------
         U = 0.
         for i in range(self.obj):
             U += self.co1 * self.mass(
@@ -154,20 +152,16 @@ class HnnMod_pend2(LossNN):
                 U += self.co2 * (
                         0.5 * self.mass(self.Potential2(x_ij)) + 0.5 * self.mass(self.Potential2(x_ji)))
 
-        dqH = dfx(U.sum(), q)
+        dqH = dfx(U.sum(), x)
 
-        # Calculate the velocity
-        # dq_dt = v = Minv @ p
-        Minv = self.Minv(q)
-        v_global = Minv.matmul(p.unsqueeze(-1)).squeeze(-1)
+        # Calculate the velocity （dq_dt = v = Minv @ p）--------------------------------------------------------------
+        v_global = self.Minv(x).matmul(p.unsqueeze(-1)).squeeze(-1)
 
-        # Calculate the Derivative
+        # Calculate the Derivative ----------------------------------------------------------------
         dq_dt = torch.zeros((bs, self.dof), dtype=self.Dtype, device=self.Device)
         dp_dt = torch.zeros((bs, self.dof), dtype=self.Dtype, device=self.Device)
         for i in range(self.obj):
-            # dq_dt = v = Minv @ p
             dq_dt[:, i * self.dim:(i + 1) * self.dim] = v_global[:, i * self.dim:  (i + 1) * self.dim]
-            # dp_dt = A(q, v)
             dp_dt[:, i * self.dim:(i + 1) * self.dim] = -dqH[:, i * self.dim:(i + 1) * self.dim]
         dz_dt = torch.cat([dq_dt, dp_dt], dim=-1)
 
