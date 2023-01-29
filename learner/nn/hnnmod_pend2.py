@@ -135,12 +135,12 @@ class HnnMod_pend2(LossNN):
                     -torch.cos(x[:, (i) * self.dim: (i + 1) * self.dim])
                 ], dim=1)
 
-
-        # U = 0.
+        #
+        # U2 = 0.
         # y = 0.
         # for i in range(self.obj):
         #     y = y - torch.cos(x[:, i])
-        #     U = U + 9.8 * y
+        #     U2 = U2 + 9.8 * y
 
         # Calculate the potential energy for i-th element ------------------------------------------------------------
         U = 0.
@@ -163,7 +163,7 @@ class HnnMod_pend2(LossNN):
 
         # Calculate the kinetic --------------------------------------------------------------
         T = 0.
-        T = (0.5 * p.unsqueeze(1) @ self.Minv(x) @ p.unsqueeze(-1)).squeeze(-1).squeeze(-1)
+        T = (0.5 * p.unsqueeze(1) @ self.Minv(x) @ p.unsqueeze(-1)).squeeze(-1)
 
         # Calculate the Hamilton Derivative --------------------------------------------------------------
         H = U + T
