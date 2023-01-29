@@ -97,25 +97,6 @@ class HnnMod_pend2(LossNN):
         self.mass = torch.nn.Linear(1, 1, bias=False)
         torch.nn.init.ones_(self.mass.weight)
 
-    # def tril_Minv(self, q):
-    #     mass_net_q = self.mass_net(q)
-    #     res = torch.triu(mass_net_q, diagonal=1)
-    #     res = res + torch.diag_embed(
-    #         torch.nn.functional.softplus(torch.diagonal(mass_net_q, dim1=-2, dim2=-1)),
-    #         dim1=-2,
-    #         dim2=-1,
-    #     )
-    #     res = res.transpose(-1, -2)  # Make lower triangular
-    #     return res
-    #
-    # def Minv(self, q: Tensor, eps=1e-4) -> Tensor:
-    #     assert q.ndim == 2
-    #     lower_triangular = self.tril_Minv(q)
-    #     assert lower_triangular.ndim == 3
-    #     diag_noise = eps * torch.eye(lower_triangular.size(-1), dtype=q.dtype, device=q.device)
-    #     Minv = lower_triangular.matmul(lower_triangular.transpose(-2, -1)) + diag_noise
-    #     return Minv
-
     def M(self, x):
         """
         ref: Simplifying Hamiltonian and Lagrangian Neural Networks via Explicit Constraints
@@ -154,24 +135,31 @@ class HnnMod_pend2(LossNN):
                     -torch.cos(x[:, (i) * self.dim: (i + 1) * self.dim])
                 ], dim=1)
 
+
+        # U = 0.
+        # y = 0.
+        # for i in range(self.obj):
+        #     y = y - torch.cos(x[:, i])
+        #     U = U + 9.8 * y
+
         # Calculate the potential energy for i-th element ------------------------------------------------------------
         U = 0.
         for i in range(self.obj):
             U += self.co1 * self.mass(
                 self.Potential1(x_global[:, i * self.global_dim: (i + 1) * self.global_dim]))
-
-        for i in range(self.obj):
-            for j in range(i):
-                x_ij = torch.cat(
-                    [x_global[:, i * self.global_dim: (i + 1) * self.global_dim],
-                     x_global[:, j * self.global_dim: (j + 1) * self.global_dim]],
-                    dim=1)
-                x_ji = torch.cat(
-                    [x_global[:, j * self.global_dim: (j + 1) * self.global_dim],
-                     x_global[:, i * self.global_dim: (i + 1) * self.global_dim]],
-                    dim=1)
-                U += self.co2 * (
-                        0.5 * self.mass(self.Potential2(x_ij)) + 0.5 * self.mass(self.Potential2(x_ji)))
+        #
+        # for i in range(self.obj):
+        #     for j in range(i):
+        #         x_ij = torch.cat(
+        #             [x_global[:, i * self.global_dim: (i + 1) * self.global_dim],
+        #              x_global[:, j * self.global_dim: (j + 1) * self.global_dim]],
+        #             dim=1)
+        #         x_ji = torch.cat(
+        #             [x_global[:, j * self.global_dim: (j + 1) * self.global_dim],
+        #              x_global[:, i * self.global_dim: (i + 1) * self.global_dim]],
+        #             dim=1)
+        #         U += self.co2 * (
+        #                 0.5 * self.mass(self.Potential2(x_ij)) + 0.5 * self.mass(self.Potential2(x_ji)))
 
         # Calculate the kinetic --------------------------------------------------------------
         T = 0.
