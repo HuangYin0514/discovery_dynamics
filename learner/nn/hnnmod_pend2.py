@@ -91,7 +91,7 @@ class HnnMod_pend2(LossNN):
         self.global_dim = 2
         self.global_dof = int(obj * self.global_dim)
 
-        self.mass_net = MassNet(q_dim=self.dof, num_layers=1, hidden_dim=100)
+        self.mass_net = MassNet(q_dim=self.dof, num_layers=1, hidden_dim=50)
         self.global4x = GlobalPositionTransform(input_dim=self.dim,
                                                 hidden_dim=16,
                                                 output_dim=self.global_dim,
