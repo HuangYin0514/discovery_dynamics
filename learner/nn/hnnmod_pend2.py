@@ -148,18 +148,18 @@ class HnnMod_pend2(LossNN):
             U += self.co1 * self.mass(
                 self.Potential1(x_global[:, i * self.global_dim: (i + 1) * self.global_dim]))
 
-        # for i in range(self.obj):
-        #     for j in range(i):
-        #         x_ij = torch.cat(
-        #             [x_global[:, i * self.global_dim: (i + 1) * self.global_dim],
-        #              x_global[:, j * self.global_dim: (j + 1) * self.global_dim]],
-        #             dim=1)
-        #         x_ji = torch.cat(
-        #             [x_global[:, j * self.global_dim: (j + 1) * self.global_dim],
-        #              x_global[:, i * self.global_dim: (i + 1) * self.global_dim]],
-        #             dim=1)
-        #         U += self.co2 * (
-        #                 0.5 * self.mass(self.Potential2(x_ij)) + 0.5 * self.mass(self.Potential2(x_ji)))
+        for i in range(self.obj):
+            for j in range(i):
+                x_ij = torch.cat(
+                    [x_global[:, i * self.global_dim: (i + 1) * self.global_dim],
+                     x_global[:, j * self.global_dim: (j + 1) * self.global_dim]],
+                    dim=1)
+                x_ji = torch.cat(
+                    [x_global[:, j * self.global_dim: (j + 1) * self.global_dim],
+                     x_global[:, i * self.global_dim: (i + 1) * self.global_dim]],
+                    dim=1)
+                U += self.co2 * (
+                        0.5 * self.mass(self.Potential2(x_ij)) + 0.5 * self.mass(self.Potential2(x_ji)))
 
         # Calculate the kinetic --------------------------------------------------------------
         T = 0.
