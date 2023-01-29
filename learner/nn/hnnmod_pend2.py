@@ -194,7 +194,8 @@ class HnnMod_pend2(LossNN):
         dq_dt = torch.zeros((bs, self.dof), dtype=self.Dtype, device=self.Device)
         dp_dt = torch.zeros((bs, self.dof), dtype=self.Dtype, device=self.Device)
         for i in range(self.obj):
-            dq_dt[:, i * self.dim:(i + 1) * self.dim] = v_global[:, i * self.dim: (i + 1) * self.dim]
+            # dq_dt[:, i * self.dim:(i + 1) * self.dim] = v_global[:, i * self.dim: (i + 1) * self.dim]
+            dq_dt[:, i * self.dim:(i + 1) * self.dim] = dpH[:, i * self.dim: (i + 1) * self.dim]
             dp_dt[:, i * self.dim:(i + 1) * self.dim] = -dqH[:, i * self.dim:(i + 1) * self.dim]
         dz_dt = torch.cat([dq_dt, dp_dt], dim=-1)
 
