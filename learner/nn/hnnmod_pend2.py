@@ -91,7 +91,7 @@ class HnnMod_pend2(LossNN):
         self.global_dim = 2
         self.global_dof = int(obj * self.global_dim)
 
-        self.mass_net = MassNet(q_dim=self.dof, num_layers=1, hidden_dim=200)
+        self.mass_net = MassNet(q_dim=self.dof, num_layers=1, hidden_dim=100)
         self.global4x = GlobalPositionTransform(input_dim=self.dim,
                                                 hidden_dim=16,
                                                 output_dim=self.global_dim,
@@ -159,8 +159,6 @@ class HnnMod_pend2(LossNN):
             x_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = self.global4x(
                 x[:, (i) * self.dim: (i + 1) * self.dim],
                 x_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim])
-
-
 
         # Calculate the potential energy for i-th element ------------------------------------------------------------
         U = 0.
