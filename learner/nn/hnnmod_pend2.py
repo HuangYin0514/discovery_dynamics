@@ -10,7 +10,7 @@ from torch import nn, Tensor
 
 from .base_module import LossNN
 from .mlp import MLP
-from .utils_nn import CosSinNet, ReshapeNet
+from .utils_nn import CosSinNet, ReshapeNet, Identity
 from ..integrator import ODESolver
 from ..utils import dfx
 
@@ -85,11 +85,11 @@ class HnnMod_pend2(LossNN):
         self.Potential1 = PotentialEnergyCell(input_dim=self.global_dim,
                                               hidden_dim=50,
                                               output_dim=1,
-                                              num_layers=1, act=nn.Tanh)
+                                              num_layers=1, act=Identity)
         self.Potential2 = PotentialEnergyCell(input_dim=self.global_dim * 2,
                                               hidden_dim=50,
                                               output_dim=1,
-                                              num_layers=1, act=nn.Tanh)
+                                              num_layers=1, act=Identity)
 
         self.co1 = torch.nn.Parameter(torch.ones(1, dtype=self.Dtype, device=self.Device) * 0.5)
         self.co2 = torch.nn.Parameter(torch.ones(1, dtype=self.Dtype, device=self.Device) * 0.5)
