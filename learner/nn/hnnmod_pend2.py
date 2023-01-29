@@ -147,7 +147,7 @@ class HnnMod_pend2(LossNN):
         for i in range(self.obj):
             U += self.co1 * self.mass(
                 self.Potential1(x_global[:, i * self.global_dim: (i + 1) * self.global_dim]))
-        #
+
         # for i in range(self.obj):
         #     for j in range(i):
         #         x_ij = torch.cat(
