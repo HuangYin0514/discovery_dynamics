@@ -14,6 +14,17 @@ from .utils_nn import CosSinNet, ReshapeNet, Identity
 from ..integrator import ODESolver
 from ..utils import dfx
 
+class GlobalPositionTransform(nn.Module):
+    """Doing coordinate transformation using a MLP"""
+
+    def __init__(self, input_dim, hidden_dim, output_dim, num_layers=1, act=nn.Tanh):
+        super(GlobalPositionTransform, self).__init__()
+        self.mlp = MLP(input_dim=input_dim, hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers,
+                       act=act)
+
+    def forward(self, x, x_0):
+        y = self.mlp(x) + x_0
+        return y
 
 class MassNet(nn.Module):
     def __init__(self, q_dim, num_layers=3, hidden_dim=30):
@@ -81,7 +92,10 @@ class HnnMod_pend2(LossNN):
         self.global_dof = int(obj * self.global_dim)
 
         self.mass_net = MassNet(q_dim=self.dof, num_layers=1, hidden_dim=200)
-
+        self.global4x = GlobalPositionTransform(input_dim=self.dim,
+                                                hidden_dim=16,
+                                                output_dim=self.global_dim,
+                                                num_layers=1, act=nn.Tanh)
         self.Potential1 = PotentialEnergyCell(input_dim=self.global_dim,
                                               hidden_dim=50,
                                               output_dim=1,
@@ -142,18 +156,11 @@ class HnnMod_pend2(LossNN):
             for j in range(i):
                 x_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim] += x_global[:, (j) * self.global_dim:
                                                                                              (j + 1) * self.global_dim]
-            x_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = \
-                x_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim] + torch.cat([
-                    torch.sin(x[:, (i) * self.dim: (i + 1) * self.dim]),
-                    -torch.cos(x[:, (i) * self.dim: (i + 1) * self.dim])
-                ], dim=1)
+            x_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = self.global4x(
+                x[:, (i) * self.dim: (i + 1) * self.dim],
+                x_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim])
 
-        #
-        # U2 = 0.
-        # y = 0.
-        # for i in range(self.obj):
-        #     y = y - torch.cos(x[:, i])
-        #     U2 = U2 + 9.8 * y
+
 
         # Calculate the potential energy for i-th element ------------------------------------------------------------
         U = 0.
