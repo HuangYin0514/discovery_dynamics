@@ -142,57 +142,46 @@ class HnnMod_pend2(LossNN):
         x, p = x.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
 
         # position transformations ----------------------------------------------------------------
-        x_global = torch.zeros((bs, self.global_dof), dtype=self.Dtype, device=self.Device)
-        x_origin = torch.zeros((bs, self.global_dof), dtype=self.Dtype, device=self.Device)
-        for i in range(self.obj):
-            for j in range(i):
-                x_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim] += x_global[:, (j) * self.global_dim:
-                                                                                             (j + 1) * self.global_dim]
-            x_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = \
-                x_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim] + torch.cat([
-                    torch.sin(x[:, (i) * self.dim: (i + 1) * self.dim]),
-                    -torch.cos(x[:, (i) * self.dim: (i + 1) * self.dim])
-                ], dim=1)
-
-        # Calculate the potential energy for i-th element ------------------------------------------------------------
-        # U = 0.
-        # for i in range(self.obj):
-        #     U += self.co1 * self.mass(
-        #         self.Potential1(x_global[:, i * self.global_dim: (i + 1) * self.global_dim]))
-        #
+        # x_global = torch.zeros((bs, self.global_dof), dtype=self.Dtype, device=self.Device)
+        # x_origin = torch.zeros((bs, self.global_dof), dtype=self.Dtype, device=self.Device)
         # for i in range(self.obj):
         #     for j in range(i):
-        #         x_ij = torch.cat(
-        #             [x_global[:, i * self.global_dim: (i + 1) * self.global_dim],
-        #              x_global[:, j * self.global_dim: (j + 1) * self.global_dim]],
-        #             dim=1)
-        #         x_ji = torch.cat(
-        #             [x_global[:, j * self.global_dim: (j + 1) * self.global_dim],
-        #              x_global[:, i * self.global_dim: (i + 1) * self.global_dim]],
-        #             dim=1)
-        #         U += self.co2 * (
-        #                 0.5 * self.mass(self.Potential2(x_ij)) + 0.5 * self.mass(self.Potential2(x_ji)))
+        #         x_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim] += x_global[:, (j) * self.global_dim:
+        #                                                                                      (j + 1) * self.global_dim]
+        #     x_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = \
+        #         x_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim] + torch.cat([
+        #             torch.sin(x[:, (i) * self.dim: (i + 1) * self.dim]),
+        #             -torch.cos(x[:, (i) * self.dim: (i + 1) * self.dim])
+        #         ], dim=1)
+
+        # Calculate the potential energy for i-th element ------------------------------------------------------------
         U = 0.
         y = 0.
         for i in range(self.obj):
-            y = y - torch.cos(x[:,i])
+            y = y - torch.cos(x[:, i])
             U = U + 9.8 * y
 
-        dqH = dfx(U.sum(), x)
+        # Calculate the kinetic --------------------------------------------------------------
+        T = 0.
+        T = (0.5 * p.unsqueeze(1) @ self.Minv(x) @ p.unsqueeze(-1)).squeeze(-1).squeeze(-1)
 
-        # Calculate the velocity （dq_dt = v = Minv @ p）--------------------------------------------------------------
+        # Calculate the Hamilton Derivative --------------------------------------------------------------
+        H = U + T
+        dqH = dfx(H.sum(), x)
+        dpH = dfx(H.sum(), p)
+
         v_global = self.Minv(x).matmul(p.unsqueeze(-1)).squeeze(-1)
 
         # Calculate the Derivative ----------------------------------------------------------------
         dq_dt = torch.zeros((bs, self.dof), dtype=self.Dtype, device=self.Device)
         dp_dt = torch.zeros((bs, self.dof), dtype=self.Dtype, device=self.Device)
         for i in range(self.obj):
-            dq_dt[:, i * self.dim:(i + 1) * self.dim] = v_global[:, i * self.dim:  (i + 1) * self.dim]
+            dq_dt[:, i * self.dim:(i + 1) * self.dim] = v_global[:, i * self.dim: (i + 1) * self.dim]
             dp_dt[:, i * self.dim:(i + 1) * self.dim] = -dqH[:, i * self.dim:(i + 1) * self.dim]
         dz_dt = torch.cat([dq_dt, dp_dt], dim=-1)
 
         return dz_dt
 
     def integrate(self, X0, t):
-        out = ODESolver(self, X0, t, method='dopri5').permute(1, 0, 2)  # (T, D)
+        out = ODESolver(self, X0, t, method='rk4').permute(1, 0, 2)  # (T, D)
         return out
