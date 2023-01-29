@@ -10,7 +10,7 @@ import torch
 from torch import nn
 
 from .base_body_dataset import BaseBodyDataset
-from ...utils import lazy_property
+from ...utils import lazy_property, dfx
 
 
 class Pendulum2(BaseBodyDataset, nn.Module):
@@ -76,11 +76,30 @@ class Pendulum2(BaseBodyDataset, nn.Module):
         dp1 = -(m1 + m2) * g * l1 * torch.sin(q1) - h1 + h2 * torch.sin(2 * (q1 - q2))
         dp2 = -m2 * g * l2 * torch.sin(q2) + h1 - h2 * torch.sin(2 * (q1 - q2))
 
-        # coords = coords.clone().detach().requires_grad_(True)
-        # h = self.energy_fn(coords)
-        # gradH = dfx(h, coords)
-        # dy = self.J @ gradH  # dy shape is (vector, )
+        coords = coords.clone().detach().requires_grad_(True)
+        h = self.energy_fn(coords)
+        gradH = dfx(h, coords)
+        dy = self.J @ gradH  # dy shape is (vector, )
         # return dy
+
+        coords = coords.clone().detach().requires_grad_(True)
+        x, p = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
+
+        U = 0.
+        y = 0.
+        for i in range(2):
+            y = y - torch.cos(x[i])
+            U = U + 9.8 * y
+
+        T = torch.sum(0.5 * p @ self.Minv(x) @ p)
+        dqH1 = dfx((T).sum(), x)
+        dqH2 = dfx((U).sum(), x)
+        dqH3 = dqH1 + dqH2
+        dqH = dfx((U + T).sum(), x)
+
+        v = self.Minv(x) @ p
+        res1 = torch.cat([dq1, dq2, dp1, dp2], dim=0)
+        res2 = torch.cat([v, dqH], dim=0)
 
         return torch.cat([dq1, dq2, dp1, dp2], dim=0)
 
@@ -111,18 +130,6 @@ class Pendulum2(BaseBodyDataset, nn.Module):
         x, p = torch.chunk(coords, 2, dim=0)
         T = torch.sum(0.5 * p @ self.Minv(x) @ p)
 
-        # for i in range(self._obj):
-        #     coords[self._dof + i] = coords[self._dof + i] / (self._m[i] * self._l[i] ** 2)
-        # T2 = 0.
-        # vx, vy = 0., 0.
-        # for i in range(self._obj):
-        #     vx = vx + self._l[i] * coords[self._dof + i] * np.cos(coords[i])
-        #     vy = vy + self._l[i] * coords[self._dof + i] * np.sin(coords[i])
-        #     T2 = T2 + 0.5 * self._m[i] * (np.power(vx, 2) + np.power(vy, 2))
-        #
-        # T3 = 0.
-        # for i in range(self._obj):
-        #     T3 = T3 + 0.5 * coords[self._dof + i] * coords[self._dof + i] / self._m[i]
         return T
 
     def potential(self, coords):
