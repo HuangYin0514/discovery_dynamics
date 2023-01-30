@@ -226,7 +226,7 @@ class Brain:
             # save fit history to png
             len_fit_history = len(self.fit_history)
             for idx in range(len_fit_history):
-                if idx % (len_fit_history // 3) != 0: continue
+                if idx % (len_fit_history // 3) != 0 and idx == 0: continue
                 it, test_pred, test_label = self.fit_history[idx]
                 filename = '/fig-{}-it{}.png'.format(self.taskname, it)
                 fig = plt.figure()
