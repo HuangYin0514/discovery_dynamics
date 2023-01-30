@@ -232,7 +232,7 @@ class Brain:
                 fig = plt.figure()
                 ax1 = fig.add_subplot(111)
                 ax1.plot(test_pred, 'b', label='pred states')
-                ax1.plot(test_label, 'r', label='label states')
+                ax1.plot(test_label, 'r--', label='label states')
                 ax1.legend(loc=1)
                 ax1.set_ylabel('states')
                 plt.tight_layout()
