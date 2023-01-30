@@ -73,6 +73,8 @@ class Brain:
         self.__init_brain()
         print('Training...', flush=True)
         loss_history = []
+        fit_history = []
+
         if not os.path.isdir('./' + 'training_file/' + self.taskname + '/model'):
             os.makedirs('./' + 'training_file/' + self.taskname + '/model')
 
@@ -123,6 +125,8 @@ class Brain:
                 }
                 pbar.set_postfix(postfix)
 
+                fit_history.append([i, test_pred.detach().cpu().numpy(), test_labels.detach().cpu().numpy()])
+
             #  save ---------------------------------------------------------------
             if self.save:
                 torch.save(self.net, 'training_file/' + self.taskname + '/model/model{}.pkl'.format(i))
@@ -135,6 +139,8 @@ class Brain:
         np.savetxt('training_file/' + self.taskname + '/loss.txt', loss_record)
 
         self.loss_history = np.array(loss_history)
+        self.fit_history = fit_history
+
         print('Done!', flush=True)
         return self.loss_history
 
@@ -209,12 +215,29 @@ class Brain:
             plt.tight_layout()
             plt.savefig(path + filename, format='png')
             plt.show()
-
         if info is not None:
             filename = '/info-{}.txt'.format(self.taskname)
             with open(path + filename, 'w') as f:
                 for key, value in info.items():
                     f.write('{}: {}\n'.format(key, str(value)))
+        if self.fit_history is not None:
+            fit_path = path + '/fit_history'
+            if not os.path.isdir(fit_path): os.makedirs(fit_path)
+            # save fit history to png
+            len_fit_history = len(self.fit_history)
+            for idx in range(len_fit_history):
+                if idx % (len_fit_history // 3) != 0: continue
+                it, test_pred, test_label = self.fit_history[idx]
+                filename = '/fig-{}-it{}.png'.format(self.taskname, it)
+                fig = plt.figure()
+                ax1 = fig.add_subplot(111)
+                ax1.plot(test_pred, 'b', label='pred states')
+                ax1.plot(test_label, 'r', label='label states')
+                ax1.legend(loc=1)
+                ax1.set_ylabel('states')
+                plt.tight_layout()
+                plt.savefig(fit_path + filename, format='png')
+
         for key, arg in kwargs.items():
             np.savetxt(path + '/' + key + '.txt', arg)
 
