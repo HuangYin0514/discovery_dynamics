@@ -106,14 +106,14 @@ class Brain:
             #  test ---------------------------------------------------------------
             if i % self.print_every == 0 or i == self.iterations:
 
-                for data in self.val_loader:
-                    inputs, labels = data
-                    X, t = inputs
-                    X, t = X.to(self.device), t.to(self.device)
-                    labels = labels.to(self.device)
+                for test_data in self.val_loader:
+                    test_inputs, test_labels = test_data
+                    test_X, test_t = test_inputs
+                    test_X, test_t = test_X.to(self.device), test_t.to(self.device)
+                    test_labels = test_labels.to(self.device)
 
-                    pred = self.net(t, X)  # self.net.integrate(X, t)
-                    test_loss = self.__criterion(pred, labels)
+                    test_pred = self.net(test_t, test_X)  # self.net.integrate(X, t)
+                    test_loss = self.__criterion(test_pred, test_labels)
 
                 loss_history.append([i, loss.item(), test_loss.item(), self.__optimizer.param_groups[0]['lr']])
                 postfix = {
