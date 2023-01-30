@@ -192,9 +192,11 @@ class Brain:
             fig-pend_2_hnn.txt        
             info-pend_2_hnn.txt        
         '''
+        # save model ----------------------------------------------------------------------------------
         if best_model:
             filename = '/model-{}.pkl'.format(self.taskname)
             torch.save(self.best_model.state_dict(), path + filename)
+        # save loss ----------------------------------------------------------------------------------
         if loss_history:
             # save loss history to txt
             filename = '/loss-{}.txt'.format(self.taskname)
@@ -215,11 +217,13 @@ class Brain:
             plt.tight_layout()
             plt.savefig(path + filename, format='png')
             plt.show()
+        # save train info ----------------------------------------------------------------------------------
         if info is not None:
             filename = '/info-{}.txt'.format(self.taskname)
             with open(path + filename, 'w') as f:
                 for key, value in info.items():
                     f.write('{}: {}\n'.format(key, str(value)))
+        # save fit_history ----------------------------------------------------------------------------------
         if self.fit_history is not None:
             fit_path = path + '/fit_history'
             if not os.path.isdir(fit_path): os.makedirs(fit_path)
@@ -238,7 +242,7 @@ class Brain:
                 ax1.set_ylabel('states')
                 plt.tight_layout()
                 plt.savefig(fit_path + filename, format='png')
-
+        # save other ----------------------------------------------------------------------------------
         for key, arg in kwargs.items():
             np.savetxt(path + '/' + key + '.txt', arg)
 
