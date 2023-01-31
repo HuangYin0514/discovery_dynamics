@@ -151,9 +151,9 @@ class HnnModScale_pend2(LossNN):
         x, p = x.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
 
         H_sum = 0.
-        for i in range(1,4):
-            x_scale = x * i
-            p_scale = p * i
+        for i in range(0, 4):
+            x_scale = x * 2**i
+            p_scale = p * 2**i
 
             # position transformations ----------------------------------------------------------------
             x_global = torch.zeros((bs, self.global_dof), dtype=self.Dtype, device=self.Device)
