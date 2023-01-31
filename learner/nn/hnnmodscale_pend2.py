@@ -14,17 +14,20 @@ from .utils_nn import CosSinNet, ReshapeNet, Identity
 from ..integrator import ODESolver
 from ..utils import dfx
 
+
 class GlobalPositionTransform(nn.Module):
     """Doing coordinate transformation using a MLP"""
 
     def __init__(self, input_dim, hidden_dim, output_dim, num_layers=1, act=nn.Tanh):
         super(GlobalPositionTransform, self).__init__()
-        self.mlp = MLP(input_dim=input_dim, hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers,
+        self.mlp = MLP(input_dim=input_dim*8, hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers,
                        act=act)
 
     def forward(self, x, x_0):
+        x = torch.cat([torch.sin(x), torch.cos(x), x, 2 * x, 4 * x, 8 * x, 16 * x, 32 * x],dim=1)
         y = self.mlp(x) + x_0
         return y
+
 
 class MassNet(nn.Module):
     def __init__(self, q_dim, num_layers=3, hidden_dim=30):
@@ -32,23 +35,26 @@ class MassNet(nn.Module):
 
         self.cos_sin_net = CosSinNet()
         self.net = nn.Sequential(
-            MLP(input_dim=q_dim , hidden_dim=hidden_dim, output_dim=q_dim * q_dim, num_layers=num_layers,
+            MLP(input_dim=q_dim*8, hidden_dim=hidden_dim, output_dim=q_dim * q_dim, num_layers=num_layers,
                 act=nn.Tanh),
             ReshapeNet(-1, q_dim, q_dim)
         )
 
-    def forward(self, q):
-        out = self.net(q)
+    def forward(self, x):
+        x = torch.cat([torch.sin(x), torch.cos(x), x, 2 * x, 4 * x, 8 * x, 16 * x, 32 * x],dim=1)
+        out = self.net(x)
         return out
+
 
 class PotentialEnergyCell(nn.Module):
     def __init__(self, input_dim, hidden_dim, output_dim, num_layers=1, act=nn.Tanh):
         super(PotentialEnergyCell, self).__init__()
 
-        self.mlp = MLP(input_dim=input_dim, hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers,
+        self.mlp = MLP(input_dim=input_dim*8, hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers,
                        act=act)
 
     def forward(self, x):
+        x = torch.cat([torch.sin(x), torch.cos(x), x, 2 * x, 4 * x, 8 * x, 16 * x, 32 * x],dim=1)
         y = self.mlp(x)
         return y
 
@@ -90,7 +96,6 @@ class HnnModScale_pend2(LossNN):
 
         self.mass = torch.nn.Linear(1, 1, bias=False)
         torch.nn.init.ones_(self.mass.weight)
-
 
     def tril_Minv(self, q):
         """
