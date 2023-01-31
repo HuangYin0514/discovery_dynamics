@@ -190,7 +190,7 @@ class HnnModScale_pend2(LossNN):
             T = 0.
             T = (0.5 * p_scale.unsqueeze(1) @ self.Minv(x_scale) @ p_scale.unsqueeze(-1)).squeeze(-1)
 
-            H_sum = U + T
+            H_sum += U + T
 
         # Calculate the Hamilton Derivative --------------------------------------------------------------
         dqH = dfx(H_sum.sum(), x)
