@@ -9,7 +9,7 @@ import numpy as np
 import torch
 from torch import nn
 
-from .base_body_dataset import BaseBodyDataset
+from ._base_body_dataset import BaseBodyDataset
 from ...utils import lazy_property, dfx
 
 

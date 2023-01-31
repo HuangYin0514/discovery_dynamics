@@ -8,7 +8,7 @@ from matplotlib import pyplot as plt
 from torch.optim import lr_scheduler
 from tqdm import tqdm
 
-from .nn.base_module import LossNN
+from .nn._base_module import LossNN
 from .scheduler import lr_decay_scheduler, no_scheduler
 from .utils import timing
 

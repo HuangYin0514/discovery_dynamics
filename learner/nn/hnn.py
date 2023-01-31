@@ -2,7 +2,7 @@ import numpy as np
 import torch
 from torch import nn
 
-from .base_module import LossNN
+from ._base_module import LossNN
 from .mlp import MLP
 from ..integrator import ODESolver
 from ..utils import lazy_property, dfx

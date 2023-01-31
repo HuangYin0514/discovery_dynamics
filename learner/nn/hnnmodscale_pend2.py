@@ -73,13 +73,13 @@ class PotentialEnergyCell(nn.Module):
         return y
 
 
-class HnnMod_pend2(LossNN):
+class HnnModScale_pend2(LossNN):
     """
     Mechanics neural networks.
     """
 
     def __init__(self, obj, dim, num_layers=None, hidden_dim=None):
-        super(HnnMod_pend2, self).__init__()
+        super(HnnModScale_pend2, self).__init__()
 
         q_dim = int(obj * dim)
         p_dim = int(obj * dim)

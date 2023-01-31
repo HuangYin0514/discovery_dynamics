@@ -9,7 +9,7 @@ import abc
 
 import torch
 
-from learner.data.datasets.bases import BaseDynamicsDataset
+from learner.data.datasets._bases import BaseDynamicsDataset
 from learner.integrator import ODESolver
 
 
