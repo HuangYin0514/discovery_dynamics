@@ -30,13 +30,11 @@ class GlobalPositionTransform(nn.Module):
 
 
 class MassNet(nn.Module):
-    def __init__(self, q_dim, num_layers=3, hidden_dim=30):
+    def __init__(self, q_dim, num_layers=3, hidden_dim=30, act=nn.Tanh):
         super(MassNet, self).__init__()
 
-        self.cos_sin_net = CosSinNet()
         self.net = nn.Sequential(
-            MLP(input_dim=q_dim * 8, hidden_dim=hidden_dim, output_dim=q_dim * q_dim, num_layers=num_layers,
-                act=nn.Tanh),
+            MLP(input_dim=q_dim * 8, hidden_dim=hidden_dim, output_dim=q_dim * q_dim, num_layers=num_layers, act=act),
             ReshapeNet(-1, q_dim, q_dim)
         )
 
@@ -77,19 +75,19 @@ class HnnModScale_pend2(LossNN):
         self.global_dim = 2
         self.global_dof = int(obj * self.global_dim)
 
-        self.mass_net = MassNet(q_dim=self.dof, num_layers=1, hidden_dim=50)
+        self.mass_net = MassNet(q_dim=self.dof, num_layers=1, hidden_dim=50, act=nn.ReLU)
         self.global4x = GlobalPositionTransform(input_dim=self.dim,
                                                 hidden_dim=16,
                                                 output_dim=self.global_dim,
-                                                num_layers=1, act=nn.Tanh)
+                                                num_layers=1, act=nn.ReLU)
         self.Potential1 = PotentialEnergyCell(input_dim=self.global_dim,
                                               hidden_dim=50,
                                               output_dim=1,
-                                              num_layers=1, act=nn.Tanh)
+                                              num_layers=1, act=nn.ReLU)
         self.Potential2 = PotentialEnergyCell(input_dim=self.global_dim * 2,
                                               hidden_dim=50,
                                               output_dim=1,
-                                              num_layers=1, act=nn.Tanh)
+                                              num_layers=1, act=nn.ReLU)
 
         self.co1 = torch.nn.Parameter(torch.ones(1, dtype=self.Dtype, device=self.Device) * 0.5)
         self.co2 = torch.nn.Parameter(torch.ones(1, dtype=self.Dtype, device=self.Device) * 0.5)
