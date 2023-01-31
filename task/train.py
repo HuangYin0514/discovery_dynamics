@@ -37,7 +37,8 @@ parser.add_argument('--net_name', default='HnnMod_body3', type=str,
                     help='Select model to train '
                          '[Baseline HNN LNN MechanicsNN'
                          'ModLaNet_pend2 ModLaNet_body3'
-                         'HnnMod_body3'
+                         'HnnMod_pend2 HnnMod_body3'
+                         'HnnModScale_pend2'
                          ']'
                     )
 parser.add_argument('--net_url', default='', type=str, help='Download net from Internet')

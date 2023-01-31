@@ -6,32 +6,29 @@ from .baseline import Baseline
 from .hnn import HNN
 from .hnnmod_body3 import HnnMod_body3
 from .hnnmod_pend2 import HnnMod_pend2
+from .hnnmodscale_pend2 import HnnModScale_pend2
 from .lnn import LNN
 from .mechanicsNN import MechanicsNN
 from .modlanet_body3 import ModLaNet_body3
 from .modlanet_pend2 import ModLaNet_pend2
 
+__model_factory = {
+    'HNN': HNN,
+    'LNN': LNN,
+    'Baseline': Baseline,
+    'MechanicsNN': MechanicsNN,
+    'ModLaNet_pend2': ModLaNet_pend2,
+    'ModLaNet_body3': ModLaNet_body3,
+    'HnnMod_pend2': HnnMod_pend2,
+    'HnnMod_body3': HnnMod_body3,
+    'HnnModScale_pend2': HnnModScale_pend2,
+}
+
 
 def choose_model(net_name, obj, dim):
-    if net_name == 'HNN':
-        net = HNN(obj, dim)
-    elif net_name == 'LNN':
-        net = LNN(obj, dim)
-    elif net_name == 'Baseline':
-        net = Baseline(obj, dim)
-    elif net_name == 'MechanicsNN':
-        net = MechanicsNN(obj, dim)
-    elif net_name == 'ModLaNet_pend2':
-        net = ModLaNet_pend2(obj, dim)
-    elif net_name == 'ModLaNet_body3':
-        net = ModLaNet_body3(obj, dim)
-    elif net_name == 'HnnMod_pend2':
-        net = HnnMod_pend2(obj, dim)
-    elif net_name == 'HnnMod_body3':
-        net = HnnMod_body3(obj, dim)
-    else:
+    if net_name not in __model_factory.keys():
         raise ValueError('Model \'{}\' is not implemented'.format(net_name))
-
+    net = __model_factory[net_name](obj, dim)
     return net
 
 
