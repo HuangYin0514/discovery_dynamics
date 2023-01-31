@@ -32,34 +32,14 @@ class MassNet(nn.Module):
 
         self.cos_sin_net = CosSinNet()
         self.net = nn.Sequential(
-            MLP(input_dim=q_dim * 2, hidden_dim=hidden_dim, output_dim=q_dim * q_dim, num_layers=num_layers,
+            MLP(input_dim=q_dim , hidden_dim=hidden_dim, output_dim=q_dim * q_dim, num_layers=num_layers,
                 act=nn.Tanh),
             ReshapeNet(-1, q_dim, q_dim)
         )
 
     def forward(self, q):
-        q = self.cos_sin_net(q)
         out = self.net(q)
         return out
-
-
-class DynamicsNet(nn.Module):
-    def __init__(self, q_dim, p_dim, num_layers=3, hidden_dim=30):
-        super(DynamicsNet, self).__init__()
-        self.cos_sin_net = CosSinNet()
-
-        self.dynamics_net = nn.Sequential(
-            MLP(input_dim=q_dim * 2 + q_dim + q_dim, hidden_dim=hidden_dim, output_dim=p_dim, num_layers=num_layers,
-                act=nn.Tanh),
-            ReshapeNet(-1, p_dim)
-        )
-
-    def forward(self, q, dqH):
-        cos_sin_q = self.cos_sin_net(q)
-        x = torch.cat([cos_sin_q, q, dqH], dim=1)
-        out = self.dynamics_net(x)
-        return out
-
 
 class PotentialEnergyCell(nn.Module):
     def __init__(self, input_dim, hidden_dim, output_dim, num_layers=1, act=nn.Tanh):
@@ -69,7 +49,7 @@ class PotentialEnergyCell(nn.Module):
                        act=act)
 
     def forward(self, x):
-        y = self.mlp(x[:])
+        y = self.mlp(x)
         return y
 
 
