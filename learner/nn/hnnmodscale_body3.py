@@ -114,16 +114,7 @@ class HnnModScale_body3(LossNN):
         bs = x.size(0)
         x, p = x.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
 
-        # position transformations ----------------------------------------------------------------
-        x_global = torch.zeros((bs, self.global_dof), dtype=self.Dtype, device=self.Device)
-        x_origin = torch.zeros((bs, self.global_dof), dtype=self.Dtype, device=self.Device)
-        for i in range(self.obj):
-            for j in range(i):
-                x_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim] += x_global[:, (j) * self.global_dim:
-                                                                                             (j + 1) * self.global_dim]
-            x_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = self.global4x(
-                x[:, (i) * self.dim: (i + 1) * self.dim],
-                x_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim])
+        x_global = x
 
         # Calculate the potential energy for i-th element ------------------------------------------------------------
         U = 0.
