@@ -26,7 +26,11 @@ class PotentialEnergyCell(nn.Module):
         )
         self.hidden_layer = nn.ModuleList([hidden_bock for _ in range(6)])
 
-        self.mlp = MLP(input_dim=input_dim * 6 * 6 + 2 * input_dim, hidden_dim=hidden_dim, output_dim=output_dim,
+        # self.mlp = MLP(input_dim=input_dim * 6 * 6 + 2 * input_dim, hidden_dim=hidden_dim, output_dim=output_dim,
+        #                num_layers=num_layers,
+        #                act=act)
+
+        self.mlp = MLP(input_dim=input_dim * 6 * 6, hidden_dim=hidden_dim, output_dim=output_dim,
                        num_layers=num_layers,
                        act=act)
 
@@ -37,8 +41,8 @@ class PotentialEnergyCell(nn.Module):
             input = scale_list[idx]
             output = self.hidden_layer[idx](input)
             input_list.append(output)
-        input_list.append(torch.sin(x))
-        input_list.append(torch.cos(x))
+        # input_list.append(torch.sin(x))
+        # input_list.append(torch.cos(x))
         x = torch.cat(input_list, dim=1)
         y = self.mlp(x)
         return y
