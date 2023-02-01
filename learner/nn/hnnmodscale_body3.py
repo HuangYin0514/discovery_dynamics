@@ -15,35 +15,6 @@ from ..integrator import ODESolver
 from ..utils import dfx
 
 
-class GlobalPositionTransform(nn.Module):
-    """Doing coordinate transformation using a MLP"""
-
-    def __init__(self, input_dim, hidden_dim, output_dim, num_layers=1, act=nn.Tanh):
-        super(GlobalPositionTransform, self).__init__()
-
-        hidden_bock = nn.Sequential(
-            nn.Linear(input_dim, input_dim * 6),
-            nn.Tanh()
-        )
-        self.hidden_layer = nn.ModuleList([hidden_bock for _ in range(6)])
-
-        self.mlp = MLP(input_dim=input_dim * 6 * 6 + 2 * input_dim, hidden_dim=hidden_dim, output_dim=output_dim,
-                       num_layers=num_layers,
-                       act=act)
-
-    def forward(self, x, x_0):
-        input_list = []
-        scale_list = [1 / 8 * x, 1 / 4 * x, 1 / 2 * x, x, 2 * x, 4 * x, 8 * x]
-        for idx in range(len(self.hidden_layer)):
-            input = scale_list[idx]
-            output = self.hidden_layer[idx](input)
-            input_list.append(output)
-        input_list.append(torch.sin(x))
-        input_list.append(torch.cos(x))
-        x = torch.cat(input_list, dim=1)
-        y = self.mlp(x) + x_0
-        return y
-
 
 class PotentialEnergyCell(nn.Module):
     def __init__(self, input_dim, hidden_dim, output_dim, num_layers=1, act=nn.Tanh):
@@ -91,10 +62,6 @@ class HnnModScale_body3(LossNN):
         self.global_dim = 2
         self.global_dof = int(obj * self.global_dim)
 
-        self.global4x = GlobalPositionTransform(input_dim=self.dim,
-                                                hidden_dim=16,
-                                                output_dim=self.global_dim,
-                                                num_layers=1, act=nn.Tanh)
         self.Potential1 = PotentialEnergyCell(input_dim=self.global_dim,
                                               hidden_dim=50,
                                               output_dim=1,
