@@ -75,19 +75,19 @@ class HnnModScale_pend2(LossNN):
         self.global_dim = 2
         self.global_dof = int(obj * self.global_dim)
 
-        self.mass_net = MassNet(q_dim=self.dof, num_layers=1, hidden_dim=50, act=nn.ReLU)
+        self.mass_net = MassNet(q_dim=self.dof, num_layers=1, hidden_dim=50, act=nn.Tanh)
         self.global4x = GlobalPositionTransform(input_dim=self.dim,
                                                 hidden_dim=16,
                                                 output_dim=self.global_dim,
-                                                num_layers=1, act=nn.ReLU)
+                                                num_layers=1, act=nn.Tanh)
         self.Potential1 = PotentialEnergyCell(input_dim=self.global_dim,
                                               hidden_dim=50,
                                               output_dim=1,
-                                              num_layers=1, act=nn.ReLU)
+                                              num_layers=1, act=nn.Tanh)
         self.Potential2 = PotentialEnergyCell(input_dim=self.global_dim * 2,
                                               hidden_dim=50,
                                               output_dim=1,
-                                              num_layers=1, act=nn.ReLU)
+                                              num_layers=1, act=nn.Tanh)
 
         self.co1 = torch.nn.Parameter(torch.ones(1, dtype=self.Dtype, device=self.Device) * 0.5)
         self.co2 = torch.nn.Parameter(torch.ones(1, dtype=self.Dtype, device=self.Device) * 0.5)
