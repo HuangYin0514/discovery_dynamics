@@ -30,7 +30,7 @@ class GlobalPositionTransform(nn.Module):
 
 
 class MassNet(nn.Module):
-    def __init__(self, q_dim, num_layers=3, hidden_dim=30, act=nn.Tanh):
+    def __init__(self, q_dim, hidden_dim=30, num_layers=3, act=nn.Tanh):
         super(MassNet, self).__init__()
 
         self.net = nn.Sequential(
