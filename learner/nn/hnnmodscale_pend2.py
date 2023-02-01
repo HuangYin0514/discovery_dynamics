@@ -27,7 +27,7 @@ class GlobalPositionTransform(nn.Module):
         )
         self.hidden_layer = nn.ModuleList([hidden_bock for _ in range(6)])
 
-        self.mlp = MLP(input_dim=input_dim * 6 * 6, hidden_dim=hidden_dim, output_dim=output_dim,
+        self.mlp = MLP(input_dim=input_dim * 6 * 6 + 2 * input_dim, hidden_dim=hidden_dim, output_dim=output_dim,
                        num_layers=num_layers,
                        act=act)
 
@@ -38,24 +38,26 @@ class GlobalPositionTransform(nn.Module):
             input = scale_list[idx]
             output = self.hidden_layer[idx](input)
             input_list.append(output)
+        input_list.append(torch.sin(x))
+        input_list.append(torch.cos(x))
         x = torch.cat(input_list, dim=1)
         y = self.mlp(x) + x_0
         return y
 
 
 class MassNet(nn.Module):
-    def __init__(self, q_dim, hidden_dim=30, num_layers=3, act=nn.Tanh):
+    def __init__(self, input_dim, hidden_dim=30, num_layers=3, act=nn.Tanh):
         super(MassNet, self).__init__()
         hidden_bock = nn.Sequential(
-            nn.Linear(q_dim, q_dim * 6),
+            nn.Linear(input_dim, input_dim * 6),
             nn.Tanh()
         )
         self.hidden_layer = nn.ModuleList([hidden_bock for _ in range(6)])
 
         self.net = nn.Sequential(
-            MLP(input_dim=q_dim * 6 * 6, hidden_dim=hidden_dim, output_dim=q_dim * q_dim,
+            MLP(input_dim=input_dim * 6 * 6 + 2 * input_dim, hidden_dim=hidden_dim, output_dim=input_dim * input_dim,
                 num_layers=num_layers, act=act),
-            ReshapeNet(-1, q_dim, q_dim)
+            ReshapeNet(-1, input_dim, input_dim)
         )
 
     def forward(self, x):
@@ -65,6 +67,8 @@ class MassNet(nn.Module):
             input = scale_list[idx]
             output = self.hidden_layer[idx](input)
             input_list.append(output)
+        input_list.append(torch.sin(x))
+        input_list.append(torch.cos(x))
         x = torch.cat(input_list, dim=1)
         out = self.net(x)
         return out
@@ -80,7 +84,7 @@ class PotentialEnergyCell(nn.Module):
         )
         self.hidden_layer = nn.ModuleList([hidden_bock for _ in range(6)])
 
-        self.mlp = MLP(input_dim=input_dim * 6 * 6, hidden_dim=hidden_dim, output_dim=output_dim,
+        self.mlp = MLP(input_dim=input_dim * 6 * 6 + 2 * input_dim, hidden_dim=hidden_dim, output_dim=output_dim,
                        num_layers=num_layers,
                        act=act)
 
@@ -91,6 +95,8 @@ class PotentialEnergyCell(nn.Module):
             input = scale_list[idx]
             output = self.hidden_layer[idx](input)
             input_list.append(output)
+        input_list.append(torch.sin(x))
+        input_list.append(torch.cos(x))
         x = torch.cat(input_list, dim=1)
         y = self.mlp(x)
         return y
@@ -114,7 +120,7 @@ class HnnModScale_pend2(LossNN):
         self.global_dim = 2
         self.global_dof = int(obj * self.global_dim)
 
-        self.mass_net = MassNet(q_dim=self.dof, num_layers=1, hidden_dim=50, act=nn.Tanh)
+        self.mass_net = MassNet(input_dim=self.dof, num_layers=1, hidden_dim=50, act=nn.Tanh)
         self.global4x = GlobalPositionTransform(input_dim=self.dim,
                                                 hidden_dim=16,
                                                 output_dim=self.global_dim,
