@@ -151,5 +151,5 @@ class HnnMod_pend2_anlytical(LossNN):
         return dz_dt
 
     def integrate(self, X0, t):
-        out = ODESolver(self, X0, t, method='dopri5').permute(1, 0, 2)  # (T, D) dopri5 rk4
+        out = ODESolver(self, X0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
         return out
