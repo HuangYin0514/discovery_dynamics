@@ -292,7 +292,9 @@ class Brain:
         elif self.scheduler == 'LambdaLR':
             lambda1 = lambda \
                     epoch: 1 if epoch < 2000 else 0.4 if epoch < 5000 else 0.2 if epoch < 7000 else 0.1 if epoch < 9000 else 0.04
-            # lambda1 = lambda epoch: 1
+            self.__scheduler = lr_scheduler.LambdaLR(self.__optimizer, lr_lambda=lambda1)
+        elif self.scheduler == 'LambdaLR_body3':
+            lambda1 = lambda epoch: 1
             self.__scheduler = lr_scheduler.LambdaLR(self.__optimizer, lr_lambda=lambda1)
         else:
             raise NotImplementedError
