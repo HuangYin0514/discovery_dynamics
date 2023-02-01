@@ -25,15 +25,15 @@ class GlobalPositionTransform(nn.Module):
             nn.Linear(input_dim, input_dim * 6),
             nn.Tanh()
         )
-        self.hidden_layer = nn.ModuleList([hidden_bock for _ in range(8)])
+        self.hidden_layer = nn.ModuleList([hidden_bock for _ in range(6)])
 
-        self.mlp = MLP(input_dim=input_dim * 6 * 8, hidden_dim=hidden_dim, output_dim=output_dim,
+        self.mlp = MLP(input_dim=input_dim * 6 * 6, hidden_dim=hidden_dim, output_dim=output_dim,
                        num_layers=num_layers,
                        act=act)
 
     def forward(self, x, x_0):
         input_list = []
-        scale_list = [torch.sin(x), torch.cos(x), x, 2 * x, 4 * x, 8 * x, 16 * x, 32 * x]
+        scale_list = [ x, 2 * x, 4 * x, 8 * x, 16 * x, 32 * x]
         for idx in range(len(self.hidden_layer)):
             input = scale_list[idx]
             output = self.hidden_layer[idx](input)
@@ -50,17 +50,17 @@ class MassNet(nn.Module):
             nn.Linear(q_dim, q_dim * 6),
             nn.Tanh()
         )
-        self.hidden_layer = nn.ModuleList([hidden_bock for _ in range(8)])
+        self.hidden_layer = nn.ModuleList([hidden_bock for _ in range(6)])
 
         self.net = nn.Sequential(
-            MLP(input_dim=q_dim * 6 * 8, hidden_dim=hidden_dim, output_dim=q_dim * q_dim,
+            MLP(input_dim=q_dim * 6 * 6, hidden_dim=hidden_dim, output_dim=q_dim * q_dim,
                 num_layers=num_layers, act=act),
             ReshapeNet(-1, q_dim, q_dim)
         )
 
     def forward(self, x):
         input_list = []
-        scale_list = [torch.sin(x), torch.cos(x), x, 2 * x, 4 * x, 8 * x, 16 * x, 32 * x]
+        scale_list = [ x, 2 * x, 4 * x, 8 * x, 16 * x, 32 * x]
         for idx in range(len(self.hidden_layer)):
             input = scale_list[idx]
             output = self.hidden_layer[idx](input)
@@ -78,15 +78,15 @@ class PotentialEnergyCell(nn.Module):
             nn.Linear(input_dim, input_dim * 6),
             nn.Tanh()
         )
-        self.hidden_layer = nn.ModuleList([hidden_bock for _ in range(8)])
+        self.hidden_layer = nn.ModuleList([hidden_bock for _ in range(6)])
 
-        self.mlp = MLP(input_dim=input_dim * 6 * 8, hidden_dim=hidden_dim, output_dim=output_dim,
+        self.mlp = MLP(input_dim=input_dim * 6 * 6, hidden_dim=hidden_dim, output_dim=output_dim,
                        num_layers=num_layers,
                        act=act)
 
     def forward(self, x):
         input_list = []
-        scale_list = [torch.sin(x), torch.cos(x), x, 2 * x, 4 * x, 8 * x, 16 * x, 32 * x]
+        scale_list = [ x, 2 * x, 4 * x, 8 * x, 16 * x, 32 * x]
         for idx in range(len(self.hidden_layer)):
             input = scale_list[idx]
             output = self.hidden_layer[idx](input)
