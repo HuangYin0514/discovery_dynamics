@@ -62,13 +62,13 @@ class PotentialEnergyCell(nn.Module):
         return y
 
 
-class HnnMod_pend2(LossNN):
+class HnnMod_pend2_anlytical(LossNN):
     """
     Mechanics neural networks.
     """
 
     def __init__(self, obj, dim, num_layers=None, hidden_dim=None):
-        super(HnnMod_pend2, self).__init__()
+        super(HnnMod_pend2_anlytical, self).__init__()
 
         q_dim = int(obj * dim)
         p_dim = int(obj * dim)
@@ -97,25 +97,6 @@ class HnnMod_pend2(LossNN):
         self.mass = torch.nn.Linear(1, 1, bias=False)
         torch.nn.init.ones_(self.mass.weight)
 
-    # def tril_Minv(self, q):
-    #     mass_net_q = self.mass_net(q)
-    #     res = torch.triu(mass_net_q, diagonal=1)
-    #     res = res + torch.diag_embed(
-    #         torch.nn.functional.softplus(torch.diagonal(mass_net_q, dim1=-2, dim2=-1)),
-    #         dim1=-2,
-    #         dim2=-1,
-    #     )
-    #     res = res.transpose(-1, -2)  # Make lower triangular
-    #     return res
-    #
-    # def Minv(self, q: Tensor, eps=1e-4) -> Tensor:
-    #     assert q.ndim == 2
-    #     lower_triangular = self.tril_Minv(q)
-    #     assert lower_triangular.ndim == 3
-    #     diag_noise = eps * torch.eye(lower_triangular.size(-1), dtype=q.dtype, device=q.device)
-    #     Minv = lower_triangular.matmul(lower_triangular.transpose(-2, -1)) + diag_noise
-    #     return Minv
-
     def M(self, x):
         """
         ref: Simplifying Hamiltonian and Lagrangian Neural Networks via Explicit Constraints
@@ -140,19 +121,6 @@ class HnnMod_pend2(LossNN):
     def forward(self, t, x):
         bs = x.size(0)
         x, p = x.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
-
-        # position transformations ----------------------------------------------------------------
-        # x_global = torch.zeros((bs, self.global_dof), dtype=self.Dtype, device=self.Device)
-        # x_origin = torch.zeros((bs, self.global_dof), dtype=self.Dtype, device=self.Device)
-        # for i in range(self.obj):
-        #     for j in range(i):
-        #         x_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim] += x_global[:, (j) * self.global_dim:
-        #                                                                                      (j + 1) * self.global_dim]
-        #     x_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = \
-        #         x_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim] + torch.cat([
-        #             torch.sin(x[:, (i) * self.dim: (i + 1) * self.dim]),
-        #             -torch.cos(x[:, (i) * self.dim: (i + 1) * self.dim])
-        #         ], dim=1)
 
         # Calculate the potential energy for i-th element ------------------------------------------------------------
         U = 0.
@@ -183,5 +151,5 @@ class HnnMod_pend2(LossNN):
         return dz_dt
 
     def integrate(self, X0, t):
-        out = ODESolver(self, X0, t, method='rk4').permute(1, 0, 2)  # (T, D)
+        out = ODESolver(self, X0, t, method='dopri5').permute(1, 0, 2)  # (T, D) dopri5 rk4
         return out

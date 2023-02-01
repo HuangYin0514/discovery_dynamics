@@ -6,6 +6,7 @@ from .baseline import Baseline
 from .hnn import HNN
 from .hnnmod_body3 import HnnMod_body3
 from .hnnmod_pend2 import HnnMod_pend2
+from .hnnmod_pend2_anlytical import HnnMod_pend2_anlytical
 from .hnnmodscale_pend2 import HnnModScale_pend2
 from .lnn import LNN
 from .mechanicsNN import MechanicsNN
@@ -21,6 +22,7 @@ __model_factory = {
     'ModLaNet_body3': ModLaNet_body3,
     'HnnMod_pend2': HnnMod_pend2,
     'HnnMod_body3': HnnMod_body3,
+    'HnnMod_pend2_anlytical': HnnMod_pend2_anlytical,
     'HnnModScale_pend2': HnnModScale_pend2,
 }
 
