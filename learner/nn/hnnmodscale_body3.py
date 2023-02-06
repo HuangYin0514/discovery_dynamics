@@ -15,7 +15,6 @@ from ..integrator import ODESolver
 from ..utils import dfx
 
 
-
 class PotentialEnergyCell(nn.Module):
     def __init__(self, input_dim, hidden_dim, output_dim, num_layers=1, act=nn.Tanh):
         super(PotentialEnergyCell, self).__init__()
@@ -34,9 +33,22 @@ class PotentialEnergyCell(nn.Module):
                        num_layers=num_layers,
                        act=act)
 
+    # def forward(self, x):
+    #     input_list = []
+    #     scale_list = [1 / 8 * x, 1 / 4 * x, 1 / 2 * x, x, 2 * x, 4 * x, 8 * x]
+    #     for idx in range(len(self.hidden_layer)):
+    #         input = scale_list[idx]
+    #         output = self.hidden_layer[idx](input)
+    #         input_list.append(output)
+    #     # input_list.append(torch.sin(x))
+    #     # input_list.append(torch.cos(x))
+    #     x = torch.cat(input_list, dim=1)
+    #     y = self.mlp(x)
+    #     return y
+    #
     def forward(self, x):
         input_list = []
-        scale_list = [1 / 8 * x, 1 / 4 * x, 1 / 2 * x, x, 2 * x, 4 * x, 8 * x]
+        scale_list = [1 * x, 2 * x, 3 * x, x, 4 * x, 5 * x, 6 * x]
         for idx in range(len(self.hidden_layer)):
             input = scale_list[idx]
             output = self.hidden_layer[idx](input)
