@@ -50,3 +50,13 @@ class Identity(nn.Module):
 
     def forward(self, input: Tensor) -> Tensor:
         return input
+
+
+class Compact_Support_Activation(nn.Module):
+    def __init__(self):
+        super(Compact_Support_Activation, self).__init__()
+
+    def forward(self, input: Tensor) -> Tensor:
+        res = torch.relu(input) ** 2 - 3 * torch.relu(input - 1) ** 2 + 3 * torch.relu(input - 2) ** 2 - torch.relu(
+            input - 3) ** 2
+        return res

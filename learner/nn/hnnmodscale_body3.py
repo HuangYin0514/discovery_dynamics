@@ -10,7 +10,7 @@ from torch import nn, Tensor
 
 from ._base_module import LossNN
 from .mlp import MLP
-from .utils_nn import CosSinNet, ReshapeNet, Identity
+from .utils_nn import CosSinNet, ReshapeNet, Identity, Compact_Support_Activation
 from ..integrator import ODESolver
 from ..utils import dfx
 
@@ -21,7 +21,7 @@ class PotentialEnergyCell(nn.Module):
 
         hidden_bock = nn.Sequential(
             nn.Linear(input_dim, input_dim * 6),
-            nn.LeakyReLU()
+            Compact_Support_Activation()
         )
         self.hidden_layer = nn.ModuleList([hidden_bock for _ in range(6)])
 
