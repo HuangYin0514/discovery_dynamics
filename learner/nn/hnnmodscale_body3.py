@@ -21,8 +21,7 @@ class PotentialEnergyCell(nn.Module):
 
         hidden_bock = nn.Sequential(
             nn.Linear(input_dim, input_dim * 6),
-            # Compact_Support_Activation()
-            nn.ReLU
+            nn.ReLU()
         )
         self.hidden_layer = nn.ModuleList([hidden_bock for _ in range(6)])
 
