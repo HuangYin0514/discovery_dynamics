@@ -23,13 +23,13 @@ class PotentialEnergyCell(nn.Module):
             nn.Linear(input_dim, input_dim * 6),
             nn.ReLU()
         )
-        self.hidden_layer = nn.ModuleList([hidden_bock for _ in range(6)])
+        self.hidden_layer = nn.ModuleList([hidden_bock for _ in range(5)])
 
         # self.mlp = MLP(input_dim=input_dim * 6 * 6 + 2 * input_dim, hidden_dim=hidden_dim, output_dim=output_dim,
         #                num_layers=num_layers,
         #                act=act)
 
-        self.mlp = MLP(input_dim=input_dim * 6 * 6, hidden_dim=hidden_dim, output_dim=output_dim,
+        self.mlp = MLP(input_dim=input_dim * 6 * 5, hidden_dim=hidden_dim, output_dim=output_dim,
                        num_layers=num_layers,
                        act=act)
 
@@ -48,7 +48,7 @@ class PotentialEnergyCell(nn.Module):
     #
     def forward(self, x):
         input_list = []
-        scale_list = [1 * x, 2 * x, 3 * x, x, 4 * x, 5 * x, 6 * x]
+        scale_list = [1 * x, 2 * x, 3 * x, x, 4 * x, 5 * x]
         for idx in range(len(self.hidden_layer)):
             input = scale_list[idx]
             output = self.hidden_layer[idx](input)
