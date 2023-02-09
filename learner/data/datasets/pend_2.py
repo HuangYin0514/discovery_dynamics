@@ -81,29 +81,40 @@ class Pendulum2(BaseBodyDataset, nn.Module):
         # h = self.energy_fn(coords)
         # gradH = dfx(h, coords)
         # dy = self.J @ gradH  # dy shape is (vector, )
-        # ## return dy
+        # # ## return dy
         #
         # coords = coords.clone().detach().requires_grad_(True)
         # x, p = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
         #
-        # U = 0.
-        # y = 0.
-        # for i in range(2):
-        #     y = y - torch.cos(x[i])
-        #     U = U + 9.8 * y
-        #
-        # T = torch.sum(0.5 * p @ self.Minv(x) @ p)
-        # dqH1 = dfx((T).sum(), x)
-        # dqH2 = dfx((U).sum(), x)
-        # dqH3 = dqH1 + dqH2
-        # dqH = dfx((U + T).sum(), x)
-        #
-        # dpH = dfx((U + T).sum(), p)
-        #
         # v = self.Minv(x) @ p
-        # res1 = torch.cat([dq1, dq2, dp1, dp2], dim=0)
-        # res2 = torch.cat([v, dqH], dim=0)
-        ################################################################################
+        #
+        # T = 0.
+        # vx, vy = 0., 0.
+        # T2 = 0.
+        # px, py = 0., 0.
+        # for i in range(self._dof):
+        #     vx = vx + self._l[i] * v[i] * torch.cos(coords[i])
+        #     vy = vy + self._l[i] * v[i] * torch.sin(coords[i])
+        #
+        #     px = px + self._l[i] * p[i] * torch.cos(coords[i])
+        #     py = py + self._l[i] * p[i] * torch.sin(coords[i])
+        #
+        #     T = T + 0.5 * self._m[i] * (torch.pow(vx, 2) + torch.pow(vy, 2))
+        #     T2 = T2 + 0.5 * self._m[i] * (torch.pow(px, 2) + torch.pow(py, 2))
+        #     print()
+        #
+        # T2 = torch.sum(0.5 * p @ self.Minv(x) @ p)
+        # # dqH1 = dfx((T).sum(), x)
+        # # dqH2 = dfx((U).sum(), x)
+        # # dqH3 = dqH1 + dqH2
+        # # dqH = dfx((U + T).sum(), x)
+        # #
+        # # dpH = dfx((U + T).sum(), p)
+        # #
+        # # v = self.Minv(x) @ p
+        # # res1 = torch.cat([dq1, dq2, dp1, dp2], dim=0)
+        # # res2 = torch.cat([v, dqH], dim=0)
+        # ################################################################################
 
         return torch.cat([dq1, dq2, dp1, dp2], dim=0)
 

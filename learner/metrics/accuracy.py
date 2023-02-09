@@ -26,17 +26,19 @@ def energy_err_fn(x, y, energy_function):
     err_list = []
     for x_, y_ in zip(x, y):
         eng_x = torch.stack([energy_function(i) for i in x_])
+
         eng_y = torch.stack([energy_function(i) for i in y_])
-        # eng_y = eng_y[0].repeat(len(eng_y))
-        # H_err = torch.abs(eng_x - eng_y) / (torch.abs(eng_x) + torch.abs(eng_y)) # 与loss正相关
-        H_err = torch.abs(eng_x - eng_y)
-        log_H_err = torch.log(torch.clamp(H_err, min=1e-7))
-        err_list.append(log_H_err)
-        # from matplotlib import pyplot as plt
-        # plt.plot(H_err.detach().numpy())
-        # plt.plot(log_H_err.detach().numpy())
-        # plt.show()
-    return torch.stack(err_list)
+        # eng_y = eng_y[0].repeat(len(eng_y)) # 与真实的eng对比
+
+        # H_err = torch.abs(eng_x - eng_y) / (torch.abs(eng_x) + torch.abs(eng_y)) # relatively errors 与loss正相关
+        # H_err = torch.mean(torch.abs(eng_x - eng_y))
+        H_err = torch.linalg.norm(eng_x - eng_y) / len(eng_y)
+
+        err_list.append(H_err)
+
+    E_err = torch.stack(err_list)
+    E_err_mean = torch.mean(E_err)
+    return E_err_mean
 
 
 def accuracy_fn(output_traj, target_traj, energy_function):
@@ -51,5 +53,5 @@ def accuracy_fn(output_traj, target_traj, energy_function):
      """
     mse_err = square_err_fn(output_traj, target_traj).mean()
     rel_err = rel_err_fn(output_traj, target_traj).mean()
-    eng_err = energy_err_fn(output_traj, target_traj, energy_function).mean()
-    return mse_err, torch.exp(rel_err), torch.exp(eng_err)
+    eng_err = energy_err_fn(output_traj, target_traj, energy_function)
+    return mse_err, torch.exp(rel_err), eng_err
