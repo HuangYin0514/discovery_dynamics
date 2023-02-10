@@ -41,16 +41,23 @@ class AnalyzeBrain:
         self.__init_brain()
         print('analyze...', flush=True)
 
-        test_data = next(iter(self.test_loader))  # get one data for test
-        inputs, labels = test_data
-        X, t = inputs
-        X, t = X.to(self.device), t.to(self.device)
-        labels = labels.to(self.device)
+        pred_list = []
+        labels_list = []
+        for test_data in self.test_loader:
+            inputs, labels = test_data
+            X, t = inputs
+            X, t = X.to(self.device), t.to(self.device)
+            labels = labels.to(self.device)
 
-        # pred ----------------------------------------------------------------
-        pred = self.net.integrate(X, t)  # (bs, T, states)
+            # pred ----------------------------------------------------------------
+            pred = self.net.integrate(X, t)  # (bs, T, states)
+
+            pred_list.append(pred)
+            labels_list.append(labels)
 
         # error ----------------------------------------------------------------
+        pred = torch.cat(pred_list, dim=0)
+        labels = torch.cat(labels_list, dim=0)
         err = accuracy_fn(pred, labels, self.energy_fn)
         mse_err, rel_err, eng_err = err
 
