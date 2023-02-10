@@ -55,6 +55,8 @@ class AnalyzeBrain:
             pred_list.append(pred)
             labels_list.append(labels)
 
+            break
+
         # error ----------------------------------------------------------------
         pred = torch.cat(pred_list, dim=0)
         labels = torch.cat(labels_list, dim=0)
