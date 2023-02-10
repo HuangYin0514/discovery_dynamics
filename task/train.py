@@ -114,6 +114,8 @@ def run():
     ln.Brain.Output(info=arguments)
     # print(arguments)
 
+    if device == 'cuda':
+        torch.cuda.empty_cache()
 
 def main():
     run()
