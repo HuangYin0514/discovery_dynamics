@@ -258,7 +258,7 @@ class Brain:
         self.__init_criterion()
 
     def __init_data(self):
-        dataset, train_loader, val_loader, test_loader = self.data
+        dataset, train_loader, val_loader, _ = self.data
         # dataloader
         self.train_loader = train_loader
         self.val_loader = val_loader
