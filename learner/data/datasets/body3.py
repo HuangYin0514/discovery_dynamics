@@ -34,9 +34,9 @@ class Body3(BaseBodyDataset, nn.Module):
         # test time is 15s
         # self.dataset_url15 = 'https://drive.google.com/file/d/1rZDGAaeuJYnIvfvwEX1WtwlKLWjeRW1D/view?usp=share_link'
         # test time is 30s, test samples are 20
-        # self.dataset_url = 'https://drive.google.com/file/d/18qjMMTKB5-y8CTPuFcn2iat7UH5O_F1P/view?usp=share_link'
+        self.dataset_url = 'https://drive.google.com/file/d/18qjMMTKB5-y8CTPuFcn2iat7UH5O_F1P/view?usp=share_link'
         # test time is 30s, test samples are 100
-        self.dataset_url = 'https://drive.google.com/file/d/1E8mdLioGy91W1XjLNEri0p3GliQVhMZB/view?usp=share_link'
+        # self.dataset_url = 'https://drive.google.com/file/d/1E8mdLioGy91W1XjLNEri0p3GliQVhMZB/view?usp=share_link'
 
         self.__init_dynamic_variable(obj, dim)
 
