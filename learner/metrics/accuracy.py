@@ -32,12 +32,17 @@ def energy_err_fn(x, y, energy_function):
 
         # H_err = torch.abs(eng_x - eng_y) / (torch.abs(eng_x) + torch.abs(eng_y)) # relatively errors 与loss正相关
         # H_err = torch.mean(torch.abs(eng_x - eng_y))
-        H_err = torch.linalg.norm(eng_x - eng_y) / len(eng_y)
+        # H_err = torch.linalg.norm(eng_x - eng_y) / len(eng_y)
+
+        H_err = torch.abs(eng_x - eng_y)
+        H_err = torch.log(torch.clamp(H_err, min=1e-7))
+        H_err = torch.exp(H_err).mean()
 
         err_list.append(H_err)
 
     E_err = torch.stack(err_list)
     E_err_mean = torch.mean(E_err)
+
     return E_err_mean
 
 
