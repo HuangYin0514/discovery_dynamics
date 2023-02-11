@@ -10,14 +10,29 @@ import torch
 
 
 def square_err_fn(x, y):
-    error = ((x - y) ** 2).mean()
-    # error = torch.linalg.norm(x - y) / len(y)
-    return error
+    bs, times, states = x.shape
+    dof = int(states // 2)
+
+    err_list = []
+    for x_, y_ in zip(x, y):
+        x_position = x_[..., :dof]
+        y_position = y_[..., :dof]
+
+        error = torch.abs(x_position - y_position)
+        error = torch.clamp(error, min=1e-7)
+
+        error_norm = torch.linalg.norm(error) / times
+
+        err_list.append(error_norm)
+
+    position_err = torch.stack(err_list)
+    position_err_mean = torch.mean(position_err)
+    return position_err_mean
 
 
 def rel_err_fn(x, y):
     #  This function is  sqrt（a-b）** 2/ (a**2 + b**2)
-    square_err = square_err_fn(x, y)
+    square_err = ((x - y) ** 2).mean()
     rel_err = torch.sqrt(square_err) / \
               (torch.sqrt((x ** 2).mean((-1, -2))) + torch.sqrt((y ** 2).mean((-1, -2))))
     loggeomean_rel_err = torch.log(torch.clamp(rel_err, min=1e-7))
