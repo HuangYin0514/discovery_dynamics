@@ -33,8 +33,8 @@ class BaseBodyDataset(BaseDynamicsDataset):
         dataset = []
         for _ in range(num):
             x0 = self.random_config()  # (D, )
-            X = self.__generate(x0, t)  # (T, D)
-            y = torch.stack(list(map(lambda x: self(None, x), X)))  # (T, D)
+            X = self.generate(x0, t).clone().detach()  # (T, D)
+            y = torch.stack(list(map(lambda x: self(None, x), X))).clone().detach()  # (T, D)
             E = torch.stack([self.energy_fn(y) for y in X])
             dataset.append((x0, t, self.dt, X, y, E))
             from matplotlib import pyplot as plt
@@ -42,7 +42,7 @@ class BaseBodyDataset(BaseDynamicsDataset):
             plt.show()
         return dataset
 
-    def __generate(self, x0, t):
+    def generate(self, x0, t):
         x = ODESolver(self, x0, t, method='rk4')  # (T, D) dopri5 rk4
         return x
 
