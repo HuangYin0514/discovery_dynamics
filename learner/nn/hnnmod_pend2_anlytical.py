@@ -77,33 +77,10 @@ class HnnMod_pend2_anlytical(LossNN):
         self.dim = dim
         self.dof = int(obj * dim)
 
-        self.global_dim = 2
-        self.global_dof = int(obj * self.global_dim)
-
-        self.mass_net = MassNet(q_dim=self.dof, num_layers=1, hidden_dim=200)
-
-        self.Potential1 = PotentialEnergyCell(input_dim=self.global_dim,
-                                              hidden_dim=50,
-                                              output_dim=1,
-                                              num_layers=1, act=nn.Tanh)
-        self.Potential2 = PotentialEnergyCell(input_dim=self.global_dim * 2,
-                                              hidden_dim=50,
-                                              output_dim=1,
-                                              num_layers=1, act=nn.Tanh)
-
-        self.co1 = torch.nn.Parameter(torch.ones(1, dtype=self.Dtype, device=self.Device) * 0.5)
-        self.co2 = torch.nn.Parameter(torch.ones(1, dtype=self.Dtype, device=self.Device) * 0.5)
-
         self.mass = torch.nn.Linear(1, 1, bias=False)
         torch.nn.init.ones_(self.mass.weight)
 
     def M(self, x):
-        """
-        ref: Simplifying Hamiltonian and Lagrangian Neural Networks via Explicit Constraints
-        Create a square mass matrix of size N x N.
-        Note: the matrix is symmetric
-        In the future, only half of the matrix can be considered
-        """
         N = self.obj
         M = torch.zeros((x.shape[0], N, N), device=x.device)
         for i in range(N):
@@ -151,5 +128,5 @@ class HnnMod_pend2_anlytical(LossNN):
         return dz_dt
 
     def integrate(self, X0, t):
-        out = ODESolver(self, X0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
+        out = ODESolver(self, X0, t, method='dopri5').permute(1, 0, 2)  # (T, D) dopri5 rk4
         return out
