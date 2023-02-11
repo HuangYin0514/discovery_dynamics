@@ -64,6 +64,11 @@ class Pendulum2(BaseBodyDataset, nn.Module):
 
     def forward(self, t, coords):
         assert len(coords) == self._dof * 2
+        dy = self.derivative_analytical(coords)
+        # dy2 = self.derivative_hamilton(coords)
+        return dy
+
+    def derivative_analytical(self, coords):
         q1, q2, p1, p2 = torch.chunk(coords, 4, dim=0)
         l1, l2, m1, m2 = self._l[0], self._l[1], self._m[0], self._m[1]
         g = self._g
@@ -76,47 +81,14 @@ class Pendulum2(BaseBodyDataset, nn.Module):
         dp1 = -(m1 + m2) * g * l1 * torch.sin(q1) - h1 + h2 * torch.sin(2 * (q1 - q2))
         dp2 = -m2 * g * l2 * torch.sin(q2) + h1 - h2 * torch.sin(2 * (q1 - q2))
 
-        ## test #################################################################
-        # coords = coords.clone().detach().requires_grad_(True)
-        # h = self.energy_fn(coords)
-        # gradH = dfx(h, coords)
-        # dy = self.J @ gradH  # dy shape is (vector, )
-        # # ## return dy
-        #
-        # coords = coords.clone().detach().requires_grad_(True)
-        # x, p = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
-        #
-        # v = self.Minv(x) @ p
-        #
-        # T = 0.
-        # vx, vy = 0., 0.
-        # T2 = 0.
-        # px, py = 0., 0.
-        # for i in range(self._dof):
-        #     vx = vx + self._l[i] * v[i] * torch.cos(coords[i])
-        #     vy = vy + self._l[i] * v[i] * torch.sin(coords[i])
-        #
-        #     px = px + self._l[i] * p[i] * torch.cos(coords[i])
-        #     py = py + self._l[i] * p[i] * torch.sin(coords[i])
-        #
-        #     T = T + 0.5 * self._m[i] * (torch.pow(vx, 2) + torch.pow(vy, 2))
-        #     T2 = T2 + 0.5 * self._m[i] * (torch.pow(px, 2) + torch.pow(py, 2))
-        #     print()
-        #
-        # T2 = torch.sum(0.5 * p @ self.Minv(x) @ p)
-        # # dqH1 = dfx((T).sum(), x)
-        # # dqH2 = dfx((U).sum(), x)
-        # # dqH3 = dqH1 + dqH2
-        # # dqH = dfx((U + T).sum(), x)
-        # #
-        # # dpH = dfx((U + T).sum(), p)
-        # #
-        # # v = self.Minv(x) @ p
-        # # res1 = torch.cat([dq1, dq2, dp1, dp2], dim=0)
-        # # res2 = torch.cat([v, dqH], dim=0)
-        # ################################################################################
-
         return torch.cat([dq1, dq2, dp1, dp2], dim=0)
+
+    def derivative_hamilton(self, coords):
+        coords = coords.clone().detach().requires_grad_(True)
+        h = self.energy_fn(coords)
+        gradH = dfx(h, coords)
+        dy = self.J @ gradH  # dy shape is (vector, )
+        return dy
 
     def M(self, x):
         """
