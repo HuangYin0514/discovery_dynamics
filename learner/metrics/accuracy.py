@@ -10,7 +10,9 @@ import torch
 
 
 def square_err_fn(x, y):
-    return ((x - y) ** 2).mean()
+    error = ((x - y) ** 2).mean()
+    # error = torch.linalg.norm(x - y) / len(y)
+    return error
 
 
 def rel_err_fn(x, y):
