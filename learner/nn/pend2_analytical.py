@@ -61,6 +61,7 @@ class Pend2_analytical(LossNN):
         # __x, __p = torch.chunk(coords, 2, dim=-1)
         # __x = __x % (2 * torch.pi)
         # coords = torch.cat([__x, __p], dim=-1).clone().detach().requires_grad_(True)
+
         coords = coords.clone().detach().requires_grad_(True)
         bs = coords.size(0)
         x, p = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
