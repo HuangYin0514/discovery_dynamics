@@ -74,10 +74,10 @@ class Pend2_analytical(LossNN):
 
         # Calculate the kinetic --------------------------------------------------------------
         T = 0.
-        T = (0.5 * p.unsqueeze(1) @ self.Minv(x) @ p.unsqueeze(-1)).squeeze(-1).squeeze(-1)
+        T = (0.5 * p.unsqueeze(1).bmm(self.Minv(x)).bmm(p.unsqueeze(-1))).squeeze(-1).squeeze(-1)
 
         # Calculate the Hamilton Derivative --------------------------------------------------------------
-        H = U*0 + T
+        H = U * 0 + T
         dqH = dfx(H.sum(), x)
         dpH = dfx(H.sum(), p)
 
@@ -104,8 +104,8 @@ class Pend2_analytical(LossNN):
         # out = ODESolver(angle_forward, X0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
         outlist = []
         for x0 in X0:
-            x0 = x0.reshape(1,-1)
+            x0 = x0.reshape(1, -1)
             out = ODESolver(angle_forward, x0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
             outlist.append(out)
-        out = torch.cat(outlist,dim=0)
+        out = torch.cat(outlist, dim=0)
         return out
