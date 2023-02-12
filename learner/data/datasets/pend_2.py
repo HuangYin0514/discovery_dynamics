@@ -119,7 +119,7 @@ class Pendulum2(BaseBodyDataset, nn.Module):
         x, p = torch.chunk(coords, 2, dim=0)
         T = 0.5 * p @ self.Minv(x) @ p
 
-        return T
+        return T*0
 
     def potential(self, coords):
         assert len(coords) == self._dof * 2
@@ -128,7 +128,7 @@ class Pendulum2(BaseBodyDataset, nn.Module):
         for i in range(self._obj):
             y = y - self._l[i] * torch.cos(coords[i])
             U = U + self._m[i] * self._g * y
-        return U*0
+        return U
 
     def energy_fn(self, coords):
         """energy function """

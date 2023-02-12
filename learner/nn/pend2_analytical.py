@@ -77,7 +77,7 @@ class Pend2_analytical(LossNN):
         T = (0.5 * p.unsqueeze(1) @ self.Minv(x) @ p.unsqueeze(-1)).squeeze(-1).squeeze(-1)
 
         # Calculate the Hamilton Derivative --------------------------------------------------------------
-        H = U*0 + T
+        H = U + T*0
         dqH = dfx(H.sum(), x)
         dpH = dfx(H.sum(), p)
 
