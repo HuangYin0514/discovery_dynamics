@@ -5,6 +5,8 @@
 @time: 2023/2/12 9:56 AM
 @desc:
 """
+import numpy as np
+
 # encoding: utf-8
 """
 @author: Yin Huang
@@ -55,14 +57,13 @@ class Pend2_analytical(LossNN):
     def Minv(self, x):
         return torch.linalg.inv(self.M(x))
 
-    def forward(self, t, x):
-        __x, __p = torch.chunk(x, 2, dim=-1)
-        __x = __x % (2 * torch.pi)
-        x = torch.cat([__x, __p], dim=-1).clone().detach().requires_grad_(True)
+    def forward(self, t, coords):
+        # __x, __p = torch.chunk(coords, 2, dim=-1)
+        # __x = __x % (2 * torch.pi)
+        # coords = torch.cat([__x, __p], dim=-1).clone().detach().requires_grad_(True)
 
-
-        bs = x.size(0)
-        x, p = x.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
+        bs = coords.size(0)
+        x, p = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
 
         # Calculate the potential energy for i-th element ------------------------------------------------------------
         U = 0.
@@ -92,13 +93,21 @@ class Pend2_analytical(LossNN):
 
         return dz_dt
 
+    def J(self):
+        # [ 0, I]
+        # [-I, 0]
+        self._dof = 2
+        d = self._dof
+        res = np.eye(self._dof * 2, k=d) - np.eye(self._dof * 2, k=-d)
+        return torch.tensor(res).float()
+
     def integrate(self, X0, t):
-        def angle_forward( t, coords):
+        def angle_forward(t, coords):
             x, p = torch.chunk(coords, 2, dim=-1)
             x = x % (2 * torch.pi)
             new_coords = torch.cat([x, p], dim=-1)
             return self(t, new_coords)
 
-        out = ODESolver(angle_forward, X0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
+        out = ODESolver(self, X0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
 
         return out
