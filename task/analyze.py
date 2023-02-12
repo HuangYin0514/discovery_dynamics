@@ -36,7 +36,7 @@ parser.add_argument('--download_data', default='False', type=str, help='Download
 parser.add_argument('--num_workers', default=0, type=int, help='how many subprocesses to use for data loading. ')
 
 # net
-parser.add_argument('--net_name', default='HnnMod_pend2_anlytical', type=str, help='Select model to train')
+parser.add_argument('--net_name', default='Pend2_analytical', type=str, help='Select model to train')
 parser.add_argument('--net_url', default='', type=str, help='Download net from Internet')
 
 # For other settings
