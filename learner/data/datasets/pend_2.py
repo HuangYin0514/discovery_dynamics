@@ -128,12 +128,12 @@ class Pendulum2(BaseBodyDataset, nn.Module):
         for i in range(self._obj):
             y = y - self._l[i] * torch.cos(coords[i])
             U = U + self._m[i] * self._g * y
-        return U
+        return U*0
 
     def energy_fn(self, coords):
         """energy function """
         assert len(coords) == self._dof * 2
-        H = self.kinetic(coords) + self.potential(coords)*0
+        H = self.kinetic(coords) + self.potential(coords)
         return H
 
     # def random_config(self):
