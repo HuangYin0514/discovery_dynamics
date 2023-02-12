@@ -52,7 +52,7 @@ class Pendulum2(BaseBodyDataset, nn.Module):
         self.t = torch.linspace(t0, t_end, _time_step)
 
         t_end = 30.
-        dt = 0.02
+        dt = 0.05
         _time_step = int((t_end - t0) / dt)
         self.test_t = torch.linspace(t0, t_end, _time_step)
 
@@ -157,6 +157,7 @@ class Pendulum2(BaseBodyDataset, nn.Module):
         return x0
 
     def generate(self, x0, t):
+        print("Generating for new function!")
         def angle_forward(t, coords):
             x, p = torch.chunk(coords, 2, dim=0)
             x = x % (2 * torch.pi)
