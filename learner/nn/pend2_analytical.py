@@ -106,9 +106,8 @@ class Pend2_analytical(LossNN):
         # T = torch.matmul(p.unsqueeze(1), v)
         # T = torch.sum(T).reshape(-1)
 
-        v = torch.matmul(self.Minv(x), p.unsqueeze(-1))
-        T = v*100
-        T = torch.sum(T).reshape(-1)
+        v = torch.matmul(self.Minv(x), p.unsqueeze(-1)**2)
+        T = torch.sum(v).reshape(-1)
 
         # T = torch.matmul(p.unsqueeze(1), x.unsqueeze(-1))
         # T = torch.sum(T).reshape(-1)
