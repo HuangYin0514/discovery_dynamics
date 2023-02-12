@@ -100,6 +100,6 @@ class Pend2_analytical(LossNN):
             new_coords = torch.cat([x, p], dim=-1)
             return self(t, new_coords)
 
-        out = ODESolver(self, X0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
+        out = ODESolver(angle_forward, X0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
 
         return out

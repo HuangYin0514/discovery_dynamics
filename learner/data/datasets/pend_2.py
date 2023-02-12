@@ -165,5 +165,5 @@ class Pendulum2(BaseBodyDataset, nn.Module):
             new_coords = torch.cat([x, p], dim=0).clone().detach()
             return self(t, new_coords)
 
-        out = ODESolver(self, x0, t, method='rk4')  # (T, D) dopri5 rk4
+        out = ODESolver(angle_forward, x0, t, method='rk4')  # (T, D) dopri5 rk4
         return out
