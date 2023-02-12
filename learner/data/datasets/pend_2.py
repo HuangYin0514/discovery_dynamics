@@ -120,12 +120,17 @@ class Pendulum2(BaseBodyDataset, nn.Module):
         # T = 0.5 * p @ self.Minv(x) @ p
         # T = torch.sum(self.Minv(x)).reshape(-1, )
 
-        v = torch.matmul(self.Minv(x), p)
-        T = torch.matmul(p, v)
-        T = torch.sum(T).reshape(-1)
+        # v = torch.matmul(self.Minv(x), p)
+        # T = torch.matmul(p, v)
+        # T = torch.sum(T).reshape(-1)
 
         # T = p @ x
         # T = torch.sum(T).reshape(-1)
+
+        v = torch.matmul(self.Minv(x), p.unsqueeze(-1))
+        T = v*100
+        T = torch.sum(T).reshape(-1)
+
         return T
 
     def potential(self, coords):
