@@ -128,7 +128,7 @@ class Pendulum2(BaseBodyDataset, nn.Module):
         # T = torch.sum(T).reshape(-1)
 
         v = torch.matmul(self.Minv(x), p.unsqueeze(-1) )
-        T = torch.sum(v).reshape(-1)
+        T = torch.sum(v**2).reshape(-1)
 
         return T
 
