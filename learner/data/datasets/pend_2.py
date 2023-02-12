@@ -133,7 +133,7 @@ class Pendulum2(BaseBodyDataset, nn.Module):
     def energy_fn(self, coords):
         """energy function """
         assert len(coords) == self._dof * 2
-        H = self.kinetic(coords) + self.potential(coords)
+        H = self.kinetic(coords) + self.potential(coords)*0
         return H
 
     # def random_config(self):
