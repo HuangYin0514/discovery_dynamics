@@ -136,25 +136,25 @@ class Pendulum2(BaseBodyDataset, nn.Module):
         H = self.kinetic(coords) + self.potential(coords)
         return H
 
-    def random_config(self):
-        max_momentum = .8
-        x0 = torch.zeros(self._obj * 2)
-        for i in range(self._obj):
-            theta = (.5 * np.pi) * torch.rand(1, ) + 0  # [0, 2pi]
-            momentum = (2 * torch.rand(1, ) - 1) * max_momentum  # [-1, 1]*max_momentum
-            x0[i] = theta
-            x0[i + self._obj] = momentum
-        return x0
-
     # def random_config(self):
-    #     max_momentum = 1.
+    #     max_momentum = .8
     #     x0 = torch.zeros(self._obj * 2)
     #     for i in range(self._obj):
-    #         theta = (2 * np.pi) * torch.rand(1, ) + 0  # [0, 2pi]
+    #         theta = (.5 * np.pi) * torch.rand(1, ) + 0  # [0, 2pi]
     #         momentum = (2 * torch.rand(1, ) - 1) * max_momentum  # [-1, 1]*max_momentum
     #         x0[i] = theta
     #         x0[i + self._obj] = momentum
     #     return x0
+
+    def random_config(self):
+        max_momentum = 1.
+        x0 = torch.zeros(self._obj * 2)
+        for i in range(self._obj):
+            theta = (2 * np.pi) * torch.rand(1, ) + 0  # [0, 2pi]
+            momentum = (2 * torch.rand(1, ) - 1) * max_momentum  # [-1, 1]*max_momentum
+            x0[i] = theta
+            x0[i + self._obj] = momentum
+        return x0
 
     def generate(self, x0, t):
         print("Generating for new function!")
