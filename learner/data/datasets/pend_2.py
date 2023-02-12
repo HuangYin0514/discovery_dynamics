@@ -124,9 +124,8 @@ class Pendulum2(BaseBodyDataset, nn.Module):
         # T = torch.matmul(p, v)
         # T = torch.sum(T).reshape(-1)
         #
-        T = p  @ p
+        T = p @ x
         T = torch.sum(T).reshape(-1)
-
         return T
 
     def potential(self, coords):
