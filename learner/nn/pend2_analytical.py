@@ -53,11 +53,27 @@ class Pend2_analytical(LossNN):
                     m_sum += 1.0
                 M[:, i, k] = torch.cos(x[:, i] - x[:, k]) * m_sum
         return M
-
+    def M2(self, x):
+        """
+        ref: Simplifying Hamiltonian and Lagrangian Neural Networks via Explicit Constraints
+        Create a square mass matrix of size N x N.
+        Note: the matrix is symmetric
+        In the future, only half of the matrix can be considered
+        """
+        N = self.obj
+        M = torch.zeros((N, N), device=x.device)
+        for i in range(N):
+            for k in range(N):
+                m_sum = 0
+                j = i if i >= k else k
+                for tmp in range(j, N):
+                    m_sum += 1.0
+                M[i, k] =  torch.cos(x[i] - x[k]) * m_sum
+        return M
     def Minv(self, x):
         inv_x_list = []
         for xi in x:
-            inv_x = torch.linalg.inv(self.M(x))
+            inv_x = torch.linalg.inv(self.M2(xi))
             inv_x_list.append(inv_x)
         return torch.cat(inv_x_list, dim=0)
         # return torch.linalg.inv(self.M(x))
