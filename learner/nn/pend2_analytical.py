@@ -73,13 +73,13 @@ class Pend2_analytical(LossNN):
         return M
 
     def Minv(self, x):
-        inv_x_list = []
-        for xi in x:
-            inv_x = torch.linalg.inv(self.M2(xi))
-            inv_x_list.append(inv_x)
-
-        return torch.cat(inv_x_list, dim=0)
-        # return torch.linalg.inv(self.M(x))
+        # inv_x_list = []
+        # for xi in x:
+        #     inv_x = torch.linalg.inv(self.M2(xi))
+        #     inv_x_list.append(inv_x)
+        #
+        # return torch.cat(inv_x_list, dim=0)
+        return torch.linalg.inv(self.M(x))
 
     def forward(self, t, coords):
         # __x, __p = torch.chunk(coords, 2, dim=-1)
