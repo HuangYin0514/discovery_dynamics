@@ -3,6 +3,7 @@ import os.path as osp
 
 from learner.utils import timing, count_parameters, download_file_from_google_drive, load_network
 from .baseline import Baseline
+from .baseline_pend2 import Baseline_pend2
 from .hnn import HNN
 from .hnnmod_body3 import HnnMod_body3
 from .hnnmod_pend2 import HnnMod_pend2
@@ -19,6 +20,7 @@ __model_factory = {
     'HNN': HNN,
     'LNN': LNN,
     'Baseline': Baseline,
+    'Baseline_pend2':Baseline_pend2,
     'MechanicsNN': MechanicsNN,
     'ModLaNet_pend2': ModLaNet_pend2,
     'ModLaNet_body3': ModLaNet_body3,
