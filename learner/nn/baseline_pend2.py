@@ -20,6 +20,10 @@ class Baseline_pend2(LossNN):
                             act=nn.Tanh)
 
     def forward(self, t, x):
+        x, p = torch.chunk(x, 2, dim=-1)
+        x = x % (2 * torch.pi)
+        x = torch.cat([x, p], dim=-1)
+
         out = self.baseline(x)
         return out
 
