@@ -42,9 +42,9 @@ def choose_model(net_name, obj, dim):
 
 @timing
 def get_model(taskname, net_name, obj, dim, net_url, load_net_path, device):
-    print('=> Start get models.')
+    print('Start get models.')
     net = choose_model(net_name, obj, dim)
-    print("=> {} loaded".format(net_name))
+    print("======> {} loaded".format(net_name))
     print('Number of parameters in model: ', count_parameters(net))
 
     if len(net_url) != 0:
