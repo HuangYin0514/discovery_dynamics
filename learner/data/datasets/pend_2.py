@@ -111,7 +111,7 @@ class Pendulum2(BaseBodyDataset, nn.Module):
         return M
 
     def Minv(self, x):
-        return torch.inverse(self.M(x))
+        return torch.linalg.inv(self.M(x))
 
     def kinetic(self, coords):
         """Kinetic energy"""
