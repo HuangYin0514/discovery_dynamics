@@ -53,6 +53,7 @@ class Pend2_analytical(LossNN):
                     m_sum += 1.0
                 M[:, i, k] = torch.cos(x[:, i] - x[:, k]) * m_sum
         return M
+
     def M2(self, x):
         """
         ref: Simplifying Hamiltonian and Lagrangian Neural Networks via Explicit Constraints
@@ -68,8 +69,9 @@ class Pend2_analytical(LossNN):
                 j = i if i >= k else k
                 for tmp in range(j, N):
                     m_sum += 1.0
-                M[i, k] =  torch.cos(x[i] - x[k]) * m_sum
+                M[i, k] = torch.cos(x[i] - x[k]) * m_sum
         return M
+
     def Minv(self, x):
         inv_x_list = []
         for xi in x:
