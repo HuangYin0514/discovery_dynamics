@@ -79,6 +79,7 @@ class Pend2_analytical(LossNN):
         v = torch.matmul(self.Minv(x), p.unsqueeze(-1))
         T = torch.matmul(p.unsqueeze(1), v)
         T = torch.sum(T).reshape(-1)
+
         # Calculate the Hamilton Derivative --------------------------------------------------------------
         H = U * 0 + T
         dqH = dfx(H.sum(), x)

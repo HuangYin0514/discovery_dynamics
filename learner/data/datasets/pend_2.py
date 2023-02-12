@@ -119,8 +119,8 @@ class Pendulum2(BaseBodyDataset, nn.Module):
         x, p = torch.chunk(coords, 2, dim=0)
         # T = 0.5 * p @ self.Minv(x) @ p
         # T = torch.sum(self.Minv(x)).reshape(-1, )
-        v = torch.matmul(self.Minv(x), p.unsqueeze(-1))
-        T = torch.matmul(p.unsqueeze(1), v)
+        v = torch.matmul(self.Minv(x), p)
+        T = torch.matmul(p, v)
         T = torch.sum(T).reshape(-1)
         return T
 
