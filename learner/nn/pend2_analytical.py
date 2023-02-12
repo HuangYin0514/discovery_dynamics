@@ -75,7 +75,7 @@ class Pend2_analytical(LossNN):
         # Calculate the kinetic --------------------------------------------------------------
         T = 0.
         # T = (0.5 * p.unsqueeze(1).bmm(self.Minv(x)).bmm(p.unsqueeze(-1))).squeeze(-1).squeeze(-1)
-        T = (0.5 * p@p.T).squeeze(-1)
+        T = (0.5 * p @ p.T).squeeze(-1)
 
         # Calculate the Hamilton Derivative --------------------------------------------------------------
         H = U * 0 + T
