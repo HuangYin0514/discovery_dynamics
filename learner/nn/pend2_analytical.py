@@ -77,6 +77,7 @@ class Pend2_analytical(LossNN):
         for xi in x:
             inv_x = torch.linalg.inv(self.M2(xi))
             inv_x_list.append(inv_x)
+
         return torch.cat(inv_x_list, dim=0)
         # return torch.linalg.inv(self.M(x))
 
