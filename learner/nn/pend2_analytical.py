@@ -21,6 +21,7 @@ from .utils_nn import CosSinNet, ReshapeNet
 from ..integrator import ODESolver
 from ..utils import dfx
 
+
 class Pend2_analytical(LossNN):
     """
     Mechanics neural networks.
@@ -86,12 +87,12 @@ class Pend2_analytical(LossNN):
 
         return dz_dt
 
-    def angle_forward(self, t, coords):
-        x, p = torch.chunk(coords, 2, dim=-1)
-        x = x % (2 * torch.pi)
-        new_coords = torch.cat([x, p], dim=-1)
-        return self(t, new_coords)
-
     def integrate(self, X0, t):
-        out = ODESolver(self.angle_forward, X0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
+        def angle_forward( t, coords):
+            x, p = torch.chunk(coords, 2, dim=-1)
+            x = x % (2 * torch.pi)
+            new_coords = torch.cat([x, p], dim=-1)
+            return self(t, new_coords)
+
+        out = ODESolver(angle_forward, X0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
         return out

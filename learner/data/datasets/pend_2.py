@@ -156,12 +156,12 @@ class Pendulum2(BaseBodyDataset, nn.Module):
             x0[i + self._obj] = momentum
         return x0
 
-    def angle_forward(self, t, coords):
-        x, p = torch.chunk(coords, 2, dim=0)
-        x = x % (2 * torch.pi)
-        new_coords = torch.cat([x, p], dim=0).clone().detach()
-        return self(t, new_coords)
-
     def generate(self, x0, t):
-        out = ODESolver(self.angle_forward, x0, t, method='rk4')  # (T, D) dopri5 rk4
+        def angle_forward(t, coords):
+            x, p = torch.chunk(coords, 2, dim=0)
+            x = x % (2 * torch.pi)
+            new_coords = torch.cat([x, p], dim=0).clone().detach()
+            return self(t, new_coords)
+
+        out = ODESolver(angle_forward, x0, t, method='rk4')  # (T, D) dopri5 rk4
         return out
