@@ -118,7 +118,7 @@ class Pendulum2(BaseBodyDataset, nn.Module):
         assert len(coords) == self._dof * 2
         x, p = torch.chunk(coords, 2, dim=0)
         # T = 0.5 * p @ self.Minv(x) @ p
-        T = (0.5 * p@p.T)
+        T = (0.5 * p@self.Minv(x))
 
         return T
 
