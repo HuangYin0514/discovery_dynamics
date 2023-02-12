@@ -55,7 +55,12 @@ class Pend2_analytical(LossNN):
         return M
 
     def Minv(self, x):
-        return torch.linalg.inv(self.M(x))
+        inv_x_list = []
+        for xi in x:
+            inv_x = torch.linalg.inv(self.M(x))
+            inv_x_list.append(inv_x)
+        return torch.cat(inv_x_list, dim=0)
+        # return torch.linalg.inv(self.M(x))
 
     def forward(self, t, coords):
         # __x, __p = torch.chunk(coords, 2, dim=-1)
@@ -77,12 +82,17 @@ class Pend2_analytical(LossNN):
         T = 0.
         # T = (0.5 * p.unsqueeze(1).bmm(self.Minv(x)).bmm(p.unsqueeze(-1))).squeeze(-1).squeeze(-1)
         # T = (0.5 * p@ self.Minv(x) @ p.T).squeeze(-1).squeeze(-1)
+
         # v = torch.matmul(self.Minv(x), p.unsqueeze(-1))
         # T = torch.matmul(p.unsqueeze(1), v)
         # T = torch.sum(T).reshape(-1)
 
-        T = torch.matmul(p.unsqueeze(1), x.unsqueeze(-1))
+        v = torch.matmul(self.Minv(x), p.unsqueeze(-1))
+        T = torch.matmul(p.unsqueeze(1), v)
         T = torch.sum(T).reshape(-1)
+
+        # T = torch.matmul(p.unsqueeze(1), x.unsqueeze(-1))
+        # T = torch.sum(T).reshape(-1)
 
         # Calculate the Hamilton Derivative --------------------------------------------------------------
         H = U * 0 + T
