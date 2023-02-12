@@ -105,11 +105,11 @@ class Pend2_analytical(LossNN):
             new_coords = torch.cat([new_x, p], dim=-1).clone().detach().requires_grad_(True)
             return self(t, new_coords)
 
-        out = ODESolver(angle_forward, X0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
-        # outlist = []
-        # for x0 in X0:
-        #     x0 = x0.reshape(1, -1)
-        #     out = ODESolver(angle_forward, x0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
-        #     outlist.append(out)
-        # out = torch.cat(outlist, dim=0)
+        # out = ODESolver(angle_forward, X0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
+        outlist = []
+        for x0 in X0:
+            x0 = x0.reshape(1, -1)
+            out = ODESolver(angle_forward, x0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
+            outlist.append(out)
+        out = torch.cat(outlist, dim=0)
         return out
