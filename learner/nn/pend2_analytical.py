@@ -61,7 +61,7 @@ class Pend2_analytical(LossNN):
         # __x, __p = torch.chunk(coords, 2, dim=-1)
         # __x = __x % (2 * torch.pi)
         # coords = torch.cat([__x, __p], dim=-1).clone().detach().requires_grad_(True)
-
+        coords = coords.clone().detach().requires_grad_(True)
         bs = coords.size(0)
         x, p = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
 
@@ -77,7 +77,7 @@ class Pend2_analytical(LossNN):
         # T = (0.5 * p.unsqueeze(1).bmm(self.Minv(x)).bmm(p.unsqueeze(-1))).squeeze(-1).squeeze(-1)
         # T = (0.5 * p@ self.Minv(x) @ p.T).squeeze(-1).squeeze(-1)
         v = torch.matmul(self.Minv(x), p.unsqueeze(-1))
-        # T = torch.matmul(p.unsqueeze(1), v)
+        T = torch.matmul(p.unsqueeze(1), v)
         T = torch.sum(v).reshape(-1)
 
         # Calculate the Hamilton Derivative --------------------------------------------------------------
@@ -105,11 +105,11 @@ class Pend2_analytical(LossNN):
             new_coords = torch.cat([new_x, p], dim=-1).clone().detach().requires_grad_(True)
             return self(t, new_coords)
 
-        # out = ODESolver(angle_forward, X0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
-        outlist = []
-        for x0 in X0:
-            x0 = x0.reshape(1, -1)
-            out = ODESolver(angle_forward, x0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
-            outlist.append(out)
-        out = torch.cat(outlist, dim=0)
+        out = ODESolver(angle_forward, X0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
+        # outlist = []
+        # for x0 in X0:
+        #     x0 = x0.reshape(1, -1)
+        #     out = ODESolver(angle_forward, x0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
+        #     outlist.append(out)
+        # out = torch.cat(outlist, dim=0)
         return out
