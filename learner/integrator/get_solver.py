@@ -14,4 +14,4 @@ def ODESolver(func, y0, t, method='dopri5', rtol=1e-7, atol=1e-9, **kwargs):
     t   # (T,)
     out   # (T, bs, D)
     '''
-    return odeint(func, y0, t, method=method)
+    return odeint(func, y0, t, method=method, rtol=rtol, atol=atol, **kwargs)

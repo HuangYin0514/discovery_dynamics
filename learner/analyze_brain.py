@@ -55,8 +55,6 @@ class AnalyzeBrain:
             pred_list.append(pred)
             labels_list.append(labels)
 
-            break
-
         # error ----------------------------------------------------------------
         pred = torch.cat(pred_list, dim=0)
         labels = torch.cat(labels_list, dim=0)
@@ -71,7 +69,7 @@ class AnalyzeBrain:
         print(result)
 
         # solutions forms ----------------------------------------------------------------
-        check_index = 1
+        check_index = 2
         ground_true = labels[check_index]
         net_pred = pred[check_index]
         true_q, true_p = ground_true.chunk(2, dim=-1)  # (T, states)
