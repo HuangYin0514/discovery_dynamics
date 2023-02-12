@@ -93,14 +93,6 @@ class Pend2_analytical(LossNN):
 
         return dz_dt
 
-    def J(self):
-        # [ 0, I]
-        # [-I, 0]
-        self._dof = 2
-        d = self._dof
-        res = np.eye(self._dof * 2, k=d) - np.eye(self._dof * 2, k=-d)
-        return torch.tensor(res).float()
-
     def integrate(self, X0, t):
         def angle_forward(t, coords):
             x, p = torch.chunk(coords, 2, dim=-1)
