@@ -164,5 +164,4 @@ class Pendulum2(BaseBodyDataset, nn.Module):
             return self(t, new_coords)
 
         coords = ODESolver(angle_forward, X0, t, method='dopri5').permute(1, 0, 2)  # (T, D) dopri5 rk4
-
         return coords
