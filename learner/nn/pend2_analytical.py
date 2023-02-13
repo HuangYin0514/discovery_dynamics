@@ -59,28 +59,28 @@ class Pend2_analytical(LossNN):
         coords = torch.cat([new_q, p], dim=-1).clone().detach().requires_grad_(True)
 
         bs = coords.size(0)
-        x, p = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
+        q, p = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
 
         # Calculate the potential energy for i-th element ------------------------------------------------------------
         U = 0.
         y = 0.
         for i in range(self.obj):
-            y = y - torch.cos(x[:, i])
+            y = y - torch.cos(q[:, i])
             U = U + 9.8 * y
 
         # Calculate the kinetic --------------------------------------------------------------
         # T = self.dataset.kinetic(torch.cat([x, p], dim=-1).reshape(-1))
 
         T = 0.
-        v = torch.matmul(self.Minv(x), p.unsqueeze(-1))
+        v = torch.matmul(self.Minv(q), p.unsqueeze(-1))
         T = 0.5 * torch.matmul(p.unsqueeze(1), v).squeeze(-1).squeeze(-1)
 
         # Calculate the Hamilton Derivative --------------------------------------------------------------
         H = U + T
-        dqH = dfx(H.sum(), x)
+        dqH = dfx(H.sum(), q)
         dpH = dfx(H.sum(), p)
 
-        v_global = self.Minv(x).matmul(p.unsqueeze(-1)).squeeze(-1)
+        v_global = self.Minv(q).matmul(p.unsqueeze(-1)).squeeze(-1)
 
         # Calculate the Derivative ----------------------------------------------------------------
         dq_dt = torch.zeros((bs, self.dof), dtype=self.Dtype, device=self.Device)
