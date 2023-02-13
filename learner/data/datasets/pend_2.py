@@ -35,6 +35,7 @@ class Pendulum2(BaseBodyDataset, nn.Module):
 
         self.Dtype = torch.float32
         self.Device = torch.device('cpu')
+
         self.__init_dynamic_variable(obj, dim)
 
     def __init_dynamic_variable(self, obj, dim):
@@ -42,13 +43,9 @@ class Pendulum2(BaseBodyDataset, nn.Module):
         self._l = [1 for i in range(obj)]
         self._g = 9.8
 
-        self._obj = obj
-        self._dim = dim
-        self._dof = self._obj * self._dim  # degree of freedom
-
-        self._bj = obj
+        self.obj = obj
         self.dim = dim
-        self.dof = self._obj * self._dim  # degree of freedom
+        self.dof = self.obj * self.dim  # degree of freedom
 
         self.dt = 0.01
 
@@ -80,35 +77,29 @@ class Pendulum2(BaseBodyDataset, nn.Module):
         x, p = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
 
         # Calculate the potential energy for i-th element ------------------------------------------------------------
-        U = 0.
-        y = 0.
-        for i in range(self._obj):
-            y = y - torch.cos(x[:, i])
-            U = U + 9.8 * y
+        U = self.potential(torch.cat([x, p], dim=-1))
 
         # Calculate the kinetic --------------------------------------------------------------
-        # T = self.dataset.kinetic(torch.cat([x, p], dim=-1).reshape(-1))
-        T = 0.
-        v = torch.matmul(self.Minv(x), p.unsqueeze(-1))
-        T = 0.5*torch.matmul(p.unsqueeze(1), v).squeeze(-1).squeeze(-1)
+        T = self.kinetic(torch.cat([x, p], dim=-1))
 
         # Calculate the Hamilton Derivative --------------------------------------------------------------
-        H = U  + T
+        H = U + T
         dqH = dfx(H.sum(), x)
         dpH = dfx(H.sum(), p)
 
         # Calculate the Derivative ----------------------------------------------------------------
-        dq_dt = torch.zeros((bs, self._dof), dtype=self.Dtype, device=self.Device)
-        dp_dt = torch.zeros((bs, self._dof), dtype=self.Dtype, device=self.Device)
-        for i in range(self._obj):
-            dq_dt[:, i * self.dim:(i + 1) * self.dim] = dpH[:, i * self.dim: (i + 1) * self.dim]
-            dp_dt[:, i * self.dim:(i + 1) * self.dim] = -dqH[:, i * self.dim:(i + 1) * self.dim]
+        dq_dt = torch.zeros((bs, self.dof), dtype=self.Dtype, device=self.Device)
+        dp_dt = torch.zeros((bs, self.dof), dtype=self.Dtype, device=self.Device)
+
+        dq_dt = dpH
+        dp_dt = -dqH
+
         dz_dt = torch.cat([dq_dt, dp_dt], dim=-1)
 
         return dz_dt
 
     def M(self, x):
-        N = self._obj
+        N = self.obj
         M = torch.zeros((x.shape[0], N, N), dtype=self.Dtype, device=self.Device)
         for i in range(N):
             for k in range(N):
@@ -124,36 +115,41 @@ class Pendulum2(BaseBodyDataset, nn.Module):
 
     def kinetic(self, coords):
         """Kinetic energy"""
+
+        s, num_states = coords.shape
+        assert num_states == self.dof * 2
+
         x, p = torch.chunk(coords, 2, dim=1)
         T = 0.
         v = torch.matmul(self.Minv(x), p.unsqueeze(-1))
-        T = 0.5*torch.matmul(p.unsqueeze(1), v).squeeze(-1).squeeze(-1)
+        T = 0.5 * torch.matmul(p.unsqueeze(1), v).squeeze(-1).squeeze(-1)
         return T
 
     def potential(self, coords):
+        bs, num_states = coords.shape
+        assert num_states == self.dof*2
         U = 0.
         y = 0.
-        for i in range(self._obj):
+        for i in range(self.obj):
             y = y - torch.cos(coords[:, i])
             U = U + 9.8 * y
         return U
 
     def energy_fn(self, coords):
         """energy function """
-        # assert len(coords) == self._dof * 2
         H = self.kinetic(coords) + self.potential(coords)
         return H
 
     def random_config(self, num):
         x0_list = []
-        for i in range( num):
-            max_momentum = 10.
-            x0 = torch.zeros((self._obj * 2))
-            for i in range(self._obj):
+        for i in range(num):
+            max_momentum = 1.
+            x0 = torch.zeros((self.obj * 2))
+            for i in range(self.obj):
                 theta = (2 * np.pi) * torch.rand(1, ) + 0  # [0, 2pi]
                 momentum = (2 * torch.rand(1, ) - 1) * max_momentum  # [-1, 1]*max_momentum
                 x0[i] = theta
-                x0[i + self._obj] = momentum
+                x0[i + self.obj] = momentum
             x0_list.append(x0)
         x0 = torch.stack(x0_list)
         return x0
