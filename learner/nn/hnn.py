@@ -31,6 +31,11 @@ class HNN(LossNN):
         return torch.tensor(res, dtype=self.Dtype, device=self.Device)
 
     def forward(self, t, coords):
+
+        q, p = torch.chunk(coords, 2, dim=-1)
+        new_q = q % (2 * torch.pi)
+        coords = torch.cat([new_q, p], dim=-1).clone().detach().requires_grad_(True)
+
         bs = coords.size(0)
         q, p = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
 
@@ -56,6 +61,6 @@ class HNN(LossNN):
             new_coords = torch.cat([new_q, p], dim=-1).clone().detach().requires_grad_(True)
             return self(t, new_coords)
 
-        coords = ODESolver(self, X0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
+        coords = ODESolver(angle_forward, X0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
 
         return coords
