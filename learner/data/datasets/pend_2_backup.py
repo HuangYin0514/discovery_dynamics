@@ -33,8 +33,6 @@ class Pendulum2(BaseBodyDataset, nn.Module):
         self.test_num = test_num
         self.dataset_url = 'https://drive.google.com/file/d/1gFpZaOsaL8-ooXs6Cn-yfisT8U6S12Qk/view?usp=share_link'
 
-        self.Dtype = torch.float32
-        self.Device = torch.device('cpu')
         self.__init_dynamic_variable(obj, dim)
 
     def __init_dynamic_variable(self, obj, dim):
@@ -45,10 +43,6 @@ class Pendulum2(BaseBodyDataset, nn.Module):
         self._obj = obj
         self._dim = dim
         self._dof = self._obj * self._dim  # degree of freedom
-
-        self._bj = obj
-        self.dim = dim
-        self.dof = self._obj * self._dim  # degree of freedom
 
         self.dt = 0.1
 
@@ -71,55 +65,50 @@ class Pendulum2(BaseBodyDataset, nn.Module):
         return torch.tensor(res).float()
 
     def forward(self, t, coords):
-        # __x, __p = torch.chunk(coords, 2, dim=-1)
-        # __x = __x % (2 * torch.pi)
-        # coords = torch.cat([__x, __p], dim=-1).clone().detach().requires_grad_(True)
+        coords= coords.reshape(-1)
+        assert len(coords) == self._dof * 2
+        # dy = self.derivative_analytical(coords)
+        dy = self.derivative_hamilton(coords)
+        return dy
 
+    def derivative_analytical(self, coords):
+        q1, q2, p1, p2 = torch.chunk(coords, 4, dim=0)
+        l1, l2, m1, m2 = self._l[0], self._l[1], self._m[0], self._m[1]
+        g = self._g
+        b = l1 * l2 * (m1 + m2 * torch.sin(q1 - q2) ** 2)
+        dq1 = (l2 * p1 - l1 * p2 * torch.cos(q1 - q2)) / (b * l1)
+        dq2 = (-m2 * l2 * p1 * torch.cos(q1 - q2) + (m1 + m2) * l1 * p2) / (m2 * b * l2)
+        h1 = p1 * p2 * torch.sin(q1 - q2) / b
+        h2 = (m2 * l2 ** 2 * p1 ** 2 + (m1 + m2) * l1 ** 2 * p2 ** 2 - 2 * m2 * l1 * l2 * p1 * p2 * torch.cos(
+            q1 - q2)) / (2 * b ** 2)
+        dp1 = -(m1 + m2) * g * l1 * torch.sin(q1) - h1 + h2 * torch.sin(2 * (q1 - q2))
+        dp2 = -m2 * g * l2 * torch.sin(q2) + h1 - h2 * torch.sin(2 * (q1 - q2))
+
+        return torch.cat([dq1, dq2, dp1, dp2], dim=0)
+
+    def derivative_hamilton(self, coords):
         coords = coords.clone().detach().requires_grad_(True)
-        bs = coords.size(0)
-        x, p = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
-
-        # Calculate the potential energy for i-th element ------------------------------------------------------------
-        U = 0.
-        y = 0.
-        for i in range(self._obj):
-            y = y - torch.cos(x[:, i])
-            U = U + 9.8 * y
-
-        # Calculate the kinetic --------------------------------------------------------------
-        # T = self.dataset.kinetic(torch.cat([x, p], dim=-1).reshape(-1))
-        T = 0.
-        v = torch.matmul(self.Minv(x), p.unsqueeze(-1))
-        T = torch.matmul(p.unsqueeze(1), v)
-        T = T.squeeze(-1).squeeze(-1)
-
-        # Calculate the Hamilton Derivative --------------------------------------------------------------
-        H = U * 0 + T
-        dqH = dfx(H.sum(), x)
-        dpH = dfx(H.sum(), p)
-
-        v_global = self.Minv(x).matmul(p.unsqueeze(-1)).squeeze(-1)
-
-        # Calculate the Derivative ----------------------------------------------------------------
-        dq_dt = torch.zeros((bs, self._dof), dtype=self.Dtype, device=self.Device)
-        dp_dt = torch.zeros((bs, self._dof), dtype=self.Dtype, device=self.Device)
-        for i in range(self._obj):
-            dq_dt[:, i * self.dim:(i + 1) * self.dim] = dpH[:, i * self.dim: (i + 1) * self.dim]
-            dp_dt[:, i * self.dim:(i + 1) * self.dim] = -dqH[:, i * self.dim:(i + 1) * self.dim]
-        dz_dt = torch.cat([dq_dt, dp_dt], dim=-1)
-
-        return dz_dt
+        h = self.energy_fn(coords)
+        gradH = dfx(h, coords)
+        dy = self.J @ gradH  # dy shape is (vector, )
+        return dy.reshape(1,-1)
 
     def M(self, x):
+        """
+        ref: Simplifying Hamiltonian and Lagrangian Neural Networks via Explicit Constraints
+        Create a square mass matrix of size N x N.
+        Note: the matrix is symmetric
+        In the future, only half of the matrix can be considered
+        """
         N = self._obj
-        M = torch.zeros((x.shape[0], N, N), dtype=self.Dtype, device=self.Device)
+        M = torch.zeros((N, N), device=x.device)
         for i in range(N):
             for k in range(N):
                 m_sum = 0
                 j = i if i >= k else k
                 for tmp in range(j, N):
-                    m_sum += 1.0
-                M[:, i, k] = torch.cos(x[:, i] - x[:, k]) * m_sum
+                    m_sum += self._m[tmp]
+                M[i, k] = self._l[i] * self._l[k] * torch.cos(x[i] - x[k]) * m_sum
         return M
 
     def Minv(self, x):
@@ -127,22 +116,39 @@ class Pendulum2(BaseBodyDataset, nn.Module):
 
     def kinetic(self, coords):
         """Kinetic energy"""
-        x, p = torch.chunk(coords, 2, dim=1)
-        T = 0.
+        assert len(coords) == self._dof * 2
+        x, p = torch.chunk(coords, 2, dim=0)
+
         v = torch.matmul(self.Minv(x), p.unsqueeze(-1))
-        T = torch.matmul(p.unsqueeze(1), v)
-        T = T.squeeze(-1).squeeze(-1)
+        T = torch.matmul(p.unsqueeze(0), v)
+        T = T.squeeze(-1)
+
         return T
 
     def potential(self, coords):
+        assert len(coords) == self._dof * 2
         U = 0.
+        y = 0.
+        for i in range(self._obj):
+            y = y - self._l[i] * torch.cos(coords[i])
+            U = U + self._m[i] * self._g * y
         return U * 0
 
     def energy_fn(self, coords):
         """energy function """
-        # assert len(coords) == self._dof * 2
+        assert len(coords) == self._dof * 2
         H = self.kinetic(coords) + self.potential(coords)
         return H
+
+    # def random_config(self):
+    #     max_momentum = .8
+    #     x0 = torch.zeros(self._obj * 2)
+    #     for i in range(self._obj):
+    #         theta = (.5 * np.pi) * torch.rand(1, ) + 0  # [0, 2pi]
+    #         momentum = (2 * torch.rand(1, ) - 1) * max_momentum  # [-1, 1]*max_momentum
+    #         x0[i] = theta
+    #         x0[i + self._obj] = momentum
+    #     return x0
 
     def random_config(self):
         max_momentum = 10.
@@ -164,7 +170,7 @@ class Pendulum2(BaseBodyDataset, nn.Module):
             return self(t, new_coords)
 
         x0 = torch.tensor([5.1, 4.3, -10.2, 9.1], dtype=torch.float32)
-        x0 = x0.reshape(1, -1)
+        x0 = x0.reshape(1,- 1)
         out = ODESolver(self, x0, t, method='rk4')  # (T, D) dopri5 rk4
         out = out.squeeze(1)
         return out
