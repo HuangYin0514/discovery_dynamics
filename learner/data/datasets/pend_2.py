@@ -143,10 +143,10 @@ class Pendulum2(BaseBodyDataset, nn.Module):
     def random_config(self, num):
         x0_list = []
         for i in range(num):
-            max_momentum = 10.
+            max_momentum = 0.8
             x0 = torch.zeros((self.obj * 2))
             for i in range(self.obj):
-                theta = (2 * np.pi) * torch.rand(1, ) + 0  # [0, 2pi]
+                theta = (0.5 * np.pi) * torch.rand(1, ) + 0  # [0, 2pi]
                 momentum = (2 * torch.rand(1, ) - 1) * max_momentum  # [-1, 1]*max_momentum
                 x0[i] = theta
                 x0[i + self.obj] = momentum
@@ -163,5 +163,5 @@ class Pendulum2(BaseBodyDataset, nn.Module):
             new_coords = torch.cat([new_q, p], dim=-1).clone().detach().requires_grad_(True)
             return self(t, new_coords)
 
-        coords = ODESolver(angle_forward, X0, t, method='dopri5').permute(1, 0, 2)  # (T, D) dopri5 rk4
+        coords = ODESolver(angle_forward, X0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
         return coords
