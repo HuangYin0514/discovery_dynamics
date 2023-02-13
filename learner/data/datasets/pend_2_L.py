@@ -75,21 +75,22 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
         dvL = dfx(L.sum(), v)
         dxL = dfx(L.sum(), x)
 
-        dvdvL = torch.zeros((self.dof, self.dof))
-        dxdvL = torch.zeros((self.dof, self.dof))
+        dvdvL = torch.zeros((bs, self.dof, self.dof), dtype=self.Dtype, device=self.Device)
+        dxdvL = torch.zeros((bs, self.dof, self.dof), dtype=self.Dtype, device=self.Device)
 
         for i in range(self.dof):
-            dvidvL = dfx(dvL[i].sum(), v)
-            dvdvL[i] += dvidvL
+            dvidvL = dfx(dvL[:, i].sum(), v)
+            dvdvL[:, i, :] += dvidvL
 
         for i in range(self.dof):
-            dxidvL = dfx(dvL[i].sum(), x)
-            dxdvL[i] += dxidvL
+            dxidvL = dfx(dvL[:, i].sum(), x)
+            dxdvL[:, i, :] += dxidvL
 
-        dvdvL_inv = torch.linalg.inv(dvdvL)
+        dvdvL_inv = torch.linalg.pinv(dvdvL)
 
-        a = dvdvL_inv @ (dxL - dxdvL @ v)
-        dz_dt = torch.cat([v, a], dim=0).detach().clone()
+        a = dvdvL_inv @ (dxL.unsqueeze(2) - dxdvL @ v.unsqueeze(2))  # (bs, a_dim, 1)
+        a = a.squeeze(2)
+        return torch.cat([v, a], dim=1)
 
     def M(self, x):
         N = self.obj
@@ -140,10 +141,10 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
     def random_config(self, num):
         x0_list = []
         for i in range(num):
-            max_momentum = 0.5
+            max_momentum = 0.8
             x0 = torch.zeros((self.obj * 2))
             for i in range(self.obj):
-                theta = (2 * np.pi) * torch.rand(1, ) + 0  # [0, 2pi]
+                theta = (0.5 * np.pi) * torch.rand(1, ) + 0  # [0, 2pi]
                 momentum = (2 * torch.rand(1, ) - 1) * max_momentum  # [-1, 1]*max_momentum
                 x0[i] = theta
                 x0[i + self.obj] = momentum
@@ -151,15 +152,14 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
         x0 = torch.stack(x0_list)
         return x0
 
-    def generate(self, x0, t):
+    def generate(self, X0, t):
         print("Generating for new function!")
 
         def angle_forward(t, coords):
-            x, p = torch.chunk(coords, 2, dim=-1)
-            new_x = x % (2 * torch.pi)
-            new_coords = torch.cat([new_x, p], dim=-1).clone().detach().requires_grad_(True)
+            q, p = torch.chunk(coords, 2, dim=-1)
+            new_q = q % (2 * torch.pi)
+            new_coords = torch.cat([new_q, p], dim=-1).clone().detach().requires_grad_(True)
             return self(t, new_coords)
 
-        coords = ODESolver(self, x0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
-
+        coords = ODESolver(angle_forward, X0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
         return coords
