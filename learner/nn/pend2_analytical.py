@@ -50,39 +50,10 @@ class Pend2_analytical(LossNN):
                 M[:, i, k] = torch.cos(x[:, i] - x[:, k]) * m_sum
         return M
 
-    def M2(self, x):
-        """
-        ref: Simplifying Hamiltonian and Lagrangian Neural Networks via Explicit Constraints
-        Create a square mass matrix of size N x N.
-        Note: the matrix is symmetric
-        In the future, only half of the matrix can be considered
-        """
-        N = self.obj
-        M = torch.zeros((N, N), device=x.device)
-        for i in range(N):
-            for k in range(N):
-                m_sum = 0
-                j = i if i >= k else k
-                for tmp in range(j, N):
-                    m_sum += 1.0
-                M[i, k] = torch.cos(x[i] - x[k]) * m_sum
-        return M
-
     def Minv(self, x):
-        # inv_x_list = []
-        # for xi in x:
-        #     inv_x = torch.linalg.inv(self.M2(xi))
-        #     inv_x_list.append(inv_x)
-        #
-        # return torch.cat(inv_x_list, dim=0)
         return torch.linalg.inv(self.M(x))
 
     def forward(self, t, coords):
-        # __x, __p = torch.chunk(coords, 2, dim=-1)
-        # __x = __x % (2 * torch.pi)
-        # coords = torch.cat([__x, __p], dim=-1).clone().detach().requires_grad_(True)
-
-        coords = coords.clone().detach().requires_grad_(True)
         bs = coords.size(0)
         x, p = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
 
@@ -124,8 +95,7 @@ class Pend2_analytical(LossNN):
             # new_x = x % (2 * torch.pi)
             # new_coords = torch.cat([new_x, p], dim=-1).clone().detach().requires_grad_(True)
             # return self(t, new_coords)
-            coords = coords.cpu()
-            return self(t, coords).cpu()
+            return self(t, coords)
 
         out = ODESolver(self, X0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
         return out
