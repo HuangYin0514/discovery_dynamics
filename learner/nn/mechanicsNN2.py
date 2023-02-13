@@ -48,6 +48,7 @@ class DynamicsNet(nn.Module):
         out = self.dynamics_net(x)
         return out
 
+
 class HnnMod_body3(LossNN):
     """
     Mechanics neural networks.

@@ -10,8 +10,6 @@ import os
 import os.path as osp
 import sys
 
-import torch
-
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 PARENT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append('.')
@@ -53,7 +51,7 @@ def main():
     # seed
     ln.utils.init_random_state(args.seed)
     # device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    device =  'cpu'
+    device = 'cpu'
     print('Using the device is:', device)
 
     # net ----------------------------------------------------------------

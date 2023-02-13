@@ -10,7 +10,7 @@ from torch import nn, Tensor
 
 from ._base_module import LossNN
 from .mlp import MLP
-from .utils_nn import CosSinNet, ReshapeNet, Identity
+from .utils_nn import ReshapeNet
 from ..integrator import ODESolver
 from ..utils import dfx
 

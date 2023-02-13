@@ -20,7 +20,7 @@ __model_factory = {
     'HNN': HNN,
     'LNN': LNN,
     'Baseline': Baseline,
-    'Baseline_pend2':Baseline_pend2,
+    'Baseline_pend2': Baseline_pend2,
     'MechanicsNN': MechanicsNN,
     'ModLaNet_pend2': ModLaNet_pend2,
     'ModLaNet_body3': ModLaNet_body3,

@@ -42,22 +42,14 @@ def rel_err_fn(x, y):
 def energy_err_fn(x, y, energy_function):
     err_list = []
     for x_, y_ in zip(x, y):
-        eng_x = torch.stack([energy_function(i[None,:]) for i in x_])
-
-        eng_y = torch.stack([energy_function(i[None,:]) for i in y_])
+        eng_x = energy_function(x_)
+        eng_y = energy_function(y_)
         # eng_y = eng_y[0].repeat(len(eng_y)) # 与真实的eng对比
 
         error = torch.abs(eng_x - eng_y)
         error = torch.clamp(error, min=1e-7)
-
         # H_err = torch.abs(eng_x - eng_y) / (torch.abs(eng_x) + torch.abs(eng_y)) # relatively errors 与loss正相关
-        # H_err = torch.mean(torch.abs(eng_x - eng_y))
         H_err = torch.linalg.norm(error) / len(eng_y)
-
-        # H_err = torch.abs(eng_x - eng_y)
-        # H_err = torch.log(torch.clamp(H_err, min=1e-7))
-        # H_err = torch.exp(H_err).mean()
-
         err_list.append(H_err)
 
     E_err = torch.stack(err_list)

@@ -5,9 +5,6 @@
 @time: 2023/2/12 9:56 AM
 @desc:
 """
-import numpy as np
-
-from ..data.datasets import Pendulum2
 
 # encoding: utf-8
 """
@@ -17,11 +14,8 @@ from ..data.datasets import Pendulum2
 @desc:
 """
 import torch
-from torch import nn, Tensor
 
 from ._base_module import LossNN
-from .mlp import MLP
-from .utils_nn import CosSinNet, ReshapeNet
 from ..integrator import ODESolver
 from ..utils import dfx
 
@@ -109,11 +103,10 @@ class Pend2_analytical(LossNN):
 
         T = 0.
         v = torch.matmul(self.Minv(x), p.unsqueeze(-1))
-        T = torch.matmul(p.unsqueeze(1), v)
-        T = T.squeeze(-1).squeeze(-1)
+        T = 0.5 * torch.matmul(p.unsqueeze(1), v).squeeze(-1).squeeze(-1)
 
         # Calculate the Hamilton Derivative --------------------------------------------------------------
-        H = U * 0 + T
+        H = U + T
         dqH = dfx(H.sum(), x)
         dpH = dfx(H.sum(), p)
 
@@ -139,13 +132,5 @@ class Pend2_analytical(LossNN):
             coords = coords.cpu()
             return self(t, coords).cpu()
 
-
-        # out = ODESolver(angle_forward, X0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
-        outlist = []
-        for x0 in X0:
-            x0 = torch.tensor([5.1, 4.3, -10.2, 9.1], dtype=self.Dtype, device=torch.device('cpu'))
-            x0 = x0.reshape(1, -1)
-            out = ODESolver(angle_forward, x0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
-            outlist.append(out)
-        out = torch.cat(outlist, dim=0)
+        out = ODESolver(self, X0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
         return out

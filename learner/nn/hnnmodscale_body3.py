@@ -6,11 +6,10 @@
 @desc:
 """
 import torch
-from torch import nn, Tensor
+from torch import nn
 
 from ._base_module import LossNN
 from .mlp import MLP
-from .utils_nn import CosSinNet, ReshapeNet, Identity, Compact_Support_Activation
 from ..integrator import ODESolver
 from ..utils import dfx
 

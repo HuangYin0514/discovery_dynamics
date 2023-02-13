@@ -127,7 +127,7 @@ class Pendulum2(BaseBodyDataset, nn.Module):
 
     def potential(self, coords):
         bs, num_states = coords.shape
-        assert num_states == self.dof*2
+        assert num_states == self.dof * 2
         U = 0.
         y = 0.
         for i in range(self.obj):

@@ -8,10 +8,10 @@
 import abc
 
 import torch
+from matplotlib import pyplot as plt
 
 from learner.data.datasets._bases import BaseDynamicsDataset
 from learner.integrator import ODESolver
-from matplotlib import pyplot as plt
 
 
 class BaseBodyDataset(BaseDynamicsDataset):

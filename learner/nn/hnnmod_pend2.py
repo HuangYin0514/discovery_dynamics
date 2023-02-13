@@ -10,9 +10,10 @@ from torch import nn, Tensor
 
 from ._base_module import LossNN
 from .mlp import MLP
-from .utils_nn import CosSinNet, ReshapeNet, Identity
+from .utils_nn import CosSinNet, ReshapeNet
 from ..integrator import ODESolver
 from ..utils import dfx
+
 
 class GlobalPositionTransform(nn.Module):
     """Doing coordinate transformation using a MLP"""
@@ -25,6 +26,7 @@ class GlobalPositionTransform(nn.Module):
     def forward(self, x, x_0):
         y = self.mlp(x) + x_0
         return y
+
 
 class MassNet(nn.Module):
     def __init__(self, q_dim, num_layers=3, hidden_dim=30):
@@ -110,7 +112,6 @@ class HnnMod_pend2(LossNN):
 
         self.mass = torch.nn.Linear(1, 1, bias=False)
         torch.nn.init.ones_(self.mass.weight)
-
 
     def tril_Minv(self, q):
         """

@@ -6,7 +6,7 @@
 @desc:
 """
 import torch
-from torch import nn, Tensor
+from torch import nn
 
 from ._base_module import LossNN
 from .mlp import MLP
