@@ -26,7 +26,7 @@ class Baseline_pend2(LossNN):
     def integrate(self, X0, t):
         print("Generating for new function!")
         def angle_forward(t, coords):
-            x, p = torch.chunk(coords, 2, dim=0)
+            x, p = torch.chunk(coords, 2, dim=-1)
             new_x = x % (2 * torch.pi)
             new_coords = torch.cat([new_x, p], dim=-1).clone().detach()
             return self(t, new_coords)
