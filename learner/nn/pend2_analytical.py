@@ -132,17 +132,20 @@ class Pend2_analytical(LossNN):
     def integrate(self, X0, t):
 
         def angle_forward(t, coords):
-            x, p = torch.chunk(coords, 2, dim=-1)
-            new_x = x % (2 * torch.pi)
-            new_coords = torch.cat([new_x, p], dim=-1).clone().detach().requires_grad_(True)
-            return self(t, new_coords)
+            # x, p = torch.chunk(coords, 2, dim=-1)
+            # new_x = x % (2 * torch.pi)
+            # new_coords = torch.cat([new_x, p], dim=-1).clone().detach().requires_grad_(True)
+            # return self(t, new_coords)
+            coords = coords.cpu()
+            return self(t, coords)
+
 
         # out = ODESolver(angle_forward, X0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
         outlist = []
         for x0 in X0:
-            x0 = torch.tensor([5.1, 4.3, -10.2, 9.1], dtype=self.Dtype, device=self.Device)
+            x0 = torch.tensor([5.1, 4.3, -10.2, 9.1], dtype=self.Dtype, device=torch.device('cpu'))
             x0 = x0.reshape(1, -1)
-            out = ODESolver(self, x0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
+            out = ODESolver(angle_forward, x0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
             outlist.append(out)
         out = torch.cat(outlist, dim=0)
         return out
