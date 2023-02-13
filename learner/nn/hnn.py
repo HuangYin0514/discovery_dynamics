@@ -31,6 +31,10 @@ class HNN(LossNN):
         return torch.tensor(res, dtype=self.Dtype, device=self.Device)
 
     def forward(self, t, coords):
+        x, p = torch.chunk(coords, 2, dim=-1)
+        new_x = x % (2 * torch.pi)
+        coords = torch.cat([new_x, p], dim=-1).clone().detach().requires_grad_(True)
+
         bs = coords.size(0)
         x, p = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
 
