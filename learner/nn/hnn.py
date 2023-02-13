@@ -47,8 +47,8 @@ class HNN(LossNN):
         dp_dt = -dqH
 
         dz_dt = torch.cat([dq_dt, dp_dt], dim=-1)
-
         return dz_dt
+
     def integrate(self, X0, t):
         def angle_forward(t, coords):
             x, p = torch.chunk(coords, 2, dim=-1)
