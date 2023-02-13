@@ -141,7 +141,7 @@ class Pend2_analytical(LossNN):
         # out = ODESolver(angle_forward, X0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
         outlist = []
         for x0 in X0:
-            x0 = torch.tensor([10.1, 10.3, -10.2, 9.1], dtype=self.Dtype, device=self.Device)
+            x0 = torch.tensor([5.1, 4.3, -10.2, 9.1], dtype=self.Dtype, device=self.Device)
             x0 = x0.reshape(1, -1)
             out = ODESolver(self, x0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
             outlist.append(out)
