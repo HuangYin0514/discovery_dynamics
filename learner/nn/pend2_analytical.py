@@ -110,7 +110,7 @@ class Pend2_analytical(LossNN):
         T = 0.
         # v = torch.matmul(self.Minv(x), p.unsqueeze(-1))
         # T = torch.sum(v**2).reshape(-1)
-        self.dataset.kinetic(coords.reshape(-1))
+        T = self.dataset.kinetic(torch.cat([x,p],dim=-1).reshape(-1))
 
         # self.dataset.
 
