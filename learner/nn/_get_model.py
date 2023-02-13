@@ -28,7 +28,6 @@ __model_factory = {
     'ModLaNet_body3': ModLaNet_body3,
     'HnnMod_pend2': HnnMod_pend2,
     'HnnMod_body3': HnnMod_body3,
-    'HnnMod_pend2_anlytical': HnnMod_pend2_anlytical,
     'HnnModScale_pend2': HnnModScale_pend2,
     'HnnModScale_body3': HnnModScale_body3,
     'Pend2_analytical': Pend2_analytical,
