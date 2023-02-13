@@ -35,7 +35,7 @@ class HNN(LossNN):
         dy = (self.J @ gradH.T).T  # dy shape is (bs, vector)
         return dy
 
-    def integrate(self, X, t):
+    def integrate(self, X0, t):
         def angle_forward(t, coords):
             x, p = torch.chunk(coords, 2, dim=-1)
             new_x = x % (2 * torch.pi)
