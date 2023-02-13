@@ -62,11 +62,11 @@ class AnalyzeBrain:
         mse_err, rel_err, eng_err = err
         result = ('net: {}'.format(self.net.__class__.__name__)
                   + '\n'
-                  + 'mse_err: {:.3e}'.format(mse_err)
+                  + 'mse_err: {:.3e} +/- {:.3e}'.format(mse_err.mean(), mse_err.std())
                   + '\n'
-                  + 'rel_err: {:.3e}'.format(rel_err)
+                  + 'rel_err: {:.3e} +/- {:.3e}'.format(rel_err.mean(), rel_err.std())
                   + '\n'
-                  + 'eng_err: {:.3e}'.format(eng_err))
+                  + 'eng_err: {:.3e} +/- {:.3e}'.format(eng_err.mean(), eng_err.std()))
         print(result)
 
         # solutions forms ----------------------------------------------------------------

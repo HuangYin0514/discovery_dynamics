@@ -5,7 +5,7 @@
 @time: 2023/1/7 10:34 PM
 @desc:
 """
-
+import numpy as np
 import torch
 
 
@@ -21,13 +21,12 @@ def square_err_fn(x, y):
         error = torch.abs(x_position - y_position)
         error = torch.clamp(error, min=1e-7)
 
-        error_norm = torch.linalg.norm(error) / times
+        error_norm = torch.linalg.norm(error)
 
         err_list.append(error_norm)
 
     position_err = torch.stack(err_list)
-    position_err_mean = torch.mean(position_err)
-    return position_err_mean
+    return position_err
 
 
 def rel_err_fn(x, y):
@@ -49,13 +48,13 @@ def energy_err_fn(x, y, energy_function):
         error = torch.abs(eng_x - eng_y)
         error = torch.clamp(error, min=1e-7)
         # H_err = torch.abs(eng_x - eng_y) / (torch.abs(eng_x) + torch.abs(eng_y)) # relatively errors 与loss正相关
-        H_err = torch.linalg.norm(error) / len(eng_y)
+        H_err = torch.linalg.norm(error)
+
         err_list.append(H_err)
 
     E_err = torch.stack(err_list)
-    E_err_mean = torch.mean(E_err)
 
-    return E_err_mean
+    return E_err
 
 
 def accuracy_fn(output_traj, target_traj, energy_function):
@@ -68,7 +67,7 @@ def accuracy_fn(output_traj, target_traj, energy_function):
      Returns:
          accuracy
      """
-    mse_err = square_err_fn(output_traj, target_traj).mean()
-    rel_err = rel_err_fn(output_traj, target_traj).mean()
+    mse_err = square_err_fn(output_traj, target_traj)
+    rel_err = rel_err_fn(output_traj, target_traj)
     eng_err = energy_err_fn(output_traj, target_traj, energy_function)
     return mse_err, torch.exp(rel_err), eng_err
