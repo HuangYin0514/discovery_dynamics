@@ -97,7 +97,7 @@ class MechanicsNN(LossNN):
         Minv = lower_triangular.matmul(lower_triangular.transpose(-2, -1)) + diag_noise
         return Minv
 
-    def forward(self, t, x):
+    def forward(self, t, coords):
         """
         Parameters
         ----------
@@ -111,13 +111,15 @@ class MechanicsNN(LossNN):
         torch.Tensor
             Loss.
         """
-        assert (x.ndim == 2)
-        q, p = x.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
+        assert (coords.ndim == 2)
+        q, p = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
+
         Minv = self.Minv(q)
         # dq_dt = v = Minv @ p
         dq_dt = Minv.matmul(p.unsqueeze(-1)).squeeze(-1)
         # dp_dt = A(q, v)
         dp_dt = self.dynamics_net(q, p)
+
         dz_dt = torch.cat([dq_dt, dp_dt], dim=-1)
         return dz_dt
 
