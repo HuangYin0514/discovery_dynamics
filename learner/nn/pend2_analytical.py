@@ -45,9 +45,9 @@ class Pend2_analytical(LossNN):
         torch.nn.init.ones_(self.mass.weight)
 
         self.dataset = Pendulum2(train_num=1,
-                            test_num=1,
-                            obj=obj,
-                            dim=dim)
+                                 test_num=1,
+                                 obj=obj,
+                                 dim=dim)
 
     def M(self, x):
         N = self.obj
@@ -106,11 +106,10 @@ class Pend2_analytical(LossNN):
 
         # Calculate the kinetic --------------------------------------------------------------
 
-
         T = 0.
         # v = torch.matmul(self.Minv(x), p.unsqueeze(-1))
         # T = torch.sum(v**2).reshape(-1)
-        T = self.dataset.kinetic(torch.cat([x,p],dim=-1).reshape(-1))
+        T = self.dataset.kinetic(torch.cat([x, p], dim=-1).reshape(-1))
 
         # self.dataset.
 
@@ -142,6 +141,7 @@ class Pend2_analytical(LossNN):
         # out = ODESolver(angle_forward, X0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
         outlist = []
         for x0 in X0:
+            x0 = torch.tensor([1.1, 1.3, 10., 9.])
             x0 = x0.reshape(1, -1)
             out = ODESolver(self, x0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
             outlist.append(out)
