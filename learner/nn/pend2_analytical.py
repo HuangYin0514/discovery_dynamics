@@ -38,11 +38,6 @@ class Pend2_analytical(LossNN):
         self.mass = torch.nn.Linear(1, 1, bias=False)
         torch.nn.init.ones_(self.mass.weight)
 
-        # self.dataset = Pendulum2(train_num=1,
-        #                          test_num=1,
-        #                          obj=obj,
-        #                          dim=dim)
-
     def M(self, x):
         N = self.obj
         M = torch.zeros((x.shape[0], N, N), dtype=self.Dtype, device=self.Device)
