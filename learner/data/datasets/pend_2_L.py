@@ -5,12 +5,12 @@
 @time: 2023/1/3 3:50 PM
 @desc:
 """
-
 import numpy as np
 import torch
 from torch import nn
 
 from ._base_body_dataset import BaseBodyDataset
+from ...integrator import ODESolver
 from ...utils import dfx
 
 
@@ -31,18 +31,21 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
 
         self.train_num = train_num
         self.test_num = test_num
-        self.dataset_url = 'https://drive.google.com/file/d/1xsfwFOToo6fPB9K3HytY72kBqo-SNdAr/view?usp=share_link'
+        self.dataset_url = ''
+
+        self.Dtype = torch.float32
+        self.Device = torch.device('cpu')
 
         self.__init_dynamic_variable(obj, dim)
 
     def __init_dynamic_variable(self, obj, dim):
-        self._m = [1 for i in range(obj)]
-        self._l = [1 for i in range(obj)]
-        self._g = 9.8
+        self.m = [1 for i in range(obj)]
+        self.l = [1 for i in range(obj)]
+        self.g = 9.8
 
-        self._obj = obj
-        self._dim = dim
-        self._dof = self._obj * self._dim  # degree of freedom
+        self.obj = obj
+        self.dim = dim
+        self.dof = self.obj * self.dim  # degree of freedom
 
         self.dt = 0.1
 
@@ -51,44 +54,24 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
         _time_step = int((t_end - t0) / self.dt)
         self.t = torch.linspace(t0, t_end, _time_step)
 
-        t_end = 15.
-        _time_step = int((t_end - t0) / self.dt)
+        t_end = 30.
+        dt = 0.05
+        _time_step = int((t_end - t0) / dt)
         self.test_t = torch.linspace(t0, t_end, _time_step)
 
     def forward(self, t, coords):
-        assert len(coords) == self._dof * 2
-
-        res = self.derivative_analytical(coords)
-        # res2 = self.derivative_lagrangian(coords)
-        return res
-
-    def derivative_analytical(self, coords):
-        '''
-                double pendulum dynamics from https://github.com/MilesCranmer/lagrangian_nns/blob/master/experiment_dblpend/physics.py
-                :param state: the angles and angular velocities of the two masses
-                :param t: dummy variable for runge-kutta calculation
-                :returns: the angular velocities and accelerations of the two masses
-                '''
-
-        t1, t2, w1, w2 = torch.chunk(coords, 4, dim=0)
-        l1, l2, m1, m2 = self._l[0], self._l[1], self._m[0], self._m[1]
-        g = self._g
-
-        a1 = (l2 / l1) * (m2 / (m1 + m2)) * torch.cos(t1 - t2)
-        a2 = (l1 / l2) * torch.cos(t1 - t2)
-        f1 = -(l2 / l1) * (m2 / (m1 + m2)) * (w2 ** 2) * torch.sin(t1 - t2) - (g / l1) * torch.sin(t1)
-        f2 = (l1 / l2) * (w1 ** 2) * torch.sin(t1 - t2) - (g / l2) * torch.sin(t2)
-        g1 = (f1 - a1 * f2) / (1 - a1 * a2)
-        g2 = (f2 - a2 * f1) / (1 - a1 * a2)
-
-        # return derivative of state
-        return torch.cat([w1, w2, g1, g2], dim=0).float()
-
-    def derivative_lagrangian(self, coords):
         coords = coords.clone().detach().requires_grad_(True)
-        x, v = torch.chunk(coords, 2, dim=0)
+        bs = coords.size(0)
+        x, v = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
 
-        L = self.energy_fn(torch.cat([x, v], dim=0), L_constant=True)
+        # Calculate the potential energy for i-th element ------------------------------------------------------------
+        U = self.potential(torch.cat([x, v], dim=-1))
+
+        # Calculate the kinetic --------------------------------------------------------------
+        T = self.kinetic(torch.cat([x, v], dim=-1))
+
+        # Calculate the Hamilton Derivative --------------------------------------------------------------
+        L = T - U
         dvL = dfx(L.sum(), v)
         dxL = dfx(L.sum(), x)
 
@@ -106,44 +89,77 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
         dvdvL_inv = torch.linalg.inv(dvdvL)
 
         a = dvdvL_inv @ (dxL - dxdvL @ v)
-        return torch.cat([v, a], dim=0).detach().clone()
+        dz_dt = torch.cat([v, a], dim=0).detach().clone()
+
+    def M(self, x):
+        N = self.obj
+        M = torch.zeros((x.shape[0], N, N), dtype=self.Dtype, device=self.Device)
+        for i in range(N):
+            for k in range(N):
+                m_sum = 0
+                j = i if i >= k else k
+                for tmp in range(j, N):
+                    m_sum += 1.0
+                M[:, i, k] = torch.cos(x[:, i] - x[:, k]) * m_sum
+        return M
+
+    def Minv(self, x):
+        return torch.linalg.inv(self.M(x))
 
     def kinetic(self, coords):
-        """
-          Coordinates consist of position and velocity -> (x, v)
-        """
+        """Kinetic energy"""
+
+        s, num_states = coords.shape
+        assert num_states == self.dof * 2
+
+        x, v = torch.chunk(coords, 2, dim=1)
+
         T = 0.
         vx, vy = 0., 0.
         for i in range(self._dof):
-            vx = vx + self._l[i] * coords[self._dof + i] * torch.cos(coords[i])
-            vy = vy + self._l[i] * coords[self._dof + i] * torch.sin(coords[i])
+            vx = vx + self._l[i] * v[:, i] * torch.cos(coords[:, i])
+            vy = vy + self._l[i] * v[:, i] * torch.sin(coords[:, i])
             T = T + 0.5 * self._m[i] * (torch.pow(vx, 2) + torch.pow(vy, 2))
         return T
 
     def potential(self, coords):
+        bs, num_states = coords.shape
+        assert num_states == self.dof * 2
         U = 0.
         y = 0.
-        for i in range(self._obj):
-            y = y - self._l[i] * torch.cos(coords[i])
-            U = U + self._m[i] * self._g * y
+        for i in range(self.obj):
+            y = y - self.l[i] * torch.cos(coords[:, i])
+            U = U + self.m[i] * self.g * y
         return U
 
-    def energy_fn(self, coords, L_constant=False):
+    def energy_fn(self, coords):
         """energy function """
-        assert len(coords) == self._dof * 2
-
-        if L_constant:
-            L = self.kinetic(coords) - self.potential(coords)
-            return L
         eng = self.kinetic(coords) + self.potential(coords)
         return eng
 
-    def random_config(self):
-        max_momentum = 1.
-        x0 = torch.zeros(self._obj * 2)
-        for i in range(self._obj):
-            theta = (.5 * np.pi) * torch.rand(1, ) + 0  # [0, 2pi]
-            momentum = (2 * torch.rand(1, ) - 1) * max_momentum  # [-1, 1]*max_momentum
-            x0[i] = theta
-            x0[i + self._obj] = momentum
+    def random_config(self, num):
+        x0_list = []
+        for i in range(num):
+            max_momentum = 0.5
+            x0 = torch.zeros((self.obj * 2))
+            for i in range(self.obj):
+                theta = (2 * np.pi) * torch.rand(1, ) + 0  # [0, 2pi]
+                momentum = (2 * torch.rand(1, ) - 1) * max_momentum  # [-1, 1]*max_momentum
+                x0[i] = theta
+                x0[i + self.obj] = momentum
+            x0_list.append(x0)
+        x0 = torch.stack(x0_list)
         return x0
+
+    def generate(self, x0, t):
+        print("Generating for new function!")
+
+        def angle_forward(t, coords):
+            x, p = torch.chunk(coords, 2, dim=-1)
+            new_x = x % (2 * torch.pi)
+            new_coords = torch.cat([new_x, p], dim=-1).clone().detach().requires_grad_(True)
+            return self(t, new_coords)
+
+        coords = ODESolver(self, x0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
+
+        return coords

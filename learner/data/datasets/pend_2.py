@@ -39,9 +39,9 @@ class Pendulum2(BaseBodyDataset, nn.Module):
         self.__init_dynamic_variable(obj, dim)
 
     def __init_dynamic_variable(self, obj, dim):
-        self._m = [1 for i in range(obj)]
-        self._l = [1 for i in range(obj)]
-        self._g = 9.8
+        self.m = [1 for i in range(obj)]
+        self.l = [1 for i in range(obj)]
+        self.g = 9.8
 
         self.obj = obj
         self.dim = dim
@@ -131,8 +131,8 @@ class Pendulum2(BaseBodyDataset, nn.Module):
         U = 0.
         y = 0.
         for i in range(self.obj):
-            y = y - torch.cos(coords[:, i])
-            U = U + 9.8 * y
+            y = y - self.l[i] * torch.cos(coords[:, i])
+            U = U + self.m[i] * self.g * y
         return U
 
     def energy_fn(self, coords):
@@ -163,6 +163,6 @@ class Pendulum2(BaseBodyDataset, nn.Module):
             new_coords = torch.cat([new_x, p], dim=-1).clone().detach().requires_grad_(True)
             return self(t, new_coords)
 
-        coords = ODESolver(self, x0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
+        coords = ODESolver(self, x0, t, method='dopri5').permute(1, 0, 2)  # (T, D) dopri5 rk4
 
         return coords
