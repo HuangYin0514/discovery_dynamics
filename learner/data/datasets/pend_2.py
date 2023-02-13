@@ -47,7 +47,7 @@ class Pendulum2(BaseBodyDataset, nn.Module):
         self.dim = dim
         self.dof = self.obj * self.dim  # degree of freedom
 
-        self.dt = 0.01
+        self.dt = 0.1
 
         t0 = 0.
         t_end = 10.
