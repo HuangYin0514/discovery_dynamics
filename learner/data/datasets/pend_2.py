@@ -136,7 +136,11 @@ class Pendulum2(BaseBodyDataset, nn.Module):
 
     def potential(self, coords):
         U = 0.
-        return U * 0
+        y = 0.
+        for i in range(self._obj):
+            y = y - torch.cos(coords[:, i])
+            U = U + 9.8 * y
+        return U * 0.
 
     def energy_fn(self, coords):
         """energy function """

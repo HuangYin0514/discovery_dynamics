@@ -75,12 +75,12 @@ class AnalyzeBrain:
         true_q, true_p = ground_true.chunk(2, dim=-1)  # (T, states)
         pred_q, pred_p = net_pred.chunk(2, dim=-1)  # (T, states)
 
-        true_eng = torch.stack([self.energy_fn(i) for i in ground_true])
-        true_kinetic_eng = torch.stack([self.kinetic_fn(i) for i in ground_true])
-        true_potential_eng = torch.stack([self.potential_fn(i) for i in ground_true])
-        pred_eng = torch.stack([self.energy_fn(i) for i in net_pred])
-        pred_kinetic_eng = torch.stack([self.kinetic_fn(i) for i in net_pred])
-        pred_potential_eng = torch.stack([self.potential_fn(i) for i in net_pred])
+        true_eng = torch.stack([self.energy_fn(i[None,:]) for i in ground_true])
+        true_kinetic_eng = torch.stack([self.kinetic_fn(i[None,:]) for i in ground_true])
+        true_potential_eng = torch.stack([self.potential_fn(i[None,:]) for i in ground_true])
+        pred_eng = torch.stack([self.energy_fn(i[None,:]) for i in net_pred])
+        pred_kinetic_eng = torch.stack([self.kinetic_fn(i[None,:]) for i in net_pred])
+        pred_potential_eng = torch.stack([self.potential_fn(i[None,:]) for i in net_pred])
 
         t = t.detach().cpu().numpy()
 
