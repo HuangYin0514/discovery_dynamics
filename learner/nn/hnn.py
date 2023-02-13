@@ -17,6 +17,7 @@ class HNN(LossNN):
 
         self.obj = obj
         self.dim = dim
+        self.dof = int(obj * dim)
 
         self.baseline = MLP(input_dim=obj * dim * 2, hidden_dim=200, output_dim=1, num_layers=1, act=nn.Tanh)
 
@@ -29,11 +30,24 @@ class HNN(LossNN):
         res = np.eye(states_dim, k=d) - np.eye(states_dim, k=-d)
         return torch.tensor(res, dtype=self.Dtype, device=self.Device)
 
-    def forward(self, t, x):
-        h = self.baseline(x)
-        gradH = dfx(h, x)
-        dy = (self.J @ gradH.T).T  # dy shape is (bs, vector)
-        return dy
+    def forward(self, t, coords):
+        bs = coords.size(0)
+        x, p = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
+
+        H = self.baseline(torch.cat([x, p], dim=-1))
+
+        dqH = dfx(H.sum(), x)
+        dpH = dfx(H.sum(), p)
+
+        # Calculate the Derivative ----------------------------------------------------------------
+        dq_dt = torch.zeros((bs, self.dof), dtype=self.Dtype, device=self.Device)
+        dp_dt = torch.zeros((bs, self.dof), dtype=self.Dtype, device=self.Device)
+        for i in range(self.obj):
+            dq_dt[:, i * self.dim:(i + 1) * self.dim] = dpH[:, i * self.dim: (i + 1) * self.dim]
+            dp_dt[:, i * self.dim:(i + 1) * self.dim] = -dqH[:, i * self.dim:(i + 1) * self.dim]
+        dz_dt = torch.cat([dq_dt, dp_dt], dim=-1)
+
+        return dz_dt
 
     def integrate(self, X0, t):
         def angle_forward(t, coords):
