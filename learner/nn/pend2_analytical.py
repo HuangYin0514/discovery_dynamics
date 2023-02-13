@@ -54,6 +54,10 @@ class Pend2_analytical(LossNN):
         return torch.linalg.inv(self.M(x))
 
     def forward(self, t, coords):
+        q, p = torch.chunk(coords, 2, dim=-1)
+        new_q = q % (2 * torch.pi)
+        coords = torch.cat([new_q, p], dim=-1).clone().detach().requires_grad_(True)
+
         bs = coords.size(0)
         x, p = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
 
@@ -97,5 +101,5 @@ class Pend2_analytical(LossNN):
             # return self(t, new_coords)
             return self(t, coords)
 
-        out = ODESolver(self, X0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
+        out = ODESolver(self, X0, t, method='dopri5').permute(1, 0, 2)  # (T, D) dopri5 rk4
         return out

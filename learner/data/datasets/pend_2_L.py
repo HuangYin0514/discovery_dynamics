@@ -117,8 +117,8 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
         T = 0.
         vx, vy = 0., 0.
         for i in range(self._dof):
-            vx = vx + self._l[i] * v[:, i] * torch.cos(coords[:, i])
-            vy = vy + self._l[i] * v[:, i] * torch.sin(coords[:, i])
+            vx = vx + self._l[i] * v[:, i] * torch.cos(x[:, i])
+            vy = vy + self._l[i] * v[:, i] * torch.sin(x[:, i])
             T = T + 0.5 * self._m[i] * (torch.pow(vx, 2) + torch.pow(vy, 2))
         return T
 

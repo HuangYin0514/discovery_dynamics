@@ -60,8 +60,9 @@ class AnalyzeBrain:
         labels = torch.cat(labels_list, dim=0)
         err = accuracy_fn(pred, labels, self.energy_fn)
         mse_err, rel_err, eng_err = err
-
-        result = ('mse_err: {:.3e}'.format(mse_err)
+        result = ('net: {}'.format(self.net.__class__.__name__)
+                  + '\n'
+                  + 'mse_err: {:.3e}'.format(mse_err)
                   + '\n'
                   + 'rel_err: {:.3e}'.format(rel_err)
                   + '\n'
