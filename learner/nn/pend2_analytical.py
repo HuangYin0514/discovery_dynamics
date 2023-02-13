@@ -51,7 +51,7 @@ class Pend2_analytical(LossNN):
 
     def M(self, x):
         N = self.obj
-        M = torch.zeros((x.shape[0], N, N), dtype=self.Dtype, device=x.device)
+        M = torch.zeros((x.shape[0], N, N), dtype=self.Dtype, device=self.Device)
         for i in range(N):
             for k in range(N):
                 m_sum = 0
