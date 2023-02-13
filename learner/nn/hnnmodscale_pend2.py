@@ -173,9 +173,13 @@ class HnnModScale_pend2(LossNN):
         Minv = lower_triangular.matmul(lower_triangular.transpose(-2, -1)) + diag_noise
         return Minv
 
-    def forward(self, t, x):
-        bs = x.size(0)
-        x, p = x.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
+    def forward(self, t, coords):
+        q, p = torch.chunk(coords, 2, dim=-1)
+        new_q = q % (2 * torch.pi)
+        coords = torch.cat([new_q, p], dim=-1).clone().detach().requires_grad_(True)
+
+        bs = coords.size(0)
+        x, p = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
 
         # position transformations ----------------------------------------------------------------
         x_global = torch.zeros((bs, self.global_dof), dtype=self.Dtype, device=self.Device)
