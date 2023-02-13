@@ -89,9 +89,13 @@ class ModLaNet_pend2(LossNN):
         self.mass = torch.nn.Linear(1, 1, bias=False)
         torch.nn.init.ones_(self.mass.weight)
 
-    def forward(self, t, data):
-        bs = data.size(0)
-        x, v = torch.chunk(data, 2, dim=1)
+    def forward(self, t, coords):
+        q, p = torch.chunk(coords, 2, dim=-1)
+        new_q = q % (2 * torch.pi)
+        coords = torch.cat([new_q, p], dim=-1).clone().detach().requires_grad_(True)
+
+        bs = coords.size(0)
+        x, v = torch.chunk(coords, 2, dim=1)
 
         L, T, U = 0., 0., torch.zeros((x.shape[0], 1), dtype=self.Dtype, device=self.Device)
 

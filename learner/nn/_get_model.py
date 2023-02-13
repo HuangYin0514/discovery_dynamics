@@ -7,10 +7,10 @@ from .baseline_pend2 import Baseline_pend2
 from .hnn import HNN
 from .hnnmod_body3 import HnnMod_body3
 from .hnnmod_pend2 import HnnMod_pend2
-from .hnnmod_pend2_anlytical import HnnMod_pend2_anlytical
 from .hnnmodscale_body3 import HnnModScale_body3
 from .hnnmodscale_pend2 import HnnModScale_pend2
 from .lnn import LNN
+from .lnn_pend2 import LNN_pend2
 from .mechanicsNN import MechanicsNN
 from .mechanicsNN_pend2 import MechanicsNN_pend2
 from .modlanet_body3 import ModLaNet_body3
@@ -20,6 +20,7 @@ from .pend2_analytical import Pend2_analytical
 __model_factory = {
     'HNN': HNN,
     'LNN': LNN,
+    'LNN_pend2': LNN_pend2,
     'Baseline': Baseline,
     'Baseline_pend2': Baseline_pend2,
     'MechanicsNN': MechanicsNN,

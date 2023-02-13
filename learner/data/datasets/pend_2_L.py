@@ -75,14 +75,14 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
         dvL = dfx(L.sum(), v)
         dxL = dfx(L.sum(), x)
 
-        dvdvL = torch.zeros((self._dof, self._dof))
-        dxdvL = torch.zeros((self._dof, self._dof))
+        dvdvL = torch.zeros((self.dof, self.dof))
+        dxdvL = torch.zeros((self.dof, self.dof))
 
-        for i in range(self._dof):
+        for i in range(self.dof):
             dvidvL = dfx(dvL[i].sum(), v)
             dvdvL[i] += dvidvL
 
-        for i in range(self._dof):
+        for i in range(self.dof):
             dxidvL = dfx(dvL[i].sum(), x)
             dxdvL[i] += dxidvL
 
@@ -116,10 +116,10 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
 
         T = 0.
         vx, vy = 0., 0.
-        for i in range(self._dof):
-            vx = vx + self._l[i] * v[:, i] * torch.cos(x[:, i])
-            vy = vy + self._l[i] * v[:, i] * torch.sin(x[:, i])
-            T = T + 0.5 * self._m[i] * (torch.pow(vx, 2) + torch.pow(vy, 2))
+        for i in range(self.dof):
+            vx = vx + self.l[i] * v[:, i] * torch.cos(x[:, i])
+            vy = vy + self.l[i] * v[:, i] * torch.sin(x[:, i])
+            T = T + 0.5 * self.m[i] * (torch.pow(vx, 2) + torch.pow(vy, 2))
         return T
 
     def potential(self, coords):
