@@ -42,13 +42,13 @@ class HNN(LossNN):
         # Calculate the Derivative ----------------------------------------------------------------
         dq_dt = torch.zeros((bs, self.dof), dtype=self.Dtype, device=self.Device)
         dp_dt = torch.zeros((bs, self.dof), dtype=self.Dtype, device=self.Device)
-        for i in range(self.obj):
-            dq_dt[:, i * self.dim:(i + 1) * self.dim] = dpH[:, i * self.dim: (i + 1) * self.dim]
-            dp_dt[:, i * self.dim:(i + 1) * self.dim] = -dqH[:, i * self.dim:(i + 1) * self.dim]
+
+        dq_dt = dpH
+        dp_dt = -dqH
+
         dz_dt = torch.cat([dq_dt, dp_dt], dim=-1)
 
         return dz_dt
-
     def integrate(self, X0, t):
         def angle_forward(t, coords):
             x, p = torch.chunk(coords, 2, dim=-1)
