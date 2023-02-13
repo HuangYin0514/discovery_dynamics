@@ -7,6 +7,8 @@
 """
 import numpy as np
 
+from ..data.datasets import Pendulum2
+
 # encoding: utf-8
 """
 @author: Yin Huang
@@ -41,6 +43,11 @@ class Pend2_analytical(LossNN):
 
         self.mass = torch.nn.Linear(1, 1, bias=False)
         torch.nn.init.ones_(self.mass.weight)
+
+        self.dataset = Pendulum2(train_num=1,
+                            test_num=1,
+                            obj=obj,
+                            dim=dim)
 
     def M(self, x):
         N = self.obj
@@ -98,9 +105,14 @@ class Pend2_analytical(LossNN):
             U = U + 9.8 * y
 
         # Calculate the kinetic --------------------------------------------------------------
+
+
         T = 0.
-        v = torch.matmul(self.Minv(x), p.unsqueeze(-1))
-        T = torch.sum(v**2).reshape(-1)
+        # v = torch.matmul(self.Minv(x), p.unsqueeze(-1))
+        # T = torch.sum(v**2).reshape(-1)
+        self.dataset.kinetic(coords.reshape(-1))
+
+        # self.dataset.
 
         # Calculate the Hamilton Derivative --------------------------------------------------------------
         H = U * 0 + T
