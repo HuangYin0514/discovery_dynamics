@@ -36,7 +36,8 @@ parser.add_argument('--num_workers', default=0, type=int, help='how many subproc
 parser.add_argument('--net_name', default='MechanicsNN', type=str,
                     help='Select model to train '
                          '[Baseline Baseline_pend2'
-                         'HNN LNN MechanicsNN'
+                         'HNN LNN '
+                         'MechanicsNN_pend2 MechanicsNN'
                          'ModLaNet_pend2 ModLaNet_body3'
                          'HnnMod_pend2 HnnMod_body3'
                          'HnnModScale_pend2'
