@@ -42,9 +42,9 @@ def rel_err_fn(x, y):
 def energy_err_fn(x, y, energy_function):
     err_list = []
     for x_, y_ in zip(x, y):
-        eng_x = torch.stack([energy_function(i) for i in x_])
+        eng_x = torch.stack([energy_function(i[None,:]) for i in x_])
 
-        eng_y = torch.stack([energy_function(i) for i in y_])
+        eng_y = torch.stack([energy_function(i[None,:]) for i in y_])
         # eng_y = eng_y[0].repeat(len(eng_y)) # 与真实的eng对比
 
         error = torch.abs(eng_x - eng_y)
