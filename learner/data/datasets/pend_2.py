@@ -65,6 +65,7 @@ class Pendulum2(BaseBodyDataset, nn.Module):
         return torch.tensor(res).float()
 
     def forward(self, t, coords):
+        coords= coords.reshape(-1)
         assert len(coords) == self._dof * 2
         # dy = self.derivative_analytical(coords)
         dy = self.derivative_hamilton(coords)
@@ -90,7 +91,7 @@ class Pendulum2(BaseBodyDataset, nn.Module):
         h = self.energy_fn(coords)
         gradH = dfx(h, coords)
         dy = self.J @ gradH  # dy shape is (vector, )
-        return dy
+        return dy.reshape(1,-1)
 
     def M(self, x):
         """
@@ -169,6 +170,7 @@ class Pendulum2(BaseBodyDataset, nn.Module):
             return self(t, new_coords)
 
         x0 = torch.tensor([5.1, 4.3, -10.2, 9.1], dtype=torch.float32)
-        x0 = x0.reshape(-1)
+        x0 = x0.reshape(1,-1)
         out = ODESolver(self, x0, t, method='rk4')  # (T, D) dopri5 rk4
+        out = out.squeeze(1)
         return out
