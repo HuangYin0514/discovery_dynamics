@@ -44,10 +44,10 @@ class Pend2_analytical(LossNN):
         self.mass = torch.nn.Linear(1, 1, bias=False)
         torch.nn.init.ones_(self.mass.weight)
 
-        self.dataset = Pendulum2(train_num=1,
-                                 test_num=1,
-                                 obj=obj,
-                                 dim=dim)
+        # self.dataset = Pendulum2(train_num=1,
+        #                          test_num=1,
+        #                          obj=obj,
+        #                          dim=dim)
 
     def M(self, x):
         N = self.obj
@@ -105,13 +105,12 @@ class Pend2_analytical(LossNN):
             U = U + 9.8 * y
 
         # Calculate the kinetic --------------------------------------------------------------
+        # T = self.dataset.kinetic(torch.cat([x, p], dim=-1).reshape(-1))
 
         T = 0.
-        # v = torch.matmul(self.Minv(x), p.unsqueeze(-1))
-        # T = torch.sum(v**2).reshape(-1)
-        T = self.dataset.kinetic(torch.cat([x, p], dim=-1).reshape(-1))
-
-        # self.dataset.
+        v = torch.matmul(self.Minv(x), p.unsqueeze(-1))
+        T = torch.matmul(p.unsqueeze(1), v)
+        T = torch.sum(T).reshape(-1)
 
         # Calculate the Hamilton Derivative --------------------------------------------------------------
         H = U * 0 + T
