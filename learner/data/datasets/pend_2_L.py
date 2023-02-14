@@ -109,10 +109,8 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
 
     def kinetic(self, coords):
         """Kinetic energy"""
-
         s, num_states = coords.shape
         assert num_states == self.dof * 2
-
         x, v = torch.chunk(coords, 2, dim=1)
 
         T = 0.
