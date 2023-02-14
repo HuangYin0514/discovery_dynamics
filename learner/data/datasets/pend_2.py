@@ -148,7 +148,7 @@ class Pendulum2(BaseBodyDataset, nn.Module):
                 x0[i + self.obj] = momentum
             x0_list.append(x0)
         x0 = torch.stack(x0_list)
-        return x0
+        return x0.to(self.Device)
 
     def generate(self, X0, t):
         print("Generating for new function!")
