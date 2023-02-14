@@ -10,6 +10,7 @@ from torch import nn
 
 from ._base_module import LossNN
 from .mlp import MLP
+from .utils_nn import Identity
 from ..integrator import ODESolver
 from ..utils import dfx
 
@@ -77,11 +78,11 @@ class ModLaNet_pend2(LossNN):
         self.Potential1 = PotentialEnergyCell(input_dim=self.global_dim,
                                               hidden_dim=50,
                                               output_dim=1,
-                                              num_layers=1, act=nn.Tanh)
+                                              num_layers=1, act=Identity)
         self.Potential2 = PotentialEnergyCell(input_dim=self.global_dim * 2,
                                               hidden_dim=50,
                                               output_dim=1,
-                                              num_layers=1, act=nn.Tanh)
+                                              num_layers=1, act=Identity)
 
         self.co1 = torch.nn.Parameter(torch.ones(1, dtype=self.Dtype, device=self.Device) * 0.5)
         self.co2 = torch.nn.Parameter(torch.ones(1, dtype=self.Dtype, device=self.Device) * 0.5)
@@ -152,13 +153,19 @@ class ModLaNet_pend2(LossNN):
 
         for i in range(self.dof):
             dvidvL = dfx(dvL[:, i].sum(), v)
-            dvdvL[:, i, :] += dvidvL
+            if dvidvL is None:
+                break
+            else:
+                dvdvL[:, i, :] += dvidvL
 
         for i in range(self.dof):
             dxidvL = dfx(dvL[:, i].sum(), x)
-            dxdvL[:, i, :] += dxidvL
+            if dxidvL is None:
+                break
+            else:
+                dxdvL[:, i, :] += dxidvL
 
-        dvdvL_inv = torch.linalg.pinv(dvdvL)
+        dvdvL_inv = torch.linalg.inv(dvdvL)
 
         a = dvdvL_inv @ (dxL.unsqueeze(2) - dxdvL @ v.unsqueeze(2))  # (bs, a_dim, 1)
         a = a.squeeze(2)
