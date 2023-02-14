@@ -31,12 +31,10 @@ class Body3(BaseBodyDataset, nn.Module):
         self.train_num = train_num
         self.test_num = test_num
 
-        # test time is 15s
-        # self.dataset_url15 = 'https://drive.google.com/file/d/1rZDGAaeuJYnIvfvwEX1WtwlKLWjeRW1D/view?usp=share_link'
-        # test time is 30s, test samples are 20
-        self.dataset_url = 'https://drive.google.com/file/d/18qjMMTKB5-y8CTPuFcn2iat7UH5O_F1P/view?usp=share_link'
-        # test time is 30s, test samples are 100
-        # self.dataset_url = 'https://drive.google.com/file/d/1E8mdLioGy91W1XjLNEri0p3GliQVhMZB/view?usp=share_link'
+        self.dataset_url = ''
+
+        self.Dtype = torch.float32
+        self.Device = torch.device('cpu')
 
         self.__init_dynamic_variable(obj, dim)
 
@@ -64,16 +62,36 @@ class Body3(BaseBodyDataset, nn.Module):
         self.k = 1  # body equation parameter
 
     def forward(self, t, coords):
-        assert len(coords) == self.dof * 2
         coords = coords.clone().detach().requires_grad_(True)
-        grad_ham = dfx(self.energy_fn(coords), coords)
-        dq, dp = grad_ham[self.dof:], -grad_ham[:self.dof]
-        return torch.cat([dq, dp], dim=0).clone().detach()
+        bs = coords.size(0)
+        x, p = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
+
+        # Calculate the potential energy for i-th element ------------------------------------------------------------
+        U = self.potential(torch.cat([x, p], dim=-1))
+
+        # Calculate the kinetic --------------------------------------------------------------
+        T = self.kinetic(torch.cat([x, p], dim=-1))
+
+        # Calculate the Hamilton Derivative --------------------------------------------------------------
+        H = U + T
+        dqH = dfx(H.sum(), x)
+        dpH = dfx(H.sum(), p)
+
+        # Calculate the Derivative ----------------------------------------------------------------
+        dq_dt = torch.zeros((bs, self.dof), dtype=self.Dtype, device=self.Device)
+        dp_dt = torch.zeros((bs, self.dof), dtype=self.Dtype, device=self.Device)
+
+        dq_dt = dpH
+        dp_dt = -dqH
+
+        dz_dt = torch.cat([dq_dt, dp_dt], dim=-1)
+
+        return dz_dt
 
     def kinetic(self, coords):
         s, num_states = coords.shape
         assert num_states == self.dof * 2
-        x, p = torch.chunk(coords, 2, dim=1)
+        q, p = torch.chunk(coords, 2, dim=1)
 
         T = 0.
         for i in range(self.obj):
@@ -95,8 +113,6 @@ class Body3(BaseBodyDataset, nn.Module):
         return U
 
     def energy_fn(self, coords):
-        """能量函数"""
-        assert (len(coords) == self.dof * 2)
         T, U = self.kinetic(coords), self.potential(coords)
         H = T + U
         return H

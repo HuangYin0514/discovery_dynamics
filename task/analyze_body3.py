@@ -10,8 +10,6 @@ import os
 import os.path as osp
 import sys
 
-import torch
-
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 PARENT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append('.')
@@ -21,7 +19,7 @@ import learner as ln
 
 parser = argparse.ArgumentParser(description=None)
 # For general settings
-parser.add_argument('--taskname', default='pend_2_task', type=str, help='Task name')
+parser.add_argument('--taskname', default='body_3_task', type=str, help='Task name')
 parser.add_argument('--seed', default=0, type=int, help='random seed')
 
 # For task
@@ -36,7 +34,7 @@ parser.add_argument('--download_data', default='False', type=str, help='Download
 parser.add_argument('--num_workers', default=0, type=int, help='how many subprocesses to use for data loading. ')
 
 # net
-parser.add_argument('--net_name', default='HnnMod_body3', type=str, help='Select model to train')
+parser.add_argument('--net_name', default='Body3_analytical', type=str, help='Select model to train')
 parser.add_argument('--net_url', default='', type=str, help='Download net from Internet')
 
 # For other settings
@@ -52,7 +50,8 @@ def main():
 
     # seed
     ln.utils.init_random_state(args.seed)
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    # device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    device = 'cpu'
     print('Using the device is:', device)
 
     # net ----------------------------------------------------------------
