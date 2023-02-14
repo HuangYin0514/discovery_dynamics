@@ -33,9 +33,6 @@ class Body3(BaseBodyDataset, nn.Module):
 
         self.dataset_url = ''
 
-        self.Dtype = torch.float32
-        self.Device = torch.device('cpu')
-
         self.__init_dynamic_variable(obj, dim)
 
     def __init_dynamic_variable(self, obj, dim):

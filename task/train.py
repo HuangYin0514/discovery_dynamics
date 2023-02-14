@@ -81,6 +81,8 @@ def run():
         'test_num': args.test_num,
         'download_data': args.download_data,
         'num_workers': args.num_workers,
+        'dtype': args.dtype,
+        'device': device
     }
     data = ln.data.get_dataloader(**arguments)
 

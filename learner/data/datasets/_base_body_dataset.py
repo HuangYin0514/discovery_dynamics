@@ -30,20 +30,6 @@ class BaseBodyDataset(BaseDynamicsDataset):
         self.train = train_dataset
         self.test = test_dataset
 
-    # def __generate_random(self, num, t):
-    #     dataset = []
-    #     for _ in range(num):
-    #         x0 = self.random_config()  # (D, )
-    #         X = self.generate(x0, t).clone().detach()  # (T, D)
-    #         # y = torch.stack(list(map(lambda x: self(None, x), X))).clone().detach()  # (T, D)
-    #         # E = torch.stack([self.energy_fn(y) for y in X])
-    #         y = torch.stack(list(map(lambda x: self(None, x[None, :]), X))).clone().detach()  # (T, D)
-    #         E = torch.stack([self.energy_fn(y[None, :]) for y in X])
-    #         dataset.append((x0, t, self.dt, X, y, E))
-    #         from matplotlib import pyplot as plt
-    #         plt.plot(E.detach().numpy())
-    #         plt.show()
-    #     return dataset
 
     def generate_random(self, num, t):
         x0 = self.random_config(num)  # (D, )

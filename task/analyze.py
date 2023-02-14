@@ -36,7 +36,7 @@ parser.add_argument('--download_data', default='False', type=str, help='Download
 parser.add_argument('--num_workers', default=0, type=int, help='how many subprocesses to use for data loading. ')
 
 # net
-parser.add_argument('--net_name', default='MechanicsNN', type=str, help='Select model to train')
+parser.add_argument('--net_name', default='MechanicsNN_pend2', type=str, help='Select model to train')
 parser.add_argument('--net_url', default='', type=str, help='Download net from Internet')
 
 # For other settings
@@ -77,6 +77,8 @@ def main():
         'test_num': args.test_num,
         'download_data': args.download_data,
         'num_workers': args.num_workers,
+        'dtype': args.dtype,
+        'device': device
     }
     data = ln.data.get_dataloader(**arguments)
 

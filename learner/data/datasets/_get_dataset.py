@@ -44,9 +44,11 @@ def choose_dataset(data_name, obj, dim, train_num, test_num):
     return dataset
 
 
-def get_dataset(data_name, taskname, obj, dim, download_data=False, **kwargs):
+def get_dataset(data_name, taskname, obj, dim,device,dtype, download_data=False, **kwargs):
     print('Start get dataset.')
     dataset = choose_dataset(data_name, obj, dim, **kwargs)
+    dataset.device = device
+    dataset.dtype = dtype
 
     data_path = osp.join('./outputs/', taskname)
 
