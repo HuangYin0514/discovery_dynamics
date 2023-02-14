@@ -96,10 +96,10 @@ class Body3(BaseBodyDataset, nn.Module):
 
         q, p = torch.chunk(coords, 2, dim=1)
 
-        #todo check
+        # todo check
         T = 0.
         for i in range(self._obj):
-            T = T + 0.5 * torch.sum(coords[self._dof + 2 * i: self._dof + 2 * i + 2] ** 2, axis=0) / self._m[i]
+            T = T + 0.5 * torch.sum(p[:, 2 * i:  2 * i + 2] ** 2, axis=1) / self._m[i]
         return T
 
     def potential(self, coords):

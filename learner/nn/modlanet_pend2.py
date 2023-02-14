@@ -180,5 +180,5 @@ class ModLaNet_pend2(LossNN):
         return res
 
     def integrate(self, X, t):
-        out = ODESolver(self.integrate_fun, X, t, method='rk4').permute(1, 0, 2)  # (T, D)
+        out = ODESolver(self.integrate_fun, X, t, method='dopri5').permute(1, 0, 2)  # (T, D)
         return out

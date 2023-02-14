@@ -41,13 +41,13 @@ class Body3(BaseBodyDataset, nn.Module):
         self.__init_dynamic_variable(obj, dim)
 
     def __init_dynamic_variable(self, obj, dim):
-        self._m = [1 for i in range(obj)]
-        self._l = [1 for i in range(obj)]
-        self._g = 9.8
+        self.m = [1 for i in range(obj)]
+        self.l = [1 for i in range(obj)]
+        self.g = 9.8
 
-        self._obj = obj
-        self._dim = dim
-        self._dof = self._obj * self._dim  # degree of freedom
+        self.obj = obj
+        self.dim = dim
+        self.dof = self.obj * self.dim  # degree of freedom
 
         self.dt = 0.05
 
@@ -64,37 +64,40 @@ class Body3(BaseBodyDataset, nn.Module):
         self.k = 1  # body equation parameter
 
     def forward(self, t, coords):
-        assert len(coords) == self._dof * 2
+        assert len(coords) == self.dof * 2
         coords = coords.clone().detach().requires_grad_(True)
         grad_ham = dfx(self.energy_fn(coords), coords)
-        dq, dp = grad_ham[self._dof:], -grad_ham[:self._dof]
+        dq, dp = grad_ham[self.dof:], -grad_ham[:self.dof]
         return torch.cat([dq, dp], dim=0).clone().detach()
 
     def kinetic(self, coords):
-        assert len(coords) == self._dof * 2
+        s, num_states = coords.shape
+        assert num_states == self.dof * 2
+        x, p = torch.chunk(coords, 2, dim=1)
+
         T = 0.
-        for i in range(self._obj):
-            T = T + 0.5 * torch.sum(coords[self._dof + 2 * i: self._dof + 2 * i + 2] ** 2, axis=0) / self._m[i]
+        for i in range(self.obj):
+            T = T + 0.5 * torch.sum(p[:, 2 * i:  2 * i + 2] ** 2, dim=1) / self.m[i]
         return T
 
     def potential(self, coords):
-        assert len(coords) == self._dof * 2
-        if isinstance(coords, np.ndarray):
-            coords = torch.tensor(coords)
+        s, num_states = coords.shape
+        assert num_states == self.dof * 2
+        q, p = torch.chunk(coords, 2, dim=1)
+
         k = self.k
         U = 0.
-        for i in range(self._obj):
+        for i in range(self.obj):
             for j in range(i):
-                U = U - k * self._m[i] * self._m[j] / (
-                        (coords[2 * i] - coords[2 * j]) ** 2 +
-                        (coords[2 * i + 1] - coords[2 * j + 1]) ** 2) ** 0.5
+                U = U - k * self.m[i] * self.m[j] / (
+                        (q[:, 2 * i] - q[:, 2 * j]) ** 2 +
+                        (q[:, 2 * i + 1] - q[:, 2 * j + 1]) ** 2) ** 0.5
         return U
 
     def energy_fn(self, coords):
         """能量函数"""
-        assert (len(coords) == self._dof * 2)
+        assert (len(coords) == self.dof * 2)
         T, U = self.kinetic(coords), self.potential(coords)
-        # NOT STANDARD
         H = T + U
         return H
 
@@ -104,7 +107,7 @@ class Body3(BaseBodyDataset, nn.Module):
         R = np.array([[c, -s], [s, c]])
         return (R @ p.reshape(2, 1)).squeeze()
 
-    def random_config(self):
+    def random_config(self, num):
         # for n objects evenly distributed around the circle,
         # which means angle(obj_i, obj_{i+1}) = 2*pi/n
         # we made the requirement there that m is the same
@@ -115,28 +118,32 @@ class Body3(BaseBodyDataset, nn.Module):
         max_radius = 5
         system = 'hnn'
 
-        state = np.zeros(self._dof * 2)
+        x0_list = []
+        for i in range(num):
+            state = np.zeros(self.dof * 2)
 
-        p0 = 2 * np.random.rand(2) - 1
-        r = np.random.rand() * (max_radius - min_radius) + min_radius
+            p0 = 2 * np.random.rand(2) - 1
+            r = np.random.rand() * (max_radius - min_radius) + min_radius
 
-        theta = 2 * np.pi / self._obj
-        p0 *= r / np.sqrt(np.sum((p0 ** 2)))
-        for i in range(self._obj):
-            state[2 * i: 2 * i + 2] = self.rotate2d(p0, theta=i * theta)
+            theta = 2 * np.pi / self.obj
+            p0 *= r / np.sqrt(np.sum((p0 ** 2)))
+            for i in range(self.obj):
+                state[2 * i: 2 * i + 2] = self.rotate2d(p0, theta=i * theta)
 
-        # # velocity that yields a circular orbit
-        dirction = p0 / np.sqrt((p0 * p0).sum())
-        v0 = self.rotate2d(dirction, theta=np.pi / 2)
-        k = self.k / (2 * r)
-        for i in range(self._obj):
-            v = v0 * np.sqrt(
-                k * sum([self._m[j % self._obj] / np.sin((j - i) * theta / 2) for j in range(i + 1, self._obj + i)]))
-            # make the circular orbits slightly chaotic
-            if system == 'hnn':
-                v *= (1 + nu * (2 * np.random.rand(2) - 1))
-            else:
-                v *= self._m[i] * (1 + nu * (2 * np.random.rand(2) - 1))
-            state[self._dof + 2 * i: self._dof + 2 * i + 2] = self.rotate2d(v, theta=i * theta)
-
-        return torch.tensor(state).float()
+            # # velocity that yields a circular orbit
+            dirction = p0 / np.sqrt((p0 * p0).sum())
+            v0 = self.rotate2d(dirction, theta=np.pi / 2)
+            k = self.k / (2 * r)
+            for i in range(self.obj):
+                v = v0 * np.sqrt(
+                    k * sum(
+                        [self.m[j % self.obj] / np.sin((j - i) * theta / 2) for j in range(i + 1, self.obj + i)]))
+                # make the circular orbits slightly chaotic
+                if system == 'hnn':
+                    v *= (1 + nu * (2 * np.random.rand(2) - 1))
+                else:
+                    v *= self.m[i] * (1 + nu * (2 * np.random.rand(2) - 1))
+                state[self.dof + 2 * i: self.dof + 2 * i + 2] = self.rotate2d(v, theta=i * theta)
+            x0_list.append(torch.tensor(state).float())
+        x0 = torch.stack(x0_list)
+        return x0

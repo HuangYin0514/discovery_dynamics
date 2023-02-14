@@ -79,7 +79,7 @@ class Body3_L(BaseBodyDataset, nn.Module):
         x, v = torch.chunk(coords, 2, dim=0)
 
         coords = torch.cat([x, v], dim=0)
-        L = self.energy_fn(coords, L_constant=True)
+        L = self.energy_fn(coords)
         dvL = dfx(L.sum(), v)
         dxL = dfx(L.sum(), x)
 
@@ -100,9 +100,15 @@ class Body3_L(BaseBodyDataset, nn.Module):
         return torch.cat([v, a], dim=0).detach().clone()
 
     def kinetic(self, coords):
+        s, num_states = coords.shape
+        assert num_states == self.dof * 2
+
+        q, p = torch.chunk(coords, 2, dim=1)
+
+        # todo check
         T = 0.
         for i in range(self._obj):
-            T = T + 0.5 * self._m[i] * torch.sum(coords[self._dof + 2 * i: self._dof + 2 * i + 2] ** 2, dim=0)
+            T = T + 0.5 * torch.sum(p[:, 2 * i:  2 * i + 2] ** 2, dim=1) / self._m[i]
         return T
 
     def potential(self, coords):
@@ -115,12 +121,7 @@ class Body3_L(BaseBodyDataset, nn.Module):
                         (coords[2 * i + 1] - coords[2 * j + 1]) ** 2) ** 0.5
         return U
 
-    def energy_fn(self, coords, L_constant=False):
-        assert len(coords) == self._dof * 2
-        if L_constant:
-            L = self.kinetic(coords) - self.potential(coords)
-            # L = - self.potential(coords)
-            return L
+    def energy_fn(self, coords):
         eng = self.kinetic(coords) + self.potential(coords)
         return eng
 
