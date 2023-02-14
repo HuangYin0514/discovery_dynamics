@@ -21,7 +21,7 @@ parser.add_argument('--obj', default=2, type=int, help='number of objects')
 parser.add_argument('--dim', default=1, type=int, help='coordinate dimension')
 
 # data
-parser.add_argument('--data_name', default='Pendulum2_L', type=str,
+parser.add_argument('--data_name', default='Pendulum2', type=str,
                     help='choose dataset '
                          '[Pendulum2 Pendulum2_L '
                          'Body3 Body3_L '
@@ -33,7 +33,7 @@ parser.add_argument('--download_data', default='False', type=str, help='Download
 parser.add_argument('--num_workers', default=0, type=int, help='how many subprocesses to use for data loading. ')
 
 # net
-parser.add_argument('--net_name', default='ModLaNet_pend2', type=str,
+parser.add_argument('--net_name', default='Baseline_pend2', type=str,
                     help='Select model to train '
                          '[Baseline_pend2 Baseline_body3'
                          'HNN_pend2 HNN_body3'

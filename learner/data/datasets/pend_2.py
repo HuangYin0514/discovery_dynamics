@@ -55,7 +55,7 @@ class Pendulum2(BaseBodyDataset, nn.Module):
         self.t = torch.linspace(t0, t_end, _time_step)
 
         t_end = 30.
-        dt = 0.05
+        dt = 0.02
         _time_step = int((t_end - t0) / dt)
         self.test_t = torch.linspace(t0, t_end, _time_step)
 
@@ -162,5 +162,5 @@ class Pendulum2(BaseBodyDataset, nn.Module):
             new_coords = torch.cat([new_q, p], dim=-1).clone().detach().requires_grad_(True)
             return self(t, new_coords)
 
-        coords = ODESolver(angle_forward, X0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
+        coords = ODESolver(angle_forward, X0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4 scipy_solver
         return coords
