@@ -5,7 +5,6 @@
 @time: 2023/1/3 3:50 PM
 @desc:
 """
-
 import numpy as np
 import torch
 from torch import nn
@@ -15,34 +14,27 @@ from ...utils import dfx
 
 
 class Body3_L(BaseBodyDataset, nn.Module):
-    """
-    Pendulum with 2 bodies
-    Reference:
-    # ref: Simplifying Hamiltonian and Lagrangian Neural Networks via Explicit Constraints
-    # URL: https://proceedings.neurips.cc/paper/2020/file/9f655cc8884fda7ad6d8a6fb15cc001e-Paper.pdf
-    Dataset statistics:
-    # type: hamilton
-    # obj: 2
-    # dim: 1
-    """
 
     def __init__(self, train_num, test_num, obj, dim, m=None, l=None, **kwargs):
         super(Body3_L, self).__init__()
 
         self.train_num = train_num
         self.test_num = test_num
-        self.dataset_url = 'https://drive.google.com/file/d/1uzMawAl1rW_vf3H4Dp4VPv_fmCWYmZOp/view?usp=share_link'
+        self.dataset_url = ''
+
+        self.Dtype = torch.float32
+        self.Device = torch.device('cpu')
 
         self.__init_dynamic_variable(obj, dim)
 
     def __init_dynamic_variable(self, obj, dim):
-        self._m = [1 for i in range(obj)]
-        self._l = [1 for i in range(obj)]
-        self._g = 9.8
+        self.m = [1 for i in range(obj)]
+        self.l = [1 for i in range(obj)]
+        self.g = 9.8
 
-        self._obj = obj
-        self._dim = dim
-        self._dof = self._obj * self._dim  # degree of freedom
+        self.obj = obj
+        self.dim = dim
+        self.dof = self.obj * self.dim  # degree of freedom
 
         self.dt = 0.05
 
@@ -58,70 +50,65 @@ class Body3_L(BaseBodyDataset, nn.Module):
         self.k = 1  # body equation parameter
 
     def forward(self, t, coords):
-        assert len(coords) == self._dof * 2
-        res = self.derivative_lagrangian(coords)
-        return res
-
-    def derivative_lagrangian(self, coords):
         coords = coords.clone().detach().requires_grad_(True)
-        #
-        # lagrangian_fn = partial(self.energy_fn,L_constant=True)
-        # H = hessian(lagrangian_fn, coords)
-        # J = jacobian(lagrangian_fn, coords)
-        #
-        # A = J[:self._dof]
-        # B = H[self._dof:, self._dof:]
-        # C = H[self._dof:, :self._dof]
-        #
-        # q_tt = torch.linalg.pinv(B) @ (A - C @ coords[self._dof:])
-        # return torch.cat((coords[self._dof:], q_tt))
+        bs = coords.size(0)
+        x, v = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
 
-        x, v = torch.chunk(coords, 2, dim=0)
+        # Calculate the potential energy for i-th element ------------------------------------------------------------
+        U = self.potential(torch.cat([x, v], dim=-1))
 
-        coords = torch.cat([x, v], dim=0)
-        L = self.energy_fn(coords)
+        # Calculate the kinetic --------------------------------------------------------------
+        T = self.kinetic(torch.cat([x, v], dim=-1))
+
+        # Calculate the Hamilton Derivative --------------------------------------------------------------
+        L = T - U
         dvL = dfx(L.sum(), v)
         dxL = dfx(L.sum(), x)
 
-        dvdvL = torch.zeros((self._dof, self._dof))
-        dxdvL = torch.zeros((self._dof, self._dof))
+        dvdvL = torch.zeros((bs, self.dof, self.dof), dtype=self.Dtype, device=self.Device)
+        dxdvL = torch.zeros((bs, self.dof, self.dof), dtype=self.Dtype, device=self.Device)
 
-        for i in range(self._dof):
-            dvidvL = dfx(dvL[i].sum(), v)
-            dvdvL[i] += dvidvL
+        for i in range(self.dof):
+            dvidvL = dfx(dvL[:, i].sum(), v)
+            dvdvL[:, i, :] += dvidvL
 
-        for i in range(self._dof):
-            dxidvL = dfx(dvL[i].sum(), x)
-            dxdvL[i] += dxidvL
+        for i in range(self.dof):
+            dxidvL = dfx(dvL[:, i].sum(), x)
+            dxdvL[:, i, :] += dxidvL
 
-        dvdvL_inv = torch.linalg.inv(dvdvL)
+        dvdvL_inv = torch.linalg.pinv(dvdvL)
 
-        a = dvdvL_inv @ (dxL - dxdvL @ v)
-        return torch.cat([v, a], dim=0).detach().clone()
+        a = dvdvL_inv @ (dxL.unsqueeze(2) - dxdvL @ v.unsqueeze(2))  # (bs, a_dim, 1)
+        a = a.squeeze(2)
+        return torch.cat([v, a], dim=1)
 
     def kinetic(self, coords):
+        """Kinetic energy"""
         s, num_states = coords.shape
         assert num_states == self.dof * 2
+        x, v = torch.chunk(coords, 2, dim=1)
 
-        q, p = torch.chunk(coords, 2, dim=1)
-
-        # todo check
         T = 0.
-        for i in range(self._obj):
-            T = T + 0.5 * torch.sum(p[:, 2 * i:  2 * i + 2] ** 2, dim=1) / self._m[i]
+        for i in range(self.obj):
+            T = T + 0.5 * self.m[i] * torch.sum(v[:, 2 * i: 2 * i + 2] ** 2, dim=1)
         return T
 
     def potential(self, coords):
+        s, num_states = coords.shape
+        assert num_states == self.dof * 2
+        x, v = torch.chunk(coords, 2, dim=1)
+
         k = self.k
         U = 0.
-        for i in range(self._obj):
+        for i in range(self.obj):
             for j in range(i):
-                U = U - k * self._m[i] * self._m[j] / (
-                        (coords[2 * i] - coords[2 * j]) ** 2 +
-                        (coords[2 * i + 1] - coords[2 * j + 1]) ** 2) ** 0.5
+                U = U - k * self.m[i] * self.m[j] / (
+                        (x[:, 2 * i] - x[:, 2 * j]) ** 2 +
+                        (x[:, 2 * i + 1] - x[:, 2 * j + 1]) ** 2) ** 0.5
         return U
 
     def energy_fn(self, coords):
+        """energy function """
         eng = self.kinetic(coords) + self.potential(coords)
         return eng
 
@@ -131,7 +118,7 @@ class Body3_L(BaseBodyDataset, nn.Module):
         R = np.array([[c, -s], [s, c]])
         return (R @ p.reshape(2, 1)).squeeze()
 
-    def random_config(self):
+    def random_config(self, num):
         # for n objects evenly distributed around the circle,
         # which means angle(obj_i, obj_{i+1}) = 2*pi/n
         # we made the requirement there that m is the same
@@ -142,28 +129,32 @@ class Body3_L(BaseBodyDataset, nn.Module):
         max_radius = 5
         system = 'hnn'
 
-        state = np.zeros(self._dof * 2)
+        x0_list = []
+        for i in range(num):
+            state = np.zeros(self.dof * 2)
 
-        p0 = 2 * np.random.rand(2) - 1
-        r = np.random.rand() * (max_radius - min_radius) + min_radius
+            p0 = 2 * np.random.rand(2) - 1
+            r = np.random.rand() * (max_radius - min_radius) + min_radius
 
-        theta = 2 * np.pi / self._obj
-        p0 *= r / np.sqrt(np.sum((p0 ** 2)))
-        for i in range(self._obj):
-            state[2 * i: 2 * i + 2] = self.rotate2d(p0, theta=i * theta)
+            theta = 2 * np.pi / self.obj
+            p0 *= r / np.sqrt(np.sum((p0 ** 2)))
+            for i in range(self.obj):
+                state[2 * i: 2 * i + 2] = self.rotate2d(p0, theta=i * theta)
 
-        # # velocity that yields a circular orbit
-        dirction = p0 / np.sqrt((p0 * p0).sum())
-        v0 = self.rotate2d(dirction, theta=np.pi / 2)
-        k = self.k / (2 * r)
-        for i in range(self._obj):
-            v = v0 * np.sqrt(
-                k * sum([self._m[j % self._obj] / np.sin((j - i) * theta / 2) for j in range(i + 1, self._obj + i)]))
-            # make the circular orbits slightly chaotic
-            if system == 'hnn':
-                v *= (1 + nu * (2 * np.random.rand(2) - 1))
-            else:
-                v *= self._m[i] * (1 + nu * (2 * np.random.rand(2) - 1))
-            state[self._dof + 2 * i: self._dof + 2 * i + 2] = self.rotate2d(v, theta=i * theta)
-
-        return torch.tensor(state).float()
+            # # velocity that yields a circular orbit
+            dirction = p0 / np.sqrt((p0 * p0).sum())
+            v0 = self.rotate2d(dirction, theta=np.pi / 2)
+            k = self.k / (2 * r)
+            for i in range(self.obj):
+                v = v0 * np.sqrt(
+                    k * sum(
+                        [self.m[j % self.obj] / np.sin((j - i) * theta / 2) for j in range(i + 1, self.obj + i)]))
+                # make the circular orbits slightly chaotic
+                if system == 'hnn':
+                    v *= (1 + nu * (2 * np.random.rand(2) - 1))
+                else:
+                    v *= self.m[i] * (1 + nu * (2 * np.random.rand(2) - 1))
+                state[self.dof + 2 * i: self.dof + 2 * i + 2] = self.rotate2d(v, theta=i * theta)
+            x0_list.append(torch.tensor(state).float())
+        x0 = torch.stack(x0_list)
+        return x0
