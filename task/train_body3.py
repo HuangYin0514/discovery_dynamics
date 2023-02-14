@@ -21,7 +21,7 @@ parser.add_argument('--obj', default=3, type=int, help='number of objects')
 parser.add_argument('--dim', default=2, type=int, help='coordinate dimension')
 
 # data
-parser.add_argument('--data_name', default='Body3_L', type=str,
+parser.add_argument('--data_name', default='Body3', type=str,
                     help='choose dataset '
                          '[Pendulum2 Pendulum2_L '
                          'Body3 Body3_L '
