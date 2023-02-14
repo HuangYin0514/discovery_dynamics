@@ -50,13 +50,13 @@ class DynamicsNet(nn.Module):
         return out
 
 
-class MechanicsNN(LossNN):
+class MechanicsNN_body3(LossNN):
     """
     Mechanics neural networks.
     """
 
     def __init__(self, obj, dim, num_layers=1, hidden_dim=200):
-        super(MechanicsNN, self).__init__()
+        super(MechanicsNN_body3, self).__init__()
 
         q_dim = int(obj * dim)
         p_dim = int(obj * dim)

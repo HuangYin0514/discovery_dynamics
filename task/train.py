@@ -35,13 +35,14 @@ parser.add_argument('--num_workers', default=0, type=int, help='how many subproc
 # net
 parser.add_argument('--net_name', default='ModLaNet_pend2', type=str,
                     help='Select model to train '
-                         '[Baseline Baseline_pend2'
-                         'HNN LNN '
-                         'MechanicsNN_pend2 MechanicsNN'
+                         '[Baseline_pend2 Baseline_body3'
+                         'HNN_pend2 HNN_body3'
+                         'LNN_pend2 LNN_body3'
+                         'MechanicsNN_pend2 MechanicsNN_body3'
                          'ModLaNet_pend2 ModLaNet_body3'
                          'HnnMod_pend2 HnnMod_body3'
-                         'HnnModScale_pend2'
-                         'Pend2_analytical'
+                         'HnnModScale_pend2 HnnModScale_body3'
+                         'Pend2_analytical body3_analytical'
                          ']'
                     )
 parser.add_argument('--net_url', default='', type=str, help='Download net from Internet')

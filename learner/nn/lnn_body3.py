@@ -22,12 +22,12 @@ from ..integrator import ODESolver
 from ..utils import dfx
 
 
-class LNN(LossNN):
+class LNN_body3(LossNN):
     '''Hamiltonian neural networks.
     '''
 
     def __init__(self, obj, dim):
-        super(LNN, self).__init__()
+        super(LNN_body3, self).__init__()
 
         self.obj = obj
         self.dim = dim
@@ -36,11 +36,9 @@ class LNN(LossNN):
         self.baseline = MLP(input_dim=obj * dim * 2, hidden_dim=200, output_dim=1, num_layers=1,
                             act=nn.Tanh)
 
-    def forward(self, t, data):
-
-        bs = data.size(0)
-
-        x, v = torch.chunk(data, 2, dim=1)
+    def forward(self, t, coords):
+        bs = coords.size(0)
+        x, v = torch.chunk(coords, 2, dim=1)
 
         input = torch.cat([x, v], dim=1)
         L = self.baseline(input)

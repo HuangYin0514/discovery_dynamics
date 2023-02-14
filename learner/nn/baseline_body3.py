@@ -5,12 +5,12 @@ from .mlp import MLP
 from ..integrator import ODESolver
 
 
-class Baseline(LossNN):
+class Baseline_body3(LossNN):
     '''Hamiltonian neural networks.
     '''
 
     def __init__(self, obj, dim):
-        super(Baseline, self).__init__()
+        super(Baseline_body3, self).__init__()
 
         self.obj = obj
         self.dim = dim

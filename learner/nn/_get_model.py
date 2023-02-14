@@ -2,30 +2,33 @@ import os
 import os.path as osp
 
 from learner.utils import timing, count_parameters, download_file_from_google_drive, load_network
-from .baseline import Baseline
+from .baseline_body3 import Baseline_body3
 from .baseline_pend2 import Baseline_pend2
 from .body3_analytical import Body3_analytical
-from .hnn import HNN
+from .hnn_body3 import HNN_body3
+from .hnn_pend2 import HNN_pend2
 from .hnnmod_body3 import HnnMod_body3
 from .hnnmod_pend2 import HnnMod_pend2
 from .hnnmodscale_body3 import HnnModScale_body3
 from .hnnmodscale_pend2 import HnnModScale_pend2
 from .lnn import LNN
+from .lnn_body3 import LNN_body3
 from .lnn_pend2 import LNN_pend2
-from .mechanicsNN import MechanicsNN
+from .mechanicsNN_body3 import MechanicsNN_body3
 from .mechanicsNN_pend2 import MechanicsNN_pend2
 from .modlanet_body3 import ModLaNet_body3
 from .modlanet_pend2 import ModLaNet_pend2
 from .pend2_analytical import Pend2_analytical
 
 __model_factory = {
-    'HNN': HNN,
-    'LNN': LNN,
+    'HNN_pend2': HNN_pend2,
+    'HNN_body3': HNN_body3,
     'LNN_pend2': LNN_pend2,
-    'Baseline': Baseline,
+    'LNN_body3': LNN_body3,
     'Baseline_pend2': Baseline_pend2,
-    'MechanicsNN': MechanicsNN,
-    'MechanicsNN_pend2':MechanicsNN_pend2,
+    'Baseline_body3': Baseline_body3,
+    'MechanicsNN_pend2': MechanicsNN_pend2,
+    'MechanicsNN_body3': MechanicsNN_body3,
     'ModLaNet_pend2': ModLaNet_pend2,
     'ModLaNet_body3': ModLaNet_body3,
     'HnnMod_pend2': HnnMod_pend2,

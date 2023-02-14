@@ -8,12 +8,12 @@ from ..integrator import ODESolver
 from ..utils import lazy_property, dfx
 
 
-class HNN(LossNN):
+class HNN_pend2(LossNN):
     '''Hamiltonian neural networks.
     '''
 
     def __init__(self, obj, dim):
-        super(HNN, self).__init__()
+        super(HNN_pend2, self).__init__()
 
         self.obj = obj
         self.dim = dim
@@ -31,7 +31,6 @@ class HNN(LossNN):
         return torch.tensor(res, dtype=self.Dtype, device=self.Device)
 
     def forward(self, t, coords):
-
         q, p = torch.chunk(coords, 2, dim=-1)
         new_q = q % (2 * torch.pi)
         coords = torch.cat([new_q, p], dim=-1).clone().detach().requires_grad_(True)
