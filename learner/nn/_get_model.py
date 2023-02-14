@@ -11,7 +11,6 @@ from .hnnmod_body3 import HnnMod_body3
 from .hnnmod_pend2 import HnnMod_pend2
 from .hnnmodscale_body3 import HnnModScale_body3
 from .hnnmodscale_pend2 import HnnModScale_pend2
-from .lnn import LNN
 from .lnn_body3 import LNN_body3
 from .lnn_pend2 import LNN_pend2
 from .mechanicsNN_body3 import MechanicsNN_body3
