@@ -168,7 +168,7 @@ class ModLaNet_pend2(LossNN):
 
         a = dvdvL_inv @ (dxL.unsqueeze(2) - dxdvL @ v.unsqueeze(2))  # (bs, a_dim, 1)
         a = a.squeeze(2)
-        return torch.cat([v, a], dim=1)
+        return torch.cat([v, a], dim=-1)
 
     def integrate_fun(self, t, data):
         data = data.clone().detach()
