@@ -51,6 +51,7 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
         _time_step = int((t_end - t0) / self.dt)
         self.t = torch.linspace(t0, t_end, _time_step, dtype=self.Dtype, device=self.Device)
         print('init t device',self.t.device)
+        print('init self Device device',self.Dvice)
 
         t_end = 30.
         dt = 0.02
