@@ -72,7 +72,7 @@ class Pendulum2(BaseBodyDataset, nn.Module):
         q, p = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
 
         # Calculate the potential energy for i-th element ------------------------------------------------------------
-        U = self.potential(torch.cat([x, p], dim=-1))
+        U = self.potential(torch.cat([q, p], dim=-1))
 
         # Calculate the kinetic --------------------------------------------------------------
         T = self.kinetic(torch.cat([q, p], dim=-1))
