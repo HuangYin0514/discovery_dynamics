@@ -77,7 +77,7 @@ class Pend2_L_analytical(LossNN):
             dxidvL = dfx(dvL[:, i].sum(), x)
             dxdvL[:, i, :] += dxidvL
 
-        dvdvL_inv = torch.linalg.inv(dvdvL)
+        dvdvL_inv = torch.linalg.pinv(dvdvL)
 
         a = dvdvL_inv @ (dxL.unsqueeze(2) - dxdvL @ v.unsqueeze(2))  # (bs, a_dim, 1)
         a = a.squeeze(2)
