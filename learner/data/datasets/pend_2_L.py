@@ -83,7 +83,7 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
             dxidvL = dfx(dvL[:, i].sum(), x)
             dxdvL[:, i, :] += dxidvL
 
-        dvdvL_inv = torch.linalg.pinv(dvdvL)
+        dvdvL_inv = torch.linalg.inv(dvdvL)
 
         a = dvdvL_inv @ (dxL.unsqueeze(2) - dxdvL @ v.unsqueeze(2))  # (bs, a_dim, 1)
         a = a.squeeze(2)
