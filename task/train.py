@@ -33,7 +33,7 @@ parser.add_argument('--download_data', default='False', type=str, help='Download
 parser.add_argument('--num_workers', default=0, type=int, help='how many subprocesses to use for data loading. ')
 
 # net
-parser.add_argument('--net_name', default='Baseline_pend2', type=str,
+parser.add_argument('--net_name', default='Pend2_analytical', type=str,
                     help='Select model to train '
                          '[Baseline_pend2 Baseline_body3'
                          'HNN_pend2 HNN_body3'

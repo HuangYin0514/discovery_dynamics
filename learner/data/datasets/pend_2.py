@@ -113,7 +113,7 @@ class Pendulum2(BaseBodyDataset, nn.Module):
         s, num_states = coords.shape
         assert num_states == self.dof * 2
 
-        q, p = torch.chunk(coords, 2, dim=1)
+        q, p = torch.chunk(coords, 2, dim=-1)
         T = 0.
         M_inv = self.Minv(q).to(coords.device)
         v = torch.matmul(M_inv, p.unsqueeze(-1))
@@ -123,10 +123,12 @@ class Pendulum2(BaseBodyDataset, nn.Module):
     def potential(self, coords):
         bs, num_states = coords.shape
         assert num_states == self.dof * 2
+        q, p = torch.chunk(coords, 2, dim=-1)
+
         U = 0.
         y = 0.
         for i in range(self.obj):
-            y = y - self.l[i] * torch.cos(coords[:, i])
+            y = y - self.l[i] * torch.cos(q[:, i])
             U = U + self.m[i] * self.g * y
         return U
 
@@ -148,17 +150,3 @@ class Pendulum2(BaseBodyDataset, nn.Module):
             x0_list.append(x0)
         x0 = torch.stack(x0_list)
         return x0
-
-    # def random_config(self, num):
-    #     x0_list = []
-    #     for i in range(num):
-    #         max_momentum = 10.
-    #         x0 = torch.zeros((self.obj * 2))
-    #         for i in range(self.obj):
-    #             theta = (2 * np.pi) * torch.rand(1, ) + 0  # [0, 2pi]
-    #             momentum = (2 * torch.rand(1, ) - 1) * max_momentum  # [-1, 1]*max_momentum
-    #             x0[i] = theta
-    #             x0[i + self.obj] = momentum
-    #         x0_list.append(x0)
-    #     x0 = torch.stack(x0_list)
-    #     return x0
