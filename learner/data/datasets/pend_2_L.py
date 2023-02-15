@@ -136,5 +136,7 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
         return x0
 
     def generate(self, x0, t):
+        print('x0 device', x0.device)
+        print('t device', t.device)
         x = ODESolver(self, x0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
         return x
