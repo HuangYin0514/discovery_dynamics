@@ -48,12 +48,12 @@ class Pendulum2(BaseBodyDataset, nn.Module):
         t0 = 0.
         t_end = 10.
         _time_step = int((t_end - t0) / self.dt)
-        self.t = torch.linspace(t0, t_end, _time_step)
+        self.t = torch.linspace(t0, t_end, _time_step, dtype=self.Dtype, device=self.Device)
 
         t_end = 30.
         dt = 0.02
         _time_step = int((t_end - t0) / dt)
-        self.test_t = torch.linspace(t0, t_end, _time_step)
+        self.test_t = torch.linspace(t0, t_end, _time_step, dtype=self.Dtype, device=self.Device)
 
     @lazy_property
     def J(self):
