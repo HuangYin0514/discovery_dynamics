@@ -20,7 +20,7 @@ def square_err_fn(x, y):
         error = torch.abs(x_position - y_position)
         error = torch.clamp(error, min=1e-7)
 
-        error_norm = torch.linalg.norm(error)
+        error_norm = torch.linalg.norm(error)/len(x_position)
 
         err_list.append(error_norm)
 
@@ -47,7 +47,7 @@ def energy_err_fn(x, y, energy_function):
         error = torch.abs(eng_x - eng_y)
         error = torch.clamp(error, min=1e-7)
         # H_err = torch.abs(eng_x - eng_y) / (torch.abs(eng_x) + torch.abs(eng_y)) # relatively errors 与loss正相关
-        H_err = torch.linalg.norm(error)
+        H_err = torch.linalg.norm(error)/len(eng_x)
 
         err_list.append(H_err)
 
