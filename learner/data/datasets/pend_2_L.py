@@ -57,6 +57,9 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
         self.test_t = torch.linspace(t0, t_end, _time_step)
 
     def forward(self, t, coords):
+        __x, __p = torch.chunk(coords, 2, dim=-1)
+        coords = torch.cat([__x % (2 * torch.pi), __p], dim=-1).clone().detach().requires_grad_(True)
+
         coords = coords.clone().detach().requires_grad_(True)
         bs = coords.size(0)
         x, v = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
@@ -72,8 +75,8 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
         dvL = dfx(L.sum(), v)
         dxL = dfx(L.sum(), x)
 
-        dvdvL = torch.zeros((bs, self.dof, self.dof), dtype=self.Dtype)
-        dxdvL = torch.zeros((bs, self.dof, self.dof), dtype=self.Dtype)
+        dvdvL = torch.zeros((bs, self.dof, self.dof), dtype=self.Dtype, device=self.Device)
+        dxdvL = torch.zeros((bs, self.dof, self.dof), dtype=self.Dtype, device=self.Device)
 
         for i in range(self.dof):
             dvidvL = dfx(dvL[:, i].sum(), v)
@@ -136,7 +139,7 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
                 x0[i + self.obj] = momentum
             x0_list.append(x0)
         x0 = torch.stack(x0_list)
-        return x0
+        return x0.to(self.Device)
 
     # def random_config(self, num):
     #     x0_list = []
@@ -150,16 +153,4 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
     #             x0[i + self.obj] = momentum
     #         x0_list.append(x0)
     #     x0 = torch.stack(x0_list)
-    #     return x0
-
-    def generate(self, X0, t):
-        print("Generating for new function!")
-
-        def angle_forward(t, coords):
-            q, p = torch.chunk(coords, 2, dim=-1)
-            new_q = q % (2 * torch.pi)
-            new_coords = torch.cat([new_q, p], dim=-1).clone().detach().requires_grad_(True)
-            return self(t, new_coords)
-
-        coords = ODESolver(angle_forward, X0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
-        return coords
+    #     return x0.to(self.Device)
