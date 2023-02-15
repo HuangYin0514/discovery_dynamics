@@ -31,9 +31,8 @@ class HNN_pend2(LossNN):
         return torch.tensor(res, dtype=self.Dtype, device=self.Device)
 
     def forward(self, t, coords):
-        q, p = torch.chunk(coords, 2, dim=-1)
-        new_q = q % (2 * torch.pi)
-        coords = torch.cat([new_q, p], dim=-1).clone().detach().requires_grad_(True)
+        __x, __p = torch.chunk(coords, 2, dim=-1)
+        coords = torch.cat([__x % (2 * torch.pi), __p], dim=-1).clone().detach().requires_grad_(True)
 
         bs = coords.size(0)
         q, p = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)

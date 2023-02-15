@@ -20,10 +20,8 @@ class Baseline_pend2(LossNN):
                             act=nn.Tanh)
 
     def forward(self, t, coords):
-
-        q, p = torch.chunk(coords, 2, dim=-1)
-        new_q = q % (2 * torch.pi)
-        coords = torch.cat([new_q, p], dim=-1).clone().detach().requires_grad_(True)
+        __x, __p = torch.chunk(coords, 2, dim=-1)
+        coords = torch.cat([__x % (2 * torch.pi), __p], dim=-1).clone().detach().requires_grad_(True)
 
         out = self.baseline(coords)
         return out
