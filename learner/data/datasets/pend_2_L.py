@@ -125,10 +125,10 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
     def random_config(self, num):
         x0_list = []
         for i in range(num):
-            max_momentum = 0.8
+            max_momentum = 1.
             x0 = torch.zeros((self.obj * 2), dtype=self.Dtype, device=self.Device)
             for i in range(self.obj):
-                theta = (2 * np.pi) * torch.rand(1, ) + 0  # [0, 2pi]
+                theta = (1.8 * np.pi) * torch.rand(1, ) + 0  # [0, 2pi]
                 momentum = (2 * torch.rand(1, ) - 1) * max_momentum  # [-1, 1]*max_momentum
                 x0[i] = theta
                 x0[i + self.obj] = momentum
