@@ -75,20 +75,26 @@ class Pend2_analytical(LossNN):
         T = 0.5 * torch.matmul(p.unsqueeze(1), v).squeeze(-1).squeeze(-1)
 
         # Calculate the Hamilton Derivative --------------------------------------------------------------
-        H = U  + T
+        H = U + T
         dqH = dfx(H.sum(), q)
         dpH = dfx(H.sum(), p)
 
         v_global = self.Minv(q).matmul(p.unsqueeze(-1)).squeeze(-1)
 
         # Calculate the Derivative ----------------------------------------------------------------
-        dq_dt = torch.zeros((bs, self.dof), dtype=self.Dtype, device=self.Device)
-        dp_dt = torch.zeros((bs, self.dof), dtype=self.Dtype, device=self.Device)
-        for i in range(self.obj):
-            dq_dt[:, i * self.dim:(i + 1) * self.dim] = dpH[:, i * self.dim: (i + 1) * self.dim]
-            dp_dt[:, i * self.dim:(i + 1) * self.dim] = -dqH[:, i * self.dim:(i + 1) * self.dim]
-        dz_dt = torch.cat([dq_dt, dp_dt], dim=-1)
+        # dq_dt = torch.zeros((bs, self.dof), dtype=self.Dtype, device=self.Device)
+        # dp_dt = torch.zeros((bs, self.dof), dtype=self.Dtype, device=self.Device)
+        # for i in range(self.obj):
+        #     dq_dt[:, i * self.dim:(i + 1) * self.dim] = dpH[:, i * self.dim: (i + 1) * self.dim]
+        #     dp_dt[:, i * self.dim:(i + 1) * self.dim] = -dqH[:, i * self.dim:(i + 1) * self.dim]
+        # dz_dt = torch.cat([dq_dt, dp_dt], dim=-1)
+        dq_dt = torch.zeros((bs, self.dof), dtype=self.Dtype)
+        dp_dt = torch.zeros((bs, self.dof), dtype=self.Dtype)
 
+        dq_dt = dpH
+        dp_dt = -dqH
+
+        dz_dt = torch.cat([dq_dt, dp_dt], dim=-1)
         return dz_dt
 
     def integrate(self, X0, t):
