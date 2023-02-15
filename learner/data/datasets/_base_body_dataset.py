@@ -30,7 +30,6 @@ class BaseBodyDataset(BaseDynamicsDataset):
         self.train = train_dataset
         self.test = test_dataset
 
-
     def generate_random(self, num, t):
         x0 = self.random_config(num)  # (D, )
         X = self.generate(x0, t).clone().detach()  # (T, D)

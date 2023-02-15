@@ -80,14 +80,14 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
             if dvidvL is None:
                 break
             else:
-             dvdvL[:, i, :] += dvidvL
+                dvdvL[:, i, :] += dvidvL
 
         for i in range(self.dof):
             dxidvL = dfx(dvL[:, i].sum(), x)
             if dxidvL is None:
                 break
             else:
-               dxdvL[:, i, :] += dxidvL
+                dxdvL[:, i, :] += dxidvL
 
         dvdvL_inv = torch.linalg.inv(dvdvL)
 

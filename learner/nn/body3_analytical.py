@@ -61,7 +61,7 @@ class Body3_analytical(LossNN):
         q, p = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
 
         # Calculate the potential energy for i-th element ------------------------------------------------------------
-        k=1
+        k = 1
         U = 0.
         for i in range(self.obj):
             for j in range(i):
