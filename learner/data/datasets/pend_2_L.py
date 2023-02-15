@@ -72,8 +72,8 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
         dvL = dfx(L.sum(), v)
         dxL = dfx(L.sum(), x)
 
-        dvdvL = torch.zeros((bs, self.dof, self.dof), dtype=self.Dtype, device=self.Device)
-        dxdvL = torch.zeros((bs, self.dof, self.dof), dtype=self.Dtype, device=self.Device)
+        dvdvL = torch.zeros((bs, self.dof, self.dof), dtype=self.Dtype)
+        dxdvL = torch.zeros((bs, self.dof, self.dof), dtype=self.Dtype)
 
         for i in range(self.dof):
             dvidvL = dfx(dvL[:, i].sum(), v)
@@ -88,21 +88,6 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
         a = dvdvL_inv @ (dxL.unsqueeze(2) - dxdvL @ v.unsqueeze(2))  # (bs, a_dim, 1)
         a = a.squeeze(2)
         return torch.cat([v, a], dim=1)
-
-    def M(self, x):
-        N = self.obj
-        M = torch.zeros((x.shape[0], N, N), dtype=self.Dtype, device=self.Device)
-        for i in range(N):
-            for k in range(N):
-                m_sum = 0
-                j = i if i >= k else k
-                for tmp in range(j, N):
-                    m_sum += 1.0
-                M[:, i, k] = torch.cos(x[:, i] - x[:, k]) * m_sum
-        return M
-
-    def Minv(self, x):
-        return torch.linalg.inv(self.M(x))
 
     def kinetic(self, coords):
         """Kinetic energy"""
