@@ -138,8 +138,12 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
     def generate(self, x0, t):
         x0 = x0.to(self.Device)
         t = t.to(self.Device)
+        # At small step sizes, the differential equations exhibit stiffness and the rk4 solver cannot solve
+        # the double pendulum task. Therefore, use dopri5 to generate training data.
         if len(t) == len(self.test_t):
+            # test stages
             x = ODESolver(self, x0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
         else:
+            # train stages
             x = ODESolver(self, x0, t, method='dopri5').permute(1, 0, 2)  # (T, D) dopri5 rk4
         return x
