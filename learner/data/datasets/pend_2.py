@@ -91,8 +91,8 @@ class Pendulum2(BaseBodyDataset, nn.Module):
         dpH = dfx(H.sum(), p)
 
         # Calculate the Derivative ----------------------------------------------------------------
-        dq_dt = torch.zeros((bs, self.dof), dtype=self.Dtype)
-        dp_dt = torch.zeros((bs, self.dof), dtype=self.Dtype)
+        dq_dt = torch.zeros((bs, self.dof), dtype=self.Dtype, device=self.Device)
+        dp_dt = torch.zeros((bs, self.dof), dtype=self.Dtype, device=self.Device)
 
         dq_dt = dpH
         dp_dt = -dqH
@@ -103,7 +103,7 @@ class Pendulum2(BaseBodyDataset, nn.Module):
 
     def M(self, x):
         N = self.obj
-        M = torch.zeros((x.shape[0], N, N), dtype=self.Dtype)
+        M = torch.zeros((x.shape[0], N, N), dtype=self.Dtype, device=self.Device)
         for i in range(N):
             for k in range(N):
                 m_sum = 0
@@ -123,7 +123,7 @@ class Pendulum2(BaseBodyDataset, nn.Module):
 
         q, p = torch.chunk(coords, 2, dim=-1)
         T = 0.
-        M_inv = self.Minv(q).to(coords.device)
+        M_inv = self.Minv(q).to(self.Device)
         v = torch.matmul(M_inv, p.unsqueeze(-1))
         T = 0.5 * torch.matmul(p.unsqueeze(1), v).squeeze(-1).squeeze(-1)
         return T
@@ -157,4 +157,4 @@ class Pendulum2(BaseBodyDataset, nn.Module):
                 x0[i + self.obj] = momentum
             x0_list.append(x0)
         x0 = torch.stack(x0_list)
-        return x0
+        return x0.to(self.Device)
