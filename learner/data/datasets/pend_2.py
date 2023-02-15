@@ -72,18 +72,10 @@ class Pendulum2(BaseBodyDataset, nn.Module):
         q, p = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
 
         # Calculate the potential energy for i-th element ------------------------------------------------------------
-        # U = self.potential(torch.cat([x, p], dim=-1))
-        U = 0.
-        y = 0.
-        for i in range(self.obj):
-            y = y - torch.cos(q[:, i])
-            U = U + 9.8 * y
+        U = self.potential(torch.cat([x, p], dim=-1))
 
         # Calculate the kinetic --------------------------------------------------------------
-        # T = self.kinetic(torch.cat([q, p], dim=-1))
-        T = 0.
-        v = torch.matmul(self.Minv(q), p.unsqueeze(-1))
-        T = 0.5 * torch.matmul(p.unsqueeze(1), v).squeeze(-1).squeeze(-1)
+        T = self.kinetic(torch.cat([q, p], dim=-1))
 
         # Calculate the Hamilton Derivative --------------------------------------------------------------
         H = U + T
