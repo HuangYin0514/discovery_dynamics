@@ -44,6 +44,8 @@ class BaseBodyDataset(BaseDynamicsDataset):
         return dataset
 
     def generate(self, x0, t):
+        x0 = x0.to(self.Device)
+        t = t.to(self.Device)
         x = ODESolver(self, x0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
         return x
 

@@ -49,14 +49,12 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
         t0 = 0.
         t_end = 10.
         _time_step = int((t_end - t0) / self.dt)
-        self.t = torch.linspace(t0, t_end, _time_step, dtype=self.Dtype, device=self.Device)
-        print('init t device', self.t.device)
-        print('init self Device device', self.Device)
+        self.t = torch.linspace(t0, t_end, _time_step)
 
         t_end = 30.
         dt = 0.02
         _time_step = int((t_end - t0) / dt)
-        self.test_t = torch.linspace(t0, t_end, _time_step, dtype=self.Dtype, device=self.Device)
+        self.test_t = torch.linspace(t0, t_end, _time_step)
 
     def forward(self, t, coords):
         __x, __p = torch.chunk(coords, 2, dim=-1)
@@ -138,7 +136,7 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
         return x0
 
     def generate(self, x0, t):
-        print('x0 device', x0.device)
-        print('t device', t.device)
+        x0 = x0.to(self.Device)
+        t = t.to(self.Device)
         x = ODESolver(self, x0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
         return x
