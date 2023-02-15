@@ -10,7 +10,6 @@ import torch
 from torch import nn
 
 from ._base_body_dataset import BaseBodyDataset
-from ...integrator import ODESolver
 from ...utils import lazy_property, dfx
 
 
@@ -65,9 +64,8 @@ class Pendulum2(BaseBodyDataset, nn.Module):
         return torch.tensor(res).float()
 
     def forward(self, t, coords):
-        # __x, __p = torch.chunk(coords, 2, dim=-1)
-        # __x = __x % (2 * torch.pi)
-        # coords = torch.cat([__x, __p], dim=-1).clone().detach().requires_grad_(True)
+        __x, __p = torch.chunk(coords, 2, dim=-1)
+        coords = torch.cat([__x % (2 * torch.pi), __p], dim=-1).clone().detach().requires_grad_(True)
 
         coords = coords.clone().detach().requires_grad_(True)
         bs = coords.size(0)
@@ -164,15 +162,3 @@ class Pendulum2(BaseBodyDataset, nn.Module):
     #         x0_list.append(x0)
     #     x0 = torch.stack(x0_list)
     #     return x0
-
-    def generate(self, X0, t):
-        print("Generating for new function!")
-
-        def angle_forward(t, coords):
-            q, p = torch.chunk(coords, 2, dim=-1)
-            new_q = q % (2 * torch.pi)
-            new_coords = torch.cat([new_q, p], dim=-1).clone().detach().requires_grad_(True)
-            return self(t, new_coords)
-
-        coords = ODESolver(angle_forward, X0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4 scipy_solver
-        return coords
