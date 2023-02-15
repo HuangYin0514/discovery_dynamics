@@ -69,8 +69,11 @@ class Pend2_analytical(LossNN):
             U = U + 9.8 * y
 
         # Calculate the kinetic --------------------------------------------------------------
+        # T = self.dataset.kinetic(torch.cat([x, p], dim=-1).reshape(-1))
+
         T = 0.
         v = torch.matmul(self.Minv(q), p.unsqueeze(-1))
+
         T = 0.5 * torch.matmul(p.unsqueeze(1), v).squeeze(-1).squeeze(-1)
 
         # Calculate the Hamilton Derivative --------------------------------------------------------------
@@ -81,6 +84,12 @@ class Pend2_analytical(LossNN):
         v_global = self.Minv(q).matmul(p.unsqueeze(-1)).squeeze(-1)
 
         # Calculate the Derivative ----------------------------------------------------------------
+        # dq_dt = torch.zeros((bs, self.dof), dtype=self.Dtype, device=self.Device)
+        # dp_dt = torch.zeros((bs, self.dof), dtype=self.Dtype, device=self.Device)
+        # for i in range(self.obj):
+        #     dq_dt[:, i * self.dim:(i + 1) * self.dim] = dpH[:, i * self.dim: (i + 1) * self.dim]
+        #     dp_dt[:, i * self.dim:(i + 1) * self.dim] = -dqH[:, i * self.dim:(i + 1) * self.dim]
+        # dz_dt = torch.cat([dq_dt, dp_dt], dim=-1)
         dq_dt = torch.zeros((bs, self.dof), dtype=self.Dtype)
         dp_dt = torch.zeros((bs, self.dof), dtype=self.Dtype)
 
