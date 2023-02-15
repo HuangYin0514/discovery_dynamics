@@ -71,10 +71,14 @@ class Pend2_L_analytical(LossNN):
 
         for i in range(self.dof):
             dvidvL = dfx(dvL[:, i].sum(), v)
+            if dvidvL is None:
+                print("i am is none of dvidvL")
             dvdvL[:, i, :] += dvidvL
 
         for i in range(self.dof):
             dxidvL = dfx(dvL[:, i].sum(), x)
+            if dxidvL is None:
+                print("i am is none of dxidvL")
             dxdvL[:, i, :] += dxidvL
 
         dvdvL_inv = torch.linalg.pinv(dvdvL)
