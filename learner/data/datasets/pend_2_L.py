@@ -80,17 +80,11 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
 
         for i in range(self.dof):
             dvidvL = dfx(dvL[:, i].sum(), v)
-            if dvidvL is None:
-                break
-            else:
-                dvdvL[:, i, :] += dvidvL
+            dvdvL[:, i, :] += dvidvL
 
         for i in range(self.dof):
             dxidvL = dfx(dvL[:, i].sum(), x)
-            if dxidvL is None:
-                break
-            else:
-                dxdvL[:, i, :] += dxidvL
+            dxdvL[:, i, :] += dxidvL
 
         dvdvL_inv = torch.linalg.inv(dvdvL)
 
@@ -131,7 +125,7 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
         x0_list = []
         for i in range(num):
             max_momentum = 1.
-            x0 = torch.zeros((self.obj * 2))
+            x0 = torch.zeros((self.obj * 2), dtype=self.Dtype, device=self.Device)
             for i in range(self.obj):
                 theta = (2 * np.pi) * torch.rand(1, ) + 0  # [0, 2pi]
                 momentum = (2 * torch.rand(1, ) - 1) * max_momentum  # [-1, 1]*max_momentum
@@ -139,7 +133,7 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
                 x0[i + self.obj] = momentum
             x0_list.append(x0)
         x0 = torch.stack(x0_list)
-        return x0.to(self.Device)
+        return x0
 
     def generate(self, x0, t):
         x = ODESolver(self, x0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4

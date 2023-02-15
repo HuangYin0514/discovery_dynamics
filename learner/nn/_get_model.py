@@ -15,6 +15,7 @@ from .mechanicsNN_body3 import MechanicsNN_body3
 from .mechanicsNN_pend2 import MechanicsNN_pend2
 from .modlanet_body3 import ModLaNet_body3
 from .modlanet_pend2 import ModLaNet_pend2
+from .pend2_L_analytical import Pend2_L_analytical
 from .pend2_analytical import Pend2_analytical
 
 __model_factory = {
@@ -31,6 +32,7 @@ __model_factory = {
     'HnnModScale_pend2': HnnModScale_pend2,
     'HnnModScale_body3': HnnModScale_body3,
     'Pend2_analytical': Pend2_analytical,
+    'Pend2_L_analytical': Pend2_L_analytical,
     'Body3_analytical': Body3_analytical,
 }
 
