@@ -118,6 +118,22 @@ class ModLaNet_pend2(LossNN):
                 v_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim])
 
         # Calculate the potential energy for i-th element
+        # U = torch.zeros((x.shape[0], 1), dtype=self.Dtype, device=self.Device)
+        #
+        # for i in range(self.obj):
+        #     U += self.co1 * self.mass(self.Potential1(x_global[:, i * self.global_dim: (i + 1) * self.global_dim]))
+        #
+        # for i in range(self.obj):
+        #     for j in range(i):
+        #         x_ij = torch.cat(
+        #             [x_global[:, i * self.global_dim: (i + 1) * self.global_dim],
+        #              x_global[:, j * self.global_dim: (j + 1) * self.global_dim]],
+        #             dim=1)
+        #         x_ji = torch.cat(
+        #             [x_global[:, j * self.global_dim: (j + 1) * self.global_dim],
+        #              x_global[:, i * self.global_dim: (i + 1) * self.global_dim]],
+        #             dim=1)
+        #         U += self.co2 * (0.5 * self.mass(self.Potential2(x_ij)) + 0.5 * self.mass(s67890-elf.Potential2(x_ji)))
         U = 0.
         y = 0.
         for i in range(self.obj):
@@ -131,6 +147,11 @@ class ModLaNet_pend2(LossNN):
             vx = vx + v[:, i] * torch.cos(x[:, i])
             vy = vy + v[:, i] * torch.sin(x[:, i])
             T = T + 0.5 * (torch.pow(vx, 2) + torch.pow(vy, 2))
+
+            v_global[:, i] =  v[:, i] * torch.cos(x[:, i])
+            v_global[:, i + 1] = v[:, i] * torch.sin(x[:, i])
+            vv = v_global[:, (i) * self.global_dim: (i + 1) * self.global_dim].pow(2).sum(dim=1, keepdim=True)
+            T += 0.5 * self.mass(vv)
 
         # Construct Lagrangian
         L = (T - U)

@@ -35,6 +35,9 @@ class Pend2_L_analytical(LossNN):
         self.dim = dim
         self.dof = int(obj * dim)
 
+        self.global_dim = 2
+        self.global_dof = int(obj * self.global_dim)
+
         self.mass = torch.nn.Linear(1, 1, bias=False)
         torch.nn.init.ones_(self.mass.weight)
 
@@ -46,20 +49,47 @@ class Pend2_L_analytical(LossNN):
         bs = coords.size(0)
         x, v = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
 
+        x_global = torch.zeros((bs, self.global_dof), dtype=self.Dtype, device=self.Device)
+        v_global = torch.zeros((bs, self.global_dof), dtype=self.Dtype, device=self.Device)
+
+        x_origin = torch.zeros((bs, self.global_dof), dtype=self.Dtype, device=self.Device)
+        v_origin = torch.zeros((bs, self.global_dof), dtype=self.Dtype, device=self.Device)
+
+        for i in range(self.obj):
+            for j in range(i):
+                x_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim] += x_global[:, (j) * self.global_dim:
+                                                                                             (j + 1) * self.global_dim]
+                v_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim] += v_global[:, (j) * self.global_dim:
+                                                                                             (j + 1) * self.global_dim]
+            x_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = \
+                torch.cat(
+                    [torch.sin(x[:, (i) * self.dim: (i + 1) * self.dim]),
+                     torch.cos(x[:, (i) * self.dim: (i + 1) * self.dim])],
+                    dim=-1) + \
+                x_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim]
+
+            v_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = \
+                torch.cat(
+                    [torch.sin(x[:, (i) * self.dim: (i + 1) * self.dim]),
+                     torch.cos(x[:, (i) * self.dim: (i + 1) * self.dim])],
+                    dim=-1) * v[:, (i) * self.dim: (i + 1) * self.dim] + \
+                v_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim]
+
         # Calculate the potential energy for i-th element ------------------------------------------------------------
         U = 0.
         y = 0.
         for i in range(self.obj):
-            y = y - torch.cos(x[:, i])
+            y = -x_global[:, i * self.global_dim + 1]
             U = U + 9.8 * y
 
         # Calculate the kinetic --------------------------------------------------------------
         T = 0.
         vx, vy = 0., 0.
         for i in range(self.dof):
-            vx = vx + v[:, i] * torch.cos(x[:, i])
-            vy = vy + v[:, i] * torch.sin(x[:, i])
-            T = T + 0.5 * (torch.pow(vx, 2) + torch.pow(vy, 2))
+            vx = v_global[:, i * self.global_dim]
+            vy = v_global[:, i * self.global_dim + 1]
+            vv = v_global[:, (i) * self.global_dim: (i + 1) * self.global_dim].pow(2).sum(-1)
+            T += 0.5 * vv
 
         # Calculate the Hamilton Derivative --------------------------------------------------------------
         L = T - U
