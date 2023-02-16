@@ -10,6 +10,7 @@ from torch import nn
 
 from ._base_module import LossNN
 from .mlp import MLP
+from .utils_nn import Identity
 from ..integrator import ODESolver
 from ..utils import dfx
 
@@ -96,6 +97,8 @@ class ModLaNet_pend2(LossNN):
         bs = coords.size(0)
         x, v = torch.chunk(coords, 2, dim=1)
 
+        L, T, U = 0., 0., torch.zeros((x.shape[0], 1), dtype=self.Dtype, device=self.Device)
+
         x_global = torch.zeros((bs, self.global_dof), dtype=self.Dtype, device=self.Device)
         v_global = torch.zeros((bs, self.global_dof), dtype=self.Dtype, device=self.Device)
 
@@ -118,19 +121,25 @@ class ModLaNet_pend2(LossNN):
                 v_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim])
 
         # Calculate the potential energy for i-th element
-        U = 0.
-        y = 0.
         for i in range(self.obj):
-            y = y - torch.cos(x[:, i])
-            U = U + 9.8 * y
+            U += self.co1 * self.mass(self.Potential1(x_global[:, i * self.global_dim: (i + 1) * self.global_dim]))
+
+        for i in range(self.obj):
+            for j in range(i):
+                x_ij = torch.cat(
+                    [x_global[:, i * self.global_dim: (i + 1) * self.global_dim],
+                     x_global[:, j * self.global_dim: (j + 1) * self.global_dim]],
+                    dim=1)
+                x_ji = torch.cat(
+                    [x_global[:, j * self.global_dim: (j + 1) * self.global_dim],
+                     x_global[:, i * self.global_dim: (i + 1) * self.global_dim]],
+                    dim=1)
+                U += self.co2 * (0.5 * self.mass(self.Potential2(x_ij)) + 0.5 * self.mass(self.Potential2(x_ji)))
 
         # Calculate the kinetic energy for i-th element
-        T = 0.
-        vx, vy = 0., 0.
-        for i in range(self.dof):
-            vx = vx + v[:, i] * torch.cos(x[:, i])
-            vy = vy + v[:, i] * torch.sin(x[:, i])
-            T = T + 0.5 * (torch.pow(vx, 2) + torch.pow(vy, 2))
+        for i in range(self.obj):
+            T += 0.5 * self.mass(
+                v_global[:, (i) * self.global_dim: (i + 1) * self.global_dim].pow(2).sum(axis=1, keepdim=True))
 
         # Construct Lagrangian
         L = (T - U)
