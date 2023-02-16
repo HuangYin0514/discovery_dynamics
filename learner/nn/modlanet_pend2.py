@@ -145,7 +145,7 @@ class ModLaNet_pend2(LossNN):
         for i in range(self.dof):
             vx = v_global[:, i * self.global_dim]
             vy = v_global[:, i * self.global_dim + 1]
-            vv = v_global[:, (i) * self.global_dim: (i + 1) * self.global_dim].pow(2).sum(-1)
+            vv = v_global[:, (i) * self.global_dim: (i + 1) * self.global_dim].pow(2).sum(-1,keepdim=True)
             T += 0.5 * self.mass(vv)
 
         # Calculate the Hamilton Derivative --------------------------------------------------------------
