@@ -19,11 +19,11 @@ class GlobalPositionTransform(nn.Module):
 
     def __init__(self, input_dim, hidden_dim, output_dim, num_layers=1, act=nn.Tanh):
         super(GlobalPositionTransform, self).__init__()
-        self.mlp = MLP(input_dim=input_dim*3, hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers,
+        self.mlp = MLP(input_dim=input_dim*2, hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers,
                        act=act)
 
     def forward(self, x, x_0):
-        x= torch.cat([x,torch.sin(x),torch.cos(x)],dim=-1)
+        x= torch.cat([torch.sin(x),torch.cos(x)],dim=-1)
         y = self.mlp(x) + x_0
         return y
 
@@ -33,11 +33,11 @@ class GlobalVelocityTransform(nn.Module):
 
     def __init__(self, input_dim, hidden_dim, output_dim, num_layers=1, act=nn.Tanh):
         super(GlobalVelocityTransform, self).__init__()
-        self.mlp = MLP(input_dim=input_dim*3, hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers,
+        self.mlp = MLP(input_dim=input_dim*2, hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers,
                        act=act)
 
     def forward(self, x, v, v0):
-        x= torch.cat([x,torch.sin(x),torch.cos(x)],dim=-1)
+        x= torch.cat([torch.sin(x),torch.cos(x)],dim=-1)
         y = self.mlp(x) * v + v0
         return y
 
@@ -110,26 +110,28 @@ class ModLaNet_pend2(LossNN):
                                                                                              (j + 1) * self.global_dim]
                 v_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim] += v_global[:, (j) * self.global_dim:
                                                                                              (j + 1) * self.global_dim]
-            # x_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = self.global4x(
-            #     x[:, (i) * self.dim: (i + 1) * self.dim],
-            #     x_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim])
-            # v_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = self.global4v(
-            #     x[:, (i) * self.dim: (i + 1) * self.dim],
-            #     v[:, (i) * self.dim: (i + 1) * self.dim],
-            #     v_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim])
-            x_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = \
-                torch.cat(
-                    [torch.sin(x[:, (i) * self.dim: (i + 1) * self.dim]),
-                     torch.cos(x[:, (i) * self.dim: (i + 1) * self.dim])],
-                    dim=-1) + \
-                x_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim]
 
-            v_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = \
-                torch.cat(
-                    [torch.sin(x[:, (i) * self.dim: (i + 1) * self.dim]),
-                     torch.cos(x[:, (i) * self.dim: (i + 1) * self.dim])],
-                    dim=-1) * v[:, (i) * self.dim: (i + 1) * self.dim] + \
-                v_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim]
+            # x_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = \
+            #     torch.cat(
+            #         [torch.sin(x[:, (i) * self.dim: (i + 1) * self.dim]),
+            #          torch.cos(x[:, (i) * self.dim: (i + 1) * self.dim])],
+            #         dim=-1) + \
+            #     x_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim]
+            # v_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = \
+            #     torch.cat(
+            #         [torch.sin(x[:, (i) * self.dim: (i + 1) * self.dim]),
+            #          torch.cos(x[:, (i) * self.dim: (i + 1) * self.dim])],
+            #         dim=-1) * v[:, (i) * self.dim: (i + 1) * self.dim] + \
+            #     v_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim]
+
+            x_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = self.global4x(
+                x[:, (i) * self.dim: (i + 1) * self.dim],
+                x_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim])
+            v_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = self.global4v(
+                x[:, (i) * self.dim: (i + 1) * self.dim],
+                v[:, (i) * self.dim: (i + 1) * self.dim],
+                v_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim])
+
 
         # Calculate the potential energy for i-th element ------------------------------------------------------------
         U = 0.
