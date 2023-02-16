@@ -111,7 +111,7 @@ class Pend2_L_analytical(LossNN):
                 print("i am is none of dxidvL")
             dxdvL[:, i, :] += dxidvL
 
-        dvdvL_inv = torch.linalg.pinv(dvdvL)
+        dvdvL_inv = torch.linalg.inv(dvdvL)
 
         a = dvdvL_inv @ (dxL.unsqueeze(2) - dxdvL @ v.unsqueeze(2))  # (bs, a_dim, 1)
         a = a.squeeze(2)

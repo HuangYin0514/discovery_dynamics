@@ -108,56 +108,41 @@ class ModLaNet_pend2(LossNN):
                                                                                              (j + 1) * self.global_dim]
                 v_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim] += v_global[:, (j) * self.global_dim:
                                                                                              (j + 1) * self.global_dim]
+            x_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = \
+                torch.cat(
+                    [torch.sin(x[:, (i) * self.dim: (i + 1) * self.dim]),
+                     torch.cos(x[:, (i) * self.dim: (i + 1) * self.dim])],
+                    dim=-1) + \
+                x_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim]
 
-            x_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = self.global4x(
-                x[:, (i) * self.dim: (i + 1) * self.dim],
-                x_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim])
-            v_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = self.global4v(
-                x[:, (i) * self.dim: (i + 1) * self.dim],
-                v[:, (i) * self.dim: (i + 1) * self.dim],
-                v_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim])
+            v_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = \
+                torch.cat(
+                    [torch.sin(x[:, (i) * self.dim: (i + 1) * self.dim]),
+                     torch.cos(x[:, (i) * self.dim: (i + 1) * self.dim])],
+                    dim=-1) * v[:, (i) * self.dim: (i + 1) * self.dim] + \
+                v_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim]
 
-        # Calculate the potential energy for i-th element
-        # U = torch.zeros((x.shape[0], 1), dtype=self.Dtype, device=self.Device)
-        #
-        # for i in range(self.obj):
-        #     U += self.co1 * self.mass(self.Potential1(x_global[:, i * self.global_dim: (i + 1) * self.global_dim]))
-        #
-        # for i in range(self.obj):
-        #     for j in range(i):
-        #         x_ij = torch.cat(
-        #             [x_global[:, i * self.global_dim: (i + 1) * self.global_dim],
-        #              x_global[:, j * self.global_dim: (j + 1) * self.global_dim]],
-        #             dim=1)
-        #         x_ji = torch.cat(
-        #             [x_global[:, j * self.global_dim: (j + 1) * self.global_dim],
-        #              x_global[:, i * self.global_dim: (i + 1) * self.global_dim]],
-        #             dim=1)
-        #         U += self.co2 * (0.5 * self.mass(self.Potential2(x_ij)) + 0.5 * self.mass(s67890-elf.Potential2(x_ji)))
+        # Calculate the potential energy for i-th element ------------------------------------------------------------
         U = 0.
         y = 0.
         for i in range(self.obj):
-            y = y - torch.cos(x[:, i])
+            y = -x_global[:, i * self.global_dim + 1]
             U = U + 9.8 * y
 
-        # Calculate the kinetic energy for i-th element
+        # Calculate the kinetic --------------------------------------------------------------
         T = 0.
         vx, vy = 0., 0.
         for i in range(self.dof):
-            vx = vx + v[:, i] * torch.cos(x[:, i])
-            vy = vy + v[:, i] * torch.sin(x[:, i])
-            T = T + 0.5 * (torch.pow(vx, 2) + torch.pow(vy, 2))
+            vx = v_global[:, i * self.global_dim]
+            vy = v_global[:, i * self.global_dim + 1]
+            vv = v_global[:, (i) * self.global_dim: (i + 1) * self.global_dim].pow(2).sum(-1)
+            T += 0.5 * vv
 
-            v_global[:, i] =  v[:, i] * torch.cos(x[:, i])
-            v_global[:, i + 1] = v[:, i] * torch.sin(x[:, i])
-            vv = v_global[:, (i) * self.global_dim: (i + 1) * self.global_dim].pow(2).sum(dim=1, keepdim=True)
-            T += 0.5 * self.mass(vv)
+        # Calculate the Hamilton Derivative --------------------------------------------------------------
+        L = T - U
 
-        # Construct Lagrangian
-        L = (T - U)
-
-        dvL = dfx(L.sum(), v)  # (bs, v_dim)
-        dxL = dfx(L.sum(), x)  # (bs, x_dim)
+        dvL = dfx(L.sum(), v)
+        dxL = dfx(L.sum(), x)
 
         dvdvL = torch.zeros((bs, self.dof, self.dof), dtype=self.Dtype, device=self.Device)
         dxdvL = torch.zeros((bs, self.dof, self.dof), dtype=self.Dtype, device=self.Device)
@@ -165,31 +150,21 @@ class ModLaNet_pend2(LossNN):
         for i in range(self.dof):
             dvidvL = dfx(dvL[:, i].sum(), v)
             if dvidvL is None:
-                break
-            else:
-                dvdvL[:, i, :] += dvidvL
+                print("i am is none of dvidvL")
+            dvdvL[:, i, :] += dvidvL
 
         for i in range(self.dof):
             dxidvL = dfx(dvL[:, i].sum(), x)
             if dxidvL is None:
-                break
-            else:
-                dxdvL[:, i, :] += dxidvL
+                print("i am is none of dxidvL")
+            dxdvL[:, i, :] += dxidvL
 
-        dvdvL_inv = torch.linalg.inv(dvdvL)
+        dvdvL_inv = torch.linalg.pinv(dvdvL)
 
         a = dvdvL_inv @ (dxL.unsqueeze(2) - dxdvL @ v.unsqueeze(2))  # (bs, a_dim, 1)
         a = a.squeeze(2)
         return torch.cat([v, a], dim=-1)
 
-    def integrate_fun(self, t, data):
-        data = data.clone().detach()
-        divmod_value = torch.sign(data[..., :int(data.shape[-1] // 2)]) * 2 * torch.pi  # pendulum
-        data[..., :int(data.shape[-1] // 2)] %= divmod_value  # pendulum
-        data = data.clone().detach().requires_grad_(True)
-        res = self(t, data)
-        return res
-
     def integrate(self, X, t):
-        out = ODESolver(self.integrate_fun, X, t, method='rk4').permute(1, 0, 2)  # (T, D)
+        out = ODESolver(self, X, t, method='rk4').permute(1, 0, 2)  # (T, D)
         return out
