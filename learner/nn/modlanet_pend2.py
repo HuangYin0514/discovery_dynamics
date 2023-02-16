@@ -19,10 +19,11 @@ class GlobalPositionTransform(nn.Module):
 
     def __init__(self, input_dim, hidden_dim, output_dim, num_layers=1, act=nn.Tanh):
         super(GlobalPositionTransform, self).__init__()
-        self.mlp = MLP(input_dim=input_dim, hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers,
+        self.mlp = MLP(input_dim=input_dim*3, hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers,
                        act=act)
 
     def forward(self, x, x_0):
+        x= torch.cat([x,torch.sin(x),torch.cos(x)],dim=-1)
         y = self.mlp(x) + x_0
         return y
 
@@ -32,10 +33,11 @@ class GlobalVelocityTransform(nn.Module):
 
     def __init__(self, input_dim, hidden_dim, output_dim, num_layers=1, act=nn.Tanh):
         super(GlobalVelocityTransform, self).__init__()
-        self.mlp = MLP(input_dim=input_dim, hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers,
+        self.mlp = MLP(input_dim=input_dim*3, hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers,
                        act=act)
 
     def forward(self, x, v, v0):
+        x= torch.cat([x,torch.sin(x),torch.cos(x)],dim=-1)
         y = self.mlp(x) * v + v0
         return y
 
