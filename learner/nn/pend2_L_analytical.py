@@ -45,9 +45,8 @@ class Pend2_L_analytical(LossNN):
         __x, __p = torch.chunk(coords, 2, dim=-1)
         coords = torch.cat([__x % (2 * torch.pi), __p], dim=-1).clone().detach().requires_grad_(True)
 
-        coords = coords.clone().detach().requires_grad_(True)
         bs = coords.size(0)
-        x, v = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
+        x, v = torch.chunk(coords, 2, dim=1)
 
         x_global = torch.zeros((bs, self.global_dof), dtype=self.Dtype, device=self.Device)
         v_global = torch.zeros((bs, self.global_dof), dtype=self.Dtype, device=self.Device)
@@ -93,6 +92,7 @@ class Pend2_L_analytical(LossNN):
 
         # Calculate the Hamilton Derivative --------------------------------------------------------------
         L = T - U
+
         dvL = dfx(L.sum(), v)
         dxL = dfx(L.sum(), x)
 
