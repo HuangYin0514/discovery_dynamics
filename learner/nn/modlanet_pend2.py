@@ -96,7 +96,7 @@ class ModLaNet_pend2(LossNN):
         coords = torch.cat([__x % (2 * torch.pi), __p], dim=-1).clone().detach().requires_grad_(True)
 
         bs = coords.size(0)
-        x, v = torch.chunk(coords, 2, dim=1)
+        x, v = torch.chunk(coords, 2, dim=-1)
 
         x_global = torch.zeros((bs, self.global_dof), dtype=self.Dtype, device=self.Device)
         v_global = torch.zeros((bs, self.global_dof), dtype=self.Dtype, device=self.Device)
