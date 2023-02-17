@@ -10,6 +10,7 @@ from torch import nn
 
 from ._base_module import LossNN
 from .mlp import MLP
+from .utils_nn import Identity
 from ..integrator import ODESolver
 from ..utils import dfx
 
@@ -19,11 +20,11 @@ class GlobalPositionTransform(nn.Module):
 
     def __init__(self, input_dim, hidden_dim, output_dim, num_layers=1, act=nn.Tanh):
         super(GlobalPositionTransform, self).__init__()
-        self.mlp = MLP(input_dim=input_dim*3, hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers,
+        self.mlp = MLP(input_dim=input_dim * 3, hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers,
                        act=act)
 
     def forward(self, x, x_0):
-        x= torch.cat([x, torch.sin(x),torch.cos(x)],dim=-1)
+        x = torch.cat([x, torch.sin(x), torch.cos(x)], dim=-1)
         y = self.mlp(x) + x_0
         return y
 
@@ -33,11 +34,11 @@ class GlobalVelocityTransform(nn.Module):
 
     def __init__(self, input_dim, hidden_dim, output_dim, num_layers=1, act=nn.Tanh):
         super(GlobalVelocityTransform, self).__init__()
-        self.mlp = MLP(input_dim=input_dim*3, hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers,
+        self.mlp = MLP(input_dim=input_dim * 3, hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers,
                        act=act)
 
     def forward(self, x, v, v0):
-        x= torch.cat([x, torch.sin(x),torch.cos(x)],dim=-1)
+        x = torch.cat([x, torch.sin(x), torch.cos(x)], dim=-1)
         y = self.mlp(x) * v + v0
         return y
 
@@ -79,11 +80,11 @@ class ModLaNet_pend2(LossNN):
         self.Potential1 = PotentialEnergyCell(input_dim=self.global_dim,
                                               hidden_dim=50,
                                               output_dim=1,
-                                              num_layers=1, act=nn.Tanh)
+                                              num_layers=1, act=Identity)
         self.Potential2 = PotentialEnergyCell(input_dim=self.global_dim * 2,
                                               hidden_dim=50,
                                               output_dim=1,
-                                              num_layers=1, act=nn.Tanh)
+                                              num_layers=1, act=Identity)
 
         self.co1 = torch.nn.Parameter(torch.ones(1, dtype=self.Dtype, device=self.Device) * 0.5)
         self.co2 = torch.nn.Parameter(torch.ones(1, dtype=self.Dtype, device=self.Device) * 0.5)
@@ -132,7 +133,6 @@ class ModLaNet_pend2(LossNN):
                 v[:, (i) * self.dim: (i + 1) * self.dim],
                 v_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim])
 
-
         # Calculate the potential energy for i-th element ------------------------------------------------------------
         U = 0.
         for i in range(self.obj):
@@ -156,7 +156,7 @@ class ModLaNet_pend2(LossNN):
         for i in range(self.dof):
             vx = v_global[:, i * self.global_dim]
             vy = v_global[:, i * self.global_dim + 1]
-            vv = v_global[:, (i) * self.global_dim: (i + 1) * self.global_dim].pow(2).sum(-1,keepdim=True)
+            vv = v_global[:, (i) * self.global_dim: (i + 1) * self.global_dim].pow(2).sum(-1, keepdim=True)
             T += 0.5 * self.mass(vv)
 
         # Calculate the Hamilton Derivative --------------------------------------------------------------
