@@ -51,7 +51,7 @@ class Pendulum2(BaseBodyDataset, nn.Module):
         self.t = torch.linspace(t0, t_end, _time_step, dtype=self.Dtype, device=self.Device)
 
         t_end = 30.
-        dt = 0.05
+        dt = 0.01
         _time_step = int((t_end - t0) / dt)
         self.test_t = torch.linspace(t0, t_end, _time_step, dtype=self.Dtype, device=self.Device)
 
@@ -140,7 +140,7 @@ class Pendulum2(BaseBodyDataset, nn.Module):
     def random_config(self, num):
         x0_list = []
         for i in range(num):
-            max_momentum = 5.
+            max_momentum = 1.
             x0 = torch.zeros((self.obj * 2))
             for i in range(self.obj):
                 theta = (2 * np.pi) * torch.rand(1, ) + 0  # [0, 2pi]
