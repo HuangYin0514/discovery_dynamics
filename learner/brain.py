@@ -88,8 +88,8 @@ class Brain:
                 labels = labels.to(self.device)
 
                 pred = self.net(t, X)
-                # loss = self.__criterion(pred[...,2:], labels[...,2:])
                 loss = self.__criterion(pred[...,2:], labels[...,2:])
+                # loss = self.__criterion(pred, labels)
 
                 # # reg
                 # reg_loss = symplectic_prior_reg(self.net, X)
