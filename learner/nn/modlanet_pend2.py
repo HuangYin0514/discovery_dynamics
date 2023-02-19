@@ -169,7 +169,9 @@ class ModLaNet_pend2(LossNN):
 
         dvdvL_inv = torch.linalg.inv(dvdvL)
 
-        a = dvdvL_inv .matmul (dxL.unsqueeze(2) - dxdvL @ v.unsqueeze(2))  # (bs, a_dim, 1)
+        a = dvdvL_inv.matmul(dxL.unsqueeze(2) - dxdvL @ v.unsqueeze(2))  # (bs, a_dim, 1)
+        # a = dvdvL_inv @ (dxL.unsqueeze(2) - dxdvL @ v.unsqueeze(2))  # (bs, a_dim, 1)
+
         a = a.squeeze(2)
         return torch.cat([v, a], dim=-1)
 
