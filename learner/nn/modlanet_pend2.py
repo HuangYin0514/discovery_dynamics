@@ -39,6 +39,7 @@ class GlobalVelocityTransform(nn.Module):
 
     def forward(self, x, v, v0):
         # y = torch.cat([torch.sin(x), torch.cos(x)], dim=-1) * v + v0
+        v = v.repeat(1,2)
         y = self.mlp(x) * v + v0
 
         # y = torch.cat([x, v], dim=-1)
@@ -113,7 +114,7 @@ class ModLaNet_pend2(LossNN):
                 x_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim] += x_global[:, (j) * self.global_dim:
                                                                                              (j + 1) * self.global_dim]
                 v_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim] += v_global[:, (j) * self.global_dim:
-                                                                                             (j + 1) * self.global_dim].detach().clone()
+                                                                                             (j + 1) * self.global_dim]
             x_origin[:, (i) * self.dim: (i + 1) * self.dim] += 0.0
             x_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = self.global4x(
                 x[:, (i) * self.dim: (i + 1) * self.dim],
