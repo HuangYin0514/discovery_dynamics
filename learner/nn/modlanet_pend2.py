@@ -24,8 +24,8 @@ class GlobalPositionTransform(nn.Module):
                        act=act)
 
     def forward(self, x, x_0):
-        # y = torch.cat([torch.sin(x), torch.cos(x)], dim=-1) + x_0
-        y = self.mlp(x) + x_0
+        y = torch.cat([torch.sin(x), torch.cos(x)], dim=-1) + x_0
+        # y = self.mlp(x) + x_0
         return y
 
 
@@ -34,12 +34,15 @@ class GlobalVelocityTransform(nn.Module):
 
     def __init__(self, input_dim, hidden_dim, output_dim, num_layers=1, act=nn.Tanh):
         super(GlobalVelocityTransform, self).__init__()
-        self.mlp = MLP(input_dim=input_dim, hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers,
+        self.mlp = MLP(input_dim=input_dim * 2, hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers,
                        act=act)
 
     def forward(self, x, v, v0):
-        y = torch.cat([torch.sin(x), torch.cos(x)], dim=-1) * v + v0
+        # y = torch.cat([torch.sin(x), torch.cos(x)], dim=-1) * v + v0
         # y = self.mlp(x) * v + v0
+
+        y = torch.cat([x, v], dim=-1)
+        y = self.mlp(y) + v0
         return y
 
 
@@ -167,7 +170,7 @@ class ModLaNet_pend2(LossNN):
                 print("i am is none of dxidvL")
             dxdvL[:, i, :] += dxidvL
 
-        dvdvL_inv = torch.linalg.inv(dvdvL)
+        dvdvL_inv = torch.linalg.pinv(dvdvL)
 
         a = dvdvL_inv @ (dxL.unsqueeze(2) - dxdvL @ v.unsqueeze(2))  # (bs, a_dim, 1)
         a = a.squeeze(2)
