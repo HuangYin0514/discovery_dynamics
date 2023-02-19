@@ -39,10 +39,10 @@ class GlobalVelocityTransform(nn.Module):
 
     def forward(self, x, v, v0):
         # y = torch.cat([torch.sin(x), torch.cos(x)], dim=-1) * v + v0
-        # y = self.mlp(x) * v + v0
+        y = self.mlp(x) * v + v0
 
-        y = torch.cat([x, v], dim=-1)
-        y = self.mlp(y)*v + v0
+        # y = torch.cat([x, v], dim=-1)
+        # y = self.mlp(y)*v + v0
         return y
 
 
@@ -147,7 +147,7 @@ class ModLaNet_pend2(LossNN):
             # vx = v_global[:, i * self.global_dim]
             # vy = v_global[:, i * self.global_dim + 1]
             vv = v_global[:, (i) * self.global_dim: (i + 1) * self.global_dim].pow(2).sum(-1, keepdim=True)
-            T += 0.5 * self.mass(vv)
+            T += 0.5 * vv
 
         # Calculate the Hamilton Derivative --------------------------------------------------------------
         L = T - U
