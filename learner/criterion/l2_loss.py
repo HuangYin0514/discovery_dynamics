@@ -6,7 +6,8 @@ import torch.nn.functional as F
 def L2_loss(x, y):
     # norm is sqrt [ (x - y).pow(2).sum(dim) ]
     # (pred - y).norm(2).pow(2)
-    res = F.mse_loss(x, y)
+    # res = F.mse_loss(x, y)
+    res = (x - y).pow(2).mean()
     return res
 
 
