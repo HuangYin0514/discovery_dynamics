@@ -134,6 +134,7 @@ class Brain:
             #  lr step ---------------------------------------------------------------
             if self.__scheduler is not None:
                 self.__scheduler.step()
+                self.__optimizer.zero_grad()
 
         loss_record = np.array(loss_history)
         np.savetxt('training_file/' + self.taskname + '/loss.txt', loss_record)
