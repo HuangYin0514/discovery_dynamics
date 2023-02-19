@@ -24,8 +24,8 @@ class GlobalPositionTransform(nn.Module):
                        act=act)
 
     def forward(self, x, x_0):
-        # y = torch.cat([torch.sin(x), torch.cos(x)], dim=-1) + x_0
-        y = self.mlp(x) + x_0
+        y = torch.cat([torch.sin(x), torch.cos(x)], dim=-1) + x_0
+        # y = self.mlp(x) + x_0
         return y
 
 
