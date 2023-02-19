@@ -70,11 +70,11 @@ class ModLaNet_pend2(LossNN):
         self.global4x = GlobalPositionTransform(input_dim=self.dim,
                                                 hidden_dim=16,
                                                 output_dim=self.global_dim,
-                                                num_layers=1, act=nn.ReLU)
+                                                num_layers=1, act=nn.LeakyReLU)
         self.global4v = GlobalVelocityTransform(input_dim=self.dim,
                                                 hidden_dim=16,
                                                 output_dim=self.global_dim,
-                                                num_layers=1, act=nn.ReLU)
+                                                num_layers=1, act=nn.LeakyReLU)
         self.Potential1 = PotentialEnergyCell(input_dim=self.global_dim,
                                               hidden_dim=50,
                                               output_dim=1,
