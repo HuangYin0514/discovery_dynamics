@@ -1,6 +1,6 @@
 from torch import nn
 
-from .utils_nn import weights_init_xavier_normal
+from .utils_nn import weights_init_xavier_normal, weights_init_orthogonal_normal
 
 
 class MLP(nn.Module):
@@ -34,6 +34,11 @@ class MLP(nn.Module):
         return out
 
     def __initialize(self):
-        self.input_layer.apply(weights_init_xavier_normal)
-        self.hidden_layer.apply(weights_init_xavier_normal)
-        self.output_layer.apply(weights_init_xavier_normal)
+        # self.input_layer.apply(weights_init_xavier_normal)
+        # self.hidden_layer.apply(weights_init_xavier_normal)
+        # self.output_layer.apply(weights_init_xavier_normal)
+
+        self.input_layer.apply(weights_init_orthogonal_normal)
+        self.hidden_layer.apply(weights_init_orthogonal_normal)
+        self.output_layer.apply(weights_init_orthogonal_normal)
+
