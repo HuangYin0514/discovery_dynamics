@@ -27,7 +27,7 @@ def init_random_state(random_seed=3407):
 # 求导
 def dfx(f, x):
     # return torch.autograd.grad(f, x, grad_outputs=torch.ones_like(f), retain_graph=True, create_graph=True)[0]
-    return torch.autograd.grad(f, x, grad_outputs=torch.ones_like(f), create_graph=True)[0]
+    return torch.autograd.grad(f, x,  create_graph=True)[0]
 
 
 def count_parameters(model):
