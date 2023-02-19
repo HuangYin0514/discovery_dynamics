@@ -39,9 +39,7 @@ class GlobalVelocityTransform(nn.Module):
 
     def forward(self, x, v, v0):
         # y = torch.cat([torch.sin(x), torch.cos(x)], dim=-1) * v + v0
-        # y = self.mlp(x) * v + v0
-        y = self.mlp(x) *v + v0
-
+        y = self.mlp(x) * v + v0
         return y
 
 
@@ -171,7 +169,7 @@ class ModLaNet_pend2(LossNN):
 
         dvdvL_inv = torch.linalg.inv(dvdvL)
 
-        a = dvdvL_inv @ (dxL.unsqueeze(2) - dxdvL @ v.unsqueeze(2))  # (bs, a_dim, 1)
+        a = dvdvL_inv .matmul (dxL.unsqueeze(2) - dxdvL @ v.unsqueeze(2))  # (bs, a_dim, 1)
         a = a.squeeze(2)
         return torch.cat([v, a], dim=-1)
 
