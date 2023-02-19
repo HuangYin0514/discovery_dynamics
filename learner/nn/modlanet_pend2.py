@@ -36,13 +36,11 @@ class GlobalVelocityTransform(nn.Module):
         super(GlobalVelocityTransform, self).__init__()
         self.mlp = MLP(input_dim=input_dim, hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers,
                        act=act)
-        self.mlp2 = MLP(input_dim=input_dim, hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers,
-                        act=act)
 
     def forward(self, x, v, v0):
         # y = torch.cat([torch.sin(x), torch.cos(x)], dim=-1) * v + v0
         # y = self.mlp(x) * v + v0
-        y = self.mlp(x) * self.mlp2(v)*v + v0
+        y = self.mlp(x) *v + v0
 
         return y
 
