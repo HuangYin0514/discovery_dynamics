@@ -39,7 +39,6 @@ class GlobalVelocityTransform(nn.Module):
 
     def forward(self, x, v, v0):
         # y = torch.cat([torch.sin(x), torch.cos(x)], dim=-1) * v + v0
-        v = v.repeat(1, 2)
         y = self.mlp(x) * v * 10 + v0
 
         return y
