@@ -20,7 +20,7 @@ class GlobalPositionTransform(nn.Module):
 
     def __init__(self, input_dim, hidden_dim, output_dim, num_layers=1, act=nn.Tanh):
         super(GlobalPositionTransform, self).__init__()
-        self.mlp = MLP(input_dim=input_dim , hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers,
+        self.mlp = MLP(input_dim=input_dim, hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers,
                        act=act)
 
     def forward(self, x, x_0):
@@ -33,7 +33,7 @@ class GlobalVelocityTransform(nn.Module):
 
     def __init__(self, input_dim, hidden_dim, output_dim, num_layers=1, act=nn.Tanh):
         super(GlobalVelocityTransform, self).__init__()
-        self.mlp = MLP(input_dim=input_dim , hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers,
+        self.mlp = MLP(input_dim=input_dim, hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers,
                        act=act)
 
     def forward(self, x, v, v0):
@@ -91,8 +91,8 @@ class ModLaNet_pend2(LossNN):
         torch.nn.init.ones_(self.mass.weight)
 
     def forward(self, t, coords):
-        # __x, __p = torch.chunk(coords, 2, dim=-1)
-        # coords = torch.cat([__x % (2 * torch.pi), __p], dim=-1).clone().detach().requires_grad_(True)
+        __x, __p = torch.chunk(coords, 2, dim=-1)
+        coords = torch.cat([__x % (2 * torch.pi), __p], dim=-1).detach().clone().requires_grad_(True)
 
         bs = coords.size(0)
         x, v = torch.chunk(coords, 2, dim=-1)
