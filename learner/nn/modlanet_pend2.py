@@ -38,11 +38,11 @@ class GlobalVelocityTransform(nn.Module):
                        act=act)
 
     def forward(self, x, v, v0):
-        # y = torch.cat([torch.sin(x), torch.cos(x)], dim=-1) * v + v0
+        y = torch.cat([torch.sin(x), torch.cos(x)], dim=-1) * v + v0
         # y = self.mlp(x) * v + v0
 
-        y = torch.cat([x, v], dim=-1)
-        y = self.mlp(y) + v0
+        # y = torch.cat([x, v], dim=-1)
+        # y = self.mlp(y) + v0
         return y
 
 
