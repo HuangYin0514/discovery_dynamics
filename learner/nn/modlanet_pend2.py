@@ -108,9 +108,9 @@ class ModLaNet_pend2(LossNN):
         for i in range(self.obj):
             for j in range(i):
                 x_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim] += x_global[:, (j) * self.global_dim:
-                                                                                             (j + 1) * self.global_dim].detach().clone()
+                                                                                             (j + 1) * self.global_dim]
                 v_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim] += v_global[:, (j) * self.global_dim:
-                                                                                             (j + 1) * self.global_dim].detach().clone()
+                                                                                             (j + 1) * self.global_dim]
             x_origin[:, (i) * self.dim: (i + 1) * self.dim] += 0.0
             x_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = self.global4x(
                 x[:, (i) * self.dim: (i + 1) * self.dim],
