@@ -38,8 +38,8 @@ class GlobalVelocityTransform(nn.Module):
                        act=act)
 
     def forward(self, x, v, v0):
-        y = torch.cat([torch.sin(x), torch.cos(x)], dim=-1) * v + v0
-        # y = self.mlp(x) * v + v0
+        # y = torch.cat([torch.sin(x), torch.cos(x)], dim=-1) * v + v0
+        y = self.mlp(x) * v + v0
         return y
 
 
@@ -108,23 +108,10 @@ class ModLaNet_pend2(LossNN):
         for i in range(self.obj):
             for j in range(i):
                 x_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim] += x_global[:, (j) * self.global_dim:
-                                                                                             (j + 1) * self.global_dim]
+                                                                                             (j + 1) * self.global_dim].detach().clone()
                 v_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim] += v_global[:, (j) * self.global_dim:
-                                                                                             (j + 1) * self.global_dim]
-
-            # x_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = \
-            #     torch.cat(
-            #         [torch.sin(x[:, (i) * self.dim: (i + 1) * self.dim]),
-            #          torch.cos(x[:, (i) * self.dim: (i + 1) * self.dim])],
-            #         dim=-1) + \
-            #     x_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim]
-            # v_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = \
-            #     torch.cat(
-            #         [torch.sin(x[:, (i) * self.dim: (i + 1) * self.dim]),
-            #          torch.cos(x[:, (i) * self.dim: (i + 1) * self.dim])],
-            #         dim=-1) * v[:, (i) * self.dim: (i + 1) * self.dim] + \
-            #     v_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim]
-
+                                                                                             (j + 1) * self.global_dim].detach().clone()
+            x_origin[:, (i) * self.dim: (i + 1) * self.dim] += 0.0
             x_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = self.global4x(
                 x[:, (i) * self.dim: (i + 1) * self.dim],
                 x_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim])
@@ -154,8 +141,8 @@ class ModLaNet_pend2(LossNN):
         T = 0.
         vx, vy = 0., 0.
         for i in range(self.dof):
-            vx = v_global[:, i * self.global_dim]
-            vy = v_global[:, i * self.global_dim + 1]
+            # vx = v_global[:, i * self.global_dim]
+            # vy = v_global[:, i * self.global_dim + 1]
             vv = v_global[:, (i) * self.global_dim: (i + 1) * self.global_dim].pow(2).sum(-1, keepdim=True)
             T += 0.5 * self.mass(vv)
 
