@@ -88,6 +88,7 @@ class Brain:
                 labels = labels.to(self.device)
 
                 pred = self.net(t, X)
+                # todo change the criterion for training
                 loss = self.__criterion(pred[..., 2:], labels[..., 2:])
                 # loss = self.__criterion(pred, labels)
 
