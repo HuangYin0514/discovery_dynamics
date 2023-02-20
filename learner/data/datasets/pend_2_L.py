@@ -57,7 +57,7 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
         _time_step = int((t_end - t0) / dt)
         self.test_t = torch.linspace(t0, t_end, _time_step)
 
-    def Init_data(self,num_samples=3,test_split=0.9):
+    def Init_data(self,num_samples=100,test_split=0.9):
         dataset = dmodlanet(obj=self.obj, m=[1 for i in range(self.obj)], l=[1 for i in range(self.obj)])
         data = dataset.get_dataset(seed=0, system='modlanet', noise_std=0.0, samples=num_samples)
 
