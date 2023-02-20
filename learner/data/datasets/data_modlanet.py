@@ -3,7 +3,7 @@
 import scipy.integrate
 
 import autograd
-import autograd.numpy as np
+import autograd as np
 
 #
 # import autograd
@@ -78,7 +78,7 @@ class Dataset:
         grad = grad_lag(coords)
         jaco = jaco_lag(coords)
         size = int(len(coords) / 2)
-        g = np.linalg.inv(jaco[size:, size:]) @ (grad[:size] - jaco[size:, :size] @ coords[size:])
+        g = autograd.numpy.linalg.inv(jaco[size:, size:]) @ (grad[:size] - jaco[size:, :size] @ coords[size:])
         return np.append(coords[size:], g)
 
     def lagrangian_fn(self, coords, eng=False):
@@ -120,8 +120,8 @@ class Dataset:
         max_momentum = 10.
         y0 = np.zeros(self.obj * 2)
         for i in range(self.obj):
-            theta = (2 * np.random.rand()) * np.pi
-            momentum = (2 * np.random.rand() - 1) * max_momentum
+            theta = (2 * autograd.numpy.random.rand()) * np.pi
+            momentum = (2 * autograd.numpy.random.rand() - 1) * max_momentum
             if system == "modlanet":
                 momentum = momentum / (self.m[i] * self.l[i] ** 2)
             y0[i] = theta
@@ -162,7 +162,7 @@ class Dataset:
 
         if system == "hnn":
             # add noise
-            x = spring_ivp['y'] + np.random.randn(*spring_ivp['y'].shape) * noise_std
+            x = spring_ivp['y'] + autograd.numpy.random.randn(*spring_ivp['y'].shape) * noise_std
             return x, dydt.T, spring_ivp['t'], E
 
         elif system == "modlanet":
@@ -171,8 +171,8 @@ class Dataset:
             a = dydt[self.dof:]
 
             # add noise
-            x += np.random.randn(*x.shape) * noise_std
-            v += np.random.randn(*v.shape) * noise_std
+            x += autograd.numpy.random.randn(*x.shape) * noise_std
+            v += autograd.numpy.random.randn(*v.shape) * noise_std
 
             x = x.T
             v = v.T
@@ -190,7 +190,7 @@ class Dataset:
 
         if system == 'hnn':
             # randomly sample inputs
-            np.random.seed(seed)
+            autograd.numpy.random.seed(seed)
             xs, dxs, ts, Es = [], [], [], []
             for s in range(self.samples):
                 x, dx, t, E = self.get_trajectory(system=system, timescale=timescale, **kwargs)
@@ -213,7 +213,7 @@ class Dataset:
 
         elif system == 'modlanet':
             # randomly sample inputs
-            np.random.seed(seed)
+            autograd.numpy.random.seed(seed)
             xs, vs, acs, ts, Es = np.empty((0, self.dof)), np.empty((0, self.dof)), np.empty((0, self.dof)), [], []
             for s in range(self.samples):
                 x, v, ac, t, E = self.get_trajectory(system=system, timescale=timescale, **kwargs)
