@@ -22,7 +22,7 @@ class Pend_2_modlanet(BaseBodyDataset, nn.Module):
 
         self.train_num = 90
         self.test_num = 20
-        self.dataset_url = ''
+        self.dataset_url = 'https://drive.google.com/file/d/1qgAqjZDe76_GCyJqtS--8Llk-gwWl1D1/view?usp=share_link'
 
         self.__init_dynamic_variable(obj, dim)
 
