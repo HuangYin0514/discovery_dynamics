@@ -33,7 +33,7 @@ def get_dataloader(data_name, num_workers=0, **kwargs):
 
     '''dataloader'''
     train_loader = torch.utils.data.DataLoader(
-        train_set, batch_size=len_train_set, shuffle=True,
+        train_set, batch_size=len_train_set, shuffle=False,
         num_workers=num_workers, collate_fn=train_collate_fn)
 
     # train_loader = torch.utils.data.DataLoader(
