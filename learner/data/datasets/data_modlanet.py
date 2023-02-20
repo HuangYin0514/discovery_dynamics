@@ -3,7 +3,7 @@
 import scipy.integrate
 
 import autograd
-import autograd as np
+import autograd.numpy as np
 
 #
 # import autograd
