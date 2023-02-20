@@ -15,12 +15,14 @@ from .body3 import Body3
 from .body3_L import Body3_L
 from .pend_2 import Pendulum2
 from .pend_2_L import Pendulum2_L
+from .pend_2_modlanet import Pend_2_modlanet
 
 __dataset_factory = {
     'Pendulum2': Pendulum2,
     'Pendulum2_L': Pendulum2_L,
     'Body3': Body3,
     'Body3_L': Body3_L,
+    'Pend_2_modlanet': Pend_2_modlanet
 }
 
 

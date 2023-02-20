@@ -1,8 +1,9 @@
 
 import os
 import os.path as osp
-from ._base_module import LossNN
+
 from learner.utils import timing, count_parameters, download_file_from_google_drive, load_network
+from ._base_module import LossNN
 from .baseline_body3 import Baseline_body3
 from .baseline_pend2 import Baseline_pend2
 from .body3_analytical import Body3_analytical

@@ -20,7 +20,7 @@ def train_collate_fn(batch):
     t = torch.flatten(t, start_dim=0, end_dim=1)
     y = torch.flatten(y, start_dim=0, end_dim=1)
 
-    X.requires_grad = True
+    # X.requires_grad = True
 
     input = (X, t)
     output = y
@@ -39,7 +39,7 @@ def val_collate_fn(batch):
     t = torch.flatten(t, start_dim=0, end_dim=1)
     y = torch.flatten(y, start_dim=0, end_dim=1)
 
-    X.requires_grad = True
+    # X.requires_grad = True
 
     input = (X, t)
     output = y

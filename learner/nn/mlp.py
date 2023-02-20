@@ -1,6 +1,6 @@
 from torch import nn
 
-from .utils_nn import weights_init_xavier_normal, weights_init_orthogonal_normal
+from .utils_nn import weights_init_xavier_normal
 
 
 class MLP(nn.Module):
