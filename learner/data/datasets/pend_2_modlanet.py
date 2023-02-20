@@ -35,6 +35,9 @@ class Pend_2_modlanet(BaseBodyDataset, nn.Module):
         self.dim = dim
         self.dof = self.obj * self.dim  # degree of freedom
 
+
+
+    def Init_data(self):
         filename = '/Users/drhuang/PycharmProjects/testProject/format_datasets/dataset_2_pend_modlanet_noise_0.0.npy'
         data = np.load(filename, allow_pickle=True).item()
 
@@ -60,7 +63,8 @@ class Pend_2_modlanet(BaseBodyDataset, nn.Module):
         train_dataset = []
         for i in range(90):
             train_dataset.append(
-                (x0[i], t, dt, X[i * 101:(i + 1) * 101].detach().clone(), y[i * 101:(i + 1) * 101].detach().clone(), E[i * 101:(i + 1) * 101]))
+                (x0[i], t, dt, X[i * 101:(i + 1) * 101].detach().clone(), y[i * 101:(i + 1) * 101].detach().clone(),
+                 E[i * 101:(i + 1) * 101]))
 
         test_x0 = torch.cat([test_x[::datalen], test_v[::datalen]], dim=-1).detach().clone()
         test_t = torch.linspace(0, 10, 101).detach().clone()
@@ -71,14 +75,11 @@ class Pend_2_modlanet(BaseBodyDataset, nn.Module):
         test_dataset = []
         for i in range(10):
             test_dataset.append(
-                (x0[i], t, dt, X[i * 101:(i + 1) * 101].detach().clone(), y[i * 101:(i + 1) * 101].detach().clone(), E[i * 101:(i + 1) * 101]))
+                (x0[i], t, dt, X[i * 101:(i + 1) * 101].detach().clone(), y[i * 101:(i + 1) * 101].detach().clone(),
+                 E[i * 101:(i + 1) * 101]))
 
-        self.train_dataset = train_dataset
-        self.test_dataset = test_dataset
-
-    def Init_data(self):
-        self.train = self.train_dataset
-        self.test = self.test_dataset
+        self.train = train_dataset
+        self.test = test_dataset
 
     def random_config(self, num):
         pass
