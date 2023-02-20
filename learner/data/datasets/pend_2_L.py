@@ -7,6 +7,7 @@
 """
 import numpy as np
 import torch
+from matplotlib import pyplot as plt
 from torch import nn
 
 from ._base_body_dataset import BaseBodyDataset
@@ -52,7 +53,7 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
         self.t = torch.linspace(t0, t_end, _time_step)
 
         t_end = 30.
-        dt = 0.02
+        dt = 0.05
         _time_step = int((t_end - t0) / dt)
         self.test_t = torch.linspace(t0, t_end, _time_step)
 
@@ -134,6 +135,24 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
             x0_list.append(x0)
         x0 = torch.stack(x0_list)
         return x0
+
+    def generate_random(self, num, t):
+        x0 = self.random_config(num)  # (bs, D)
+        X = self.generate(x0, t).clone().detach()  # (bs, T, D)
+        y = torch.stack(list(map(lambda x: self(None, x), X))).clone().detach()  # (bs, T, D)
+
+        v = X[..., 2:]
+        a = y[..., 2:]
+        dy = torch.cat([v,a],dim=-1)
+
+        E = torch.stack([self.energy_fn(y) for y in X])
+
+        dataset = []
+        for i in range(num):
+            dataset.append((x0[i], t, self.dt, X[i], dy[i], E[i]))
+            plt.plot(E[i].cpu().detach().numpy())
+        plt.show()
+        return dataset
 
     def generate(self, x0, t):
         x0 = x0.to(self.Device)
