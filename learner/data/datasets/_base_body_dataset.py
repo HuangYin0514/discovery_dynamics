@@ -31,9 +31,9 @@ class BaseBodyDataset(BaseDynamicsDataset):
         self.test = test_dataset
 
     def generate_random(self, num, t):
-        x0 = self.random_config(num)  # (D, )
-        X = self.generate(x0, t).clone().detach()  # (T, D)
-        y = torch.stack(list(map(lambda x: self(None, x), X))).clone().detach()  # (T, D)
+        x0 = self.random_config(num)  # (bs, D)
+        X = self.generate(x0, t).clone().detach()  # (bs, T, D)
+        y = torch.stack(list(map(lambda x: self(None, x), X))).clone().detach()  # (bs, T, D)
         E = torch.stack([self.energy_fn(y) for y in X])
 
         dataset = []

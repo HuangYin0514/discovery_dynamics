@@ -16,31 +16,18 @@ from .body3_L import Body3_L
 from .pend_2 import Pendulum2
 from .pend_2_L import Pendulum2_L
 
+__dataset_factory = {
+    'Pendulum2': Pendulum2,
+    'Pendulum2_L': Pendulum2_L,
+    'Body3': Body3,
+    'Body3_L': Body3_L,
+}
 
-def choose_dataset(data_name, obj, dim, train_num, test_num):
-    if data_name == 'Pendulum2':
-        dataset = Pendulum2(train_num=train_num,
-                            test_num=test_num,
-                            obj=obj,
-                            dim=dim)
 
-    elif data_name == 'Pendulum2_L':
-        dataset = Pendulum2_L(train_num=train_num,
-                              test_num=test_num,
-                              obj=obj,
-                              dim=dim)
-    elif data_name == 'Body3':
-        dataset = Body3(train_num=train_num,
-                        test_num=test_num,
-                        obj=obj,
-                        dim=dim)
-    elif data_name == 'Body3_L':
-        dataset = Body3_L(train_num=train_num,
-                          test_num=test_num,
-                          obj=obj,
-                          dim=dim)
-    else:
-        raise NotImplementedError('{} not implemented'.format(data_name))
+def choose_dataset(dataset_name, obj, dim, train_num, test_num, **kwargs):
+    if dataset_name not in __dataset_factory.keys():
+        raise ValueError('Dataset \'{}\' is not implemented'.format(dataset_name))
+    dataset = __dataset_factory[dataset_name](train_num, test_num, obj, dim)
     return dataset
 
 
