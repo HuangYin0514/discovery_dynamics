@@ -10,10 +10,11 @@ import torch
 from matplotlib import pyplot as plt
 from torch import nn
 
+import autograd.numpy as np
 from ._base_body_dataset import BaseBodyDataset
 from ...integrator import ODESolver
 from ...utils import dfx
-from .data_modlanet import Dataset as dmodlanet
+
 
 class Pendulum2_L(BaseBodyDataset, nn.Module):
     """
@@ -57,67 +58,108 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
         _time_step = int((t_end - t0) / dt)
         self.test_t = torch.linspace(t0, t_end, _time_step)
 
-    def Init_data(self,num_samples=100,test_split=0.9):
-        dataset = dmodlanet(obj=self.obj, m=[1 for i in range(self.obj)], l=[1 for i in range(self.obj)])
-        data = dataset.get_dataset(seed=0, system='modlanet', noise_std=0.0, samples=num_samples)
-
-        x = data['x'] % (2 * np.pi)
-        x = torch.tensor(x, requires_grad=True, dtype=torch.float32)
-        v = torch.tensor(data['v'], requires_grad=True, dtype=torch.float32)
-        a = torch.tensor(data['ac'], dtype=torch.float32)
-
-        test_x = data['test_x'] % (2 * np.pi)
-        test_x = torch.tensor(test_x, requires_grad=True, dtype=torch.float32)
-        test_v = torch.tensor(data['test_v'], requires_grad=True, dtype=torch.float32)
-        test_a = torch.tensor(data['test_ac'])
-
-        # ----------------------------------------------------------------
-        # data format (x0[i], t, self.dt, X[i], y[i], E[i])
-        datalen = 101
-        x0 = torch.cat([x[::datalen], v[::datalen]], dim=-1).detach().clone()
-        t = torch.linspace(0, 10, 101).detach().clone()
-        dt = 0.1
-        X = torch.cat([x, v], dim=-1).detach().clone()
-        y = torch.cat([v, a], dim=-1).detach().clone()
-        E = data['E']
-        train_dataset = []
-        for i in range(len(x0)):
-            train_dataset.append(
-                (x0[i], t, dt, X[i * 101:(i + 1) * 101].detach().clone(), y[i * 101:(i + 1) * 101].detach().clone(),
-                 E[i * 101:(i + 1) * 101]))
-
-        test_x0 = torch.cat([test_x[::datalen], test_v[::datalen]], dim=-1).detach().clone()
-        test_t = torch.linspace(0, 10, 101).detach().clone()
-        test_dt = 0.1
-        test_X = torch.cat([test_x, test_v], dim=-1).detach().clone()
-        test_y = torch.cat([test_v, test_a], dim=-1).detach().clone()
-        test_E = data['test_E']
-        test_dataset = []
-        for i in range(len(test_x0)):
-            test_dataset.append(
-                (test_x0[i], test_t, test_dt, test_X[i * 101:(i + 1) * 101].detach().clone(), test_y[i * 101:(i + 1) * 101].detach().clone(),
-                 test_E[i * 101:(i + 1) * 101]))
-
-        self.train = train_dataset
-        self.test = test_dataset
-
     def forward(self, t, coords):
-        pass
+        __x, __p = torch.chunk(coords, 2, dim=-1)
+        coords = torch.cat([__x % (2 * torch.pi), __p], dim=-1).clone().detach().requires_grad_(True)
+
+        coords = coords.clone().detach().requires_grad_(True)
+        bs = coords.size(0)
+        x, v = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
+
+        # Calculate the potential energy for i-th element ------------------------------------------------------------
+        U = self.potential(torch.cat([x, v], dim=-1))
+
+        # Calculate the kinetic --------------------------------------------------------------
+        T = self.kinetic(torch.cat([x, v], dim=-1))
+
+        # Calculate the Hamilton Derivative --------------------------------------------------------------
+        L = T - U
+        dvL = dfx(L.sum(), v)
+        dxL = dfx(L.sum(), x)
+
+        dvdvL = torch.zeros((bs, self.dof, self.dof), dtype=self.Dtype, device=self.Device)
+        dxdvL = torch.zeros((bs, self.dof, self.dof), dtype=self.Dtype, device=self.Device)
+
+        for i in range(self.dof):
+            dvidvL = dfx(dvL[:, i].sum(), v)
+            dvdvL[:, i, :] += dvidvL
+
+        for i in range(self.dof):
+            dxidvL = dfx(dvL[:, i].sum(), x)
+            dxdvL[:, i, :] += dxidvL
+
+        dvdvL_inv = torch.linalg.inv(dvdvL)
+
+        a = dvdvL_inv @ (dxL.unsqueeze(2) - dxdvL @ v.unsqueeze(2))  # (bs, a_dim, 1)
+        a = a.squeeze(2)
+        return torch.cat([v, a], dim=-1)
 
     def kinetic(self, coords):
-        pass
+        """Kinetic energy"""
+        s, num_states = coords.shape
+        assert num_states == self.dof * 2
+        x, v = torch.chunk(coords, 2, dim=1)
+
+        T = 0.
+        vx, vy = 0., 0.
+        for i in range(self.dof):
+            vx = vx + self.l[i] * v[:, i] * torch.cos(x[:, i])
+            vy = vy + self.l[i] * v[:, i] * torch.sin(x[:, i])
+            T = T + 0.5 * self.m[i] * (torch.pow(vx, 2) + torch.pow(vy, 2))
+        return T
 
     def potential(self, coords):
-        pass
+        bs, num_states = coords.shape
+        assert num_states == self.dof * 2
+        U = 0.
+        y = 0.
+        for i in range(self.obj):
+            y = y - self.l[i] * torch.cos(coords[:, i])
+            U = U + self.m[i] * self.g * y
+        return U
 
     def energy_fn(self, coords):
-        pass
+        """energy function """
+        eng = self.kinetic(coords) + self.potential(coords)
+        return eng
 
     def random_config(self, num):
-        pass
+        x0_list = []
+        for i in range(num):
+            max_momentum = 1.
+            x0 = torch.zeros((self.obj * 2), dtype=self.Dtype, device=self.Device)
+            for i in range(self.obj):
+                theta = (2 * np.pi) * torch.rand(1, ) + 0  # [0, 2pi]
+                momentum = (2 * torch.rand(1, ) - 1) * max_momentum  # [-1, 1]*max_momentum
+                x0[i] = theta
+                x0[i + self.obj] = momentum
+            x0_list.append(x0)
+        x0 = torch.stack(x0_list)
+        return x0
 
     def generate_random(self, num, t):
-        pass
+        x0 = self.random_config(num)  # (bs, D)
+        X = self.ode_solve_traj(x0, t).reshape(-1, self.dof * 2) # (bs x T, D)
+        dy = self(None, X)  # (bs, T, D)
+        E = self.energy_fn(X)
+        dataset = (x0, t,  X, dy, E)
 
-    def generate(self, x0, t):
-        pass
+        for i in range(num):
+            sample_len = len(t)
+            E_sample = E[i * sample_len:(i + 1) * sample_len]
+            plt.plot(E_sample.cpu().detach().numpy())
+        plt.show()
+        return dataset
+
+    def ode_solve_traj(self, x0, t):
+        x0 = x0.to(self.Device)
+        t = t.to(self.Device)
+        # At small step sizes, the differential equations exhibit stiffness and the rk4 solver cannot solve
+        # the double pendulum task. Therefore, use dopri5 to generate training data.
+        if len(t) == len(self.test_t):
+            # test stages
+            x = ODESolver(self, x0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
+        else:
+            # train stages
+            x = ODESolver(self, x0, t, method='dopri5').permute(1, 0, 2)  # (T, D) dopri5 rk4
+        return x

@@ -138,7 +138,7 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
 
     def generate_random(self, num, t):
         x0 = self.random_config(num)  # (bs, D)
-        X = self.generate(x0, t).clone().detach()  # (bs, T, D)
+        X = self.ode_solve_traj(x0, t).clone().detach()  # (bs, T, D)
         y = torch.stack(list(map(lambda x: self(None, x), X))).clone().detach()  # (bs, T, D)
 
         v = X[..., 2:]
@@ -154,7 +154,7 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
         plt.show()
         return dataset
 
-    def generate(self, x0, t):
+    def ode_solve_traj(self, x0, t):
         x0 = x0.to(self.Device)
         t = t.to(self.Device)
         # At small step sizes, the differential equations exhibit stiffness and the rk4 solver cannot solve
