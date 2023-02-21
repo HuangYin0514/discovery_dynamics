@@ -142,7 +142,7 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
         x0 = self.random_config(num)  # (bs, D)
         X = self.ode_solve_traj(x0, t).reshape(-1, self.dof * 2).clone().detach()  # (bs x T, D)
 
-        X_np = X.clone().detach().numpy()
+        X_np = X.clone().detach().cpu().numpy()
         dy_list = []
         for x_np in X_np:
             dy_ = self.dynamics_lagrangian_fn(x_np)
