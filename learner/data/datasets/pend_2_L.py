@@ -139,8 +139,8 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
 
     def generate_random(self, num, t):
         x0 = self.random_config(num)  # (bs, D)
-        X = self.ode_solve_traj(x0, t).reshape(-1, self.dof * 2) # (bs x T, D)
-        dy = self(None, X)  # (bs, T, D)
+        X = self.ode_solve_traj(x0, t).reshape(-1, self.dof * 2).clone().detach() # (bs x T, D)
+        dy = self(None, X).clone().detach()  # (bs, T, D)
         E = self.energy_fn(X)
         dataset = (x0, t,  X, dy, E)
 
