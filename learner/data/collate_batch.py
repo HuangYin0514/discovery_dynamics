@@ -40,7 +40,7 @@ def test_collate_fn(batch):
     x0 = x0[0]  # (bs, D)
     t = t[0]  # (T,)
 
-    X = torch.stack(X, dim=0).reshape(x0.size(0), len(t), x0.size(1))
+    X = torch.stack(X, dim=0).reshape(x0.size(0), len(t), x0.size(1)) # (bs, T, D)
 
     input = (x0, t)
     output = X
