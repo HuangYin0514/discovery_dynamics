@@ -10,12 +10,11 @@ import torch
 from matplotlib import pyplot as plt
 from torch import nn
 
+import autograd.numpy as np
 from ._base_body_dataset import BaseBodyDataset
 from ...integrator import ODESolver
 from ...utils import dfx
 
-import autograd
-import autograd.numpy as np
 
 class Pendulum2_L(BaseBodyDataset, nn.Module):
     """
@@ -141,16 +140,7 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
     def generate_random(self, num, t):
         x0 = self.random_config(num)  # (bs, D)
         X = self.ode_solve_traj(x0, t).reshape(-1, self.dof * 2).clone().detach()  # (bs x T, D)
-
-        X_np = X.clone().detach().numpy()
-        dy_list = []
-        for x_np in X_np:
-            dy_ = self.dynamics_lagrangian_fn(x_np)
-            dy_list.append(dy_)
-        dy = np.stack(dy_list)
-        dy= torch.tensor(dy, dtype=self.Dtype,device=self.Device)
-
-        # dy = self(None, X).clone().detach()  # (bs, T, D)
+        dy = self(None, X).clone().detach()  # (bs, T, D)
         E = self.energy_fn(X).reshape(num, len(t))
         dataset = (x0, t, X, dy, E)
 
@@ -171,37 +161,3 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
             # train stages
             x = ODESolver(self, x0, t, method='dopri5').permute(1, 0, 2)  # (T, D) dopri5 rk4
         return x
-
-    def dynamics_lagrangian_fn(self, coords):
-        grad_lag = autograd.grad(self.lagrangian_fn)
-        jaco_lag = autograd.jacobian(grad_lag)
-        grad = grad_lag(coords)
-        jaco = jaco_lag(coords)
-        size = int(len(coords) / 2)
-        g = autograd.numpy.linalg.inv(jaco[size:, size:]) @ (grad[:size] - jaco[size:, :size] @ coords[size:])
-        return np.append(coords[size:], g)
-
-    def lagrangian_fn(self, coords, eng=False):
-        assert (len(coords) == self.dof * 2)
-        g = self.g
-        U, T = 0., 0.
-        vx, vy = 0., 0.
-        y = 0.
-        for i in range(self.obj):
-            vx = vx + self.l[i] * coords[self.dof + i] * np.cos(coords[i])
-            vy = vy + self.l[i] * coords[self.dof + i] * np.sin(coords[i])
-            T = T + 0.5 * self.m[i] * (np.power(vx, 2) + np.power(vy, 2))
-            y = y - self.l[i] * np.cos(coords[i])
-            U = U + self.m[i] * g * y
-        L = T - U if not eng else T + U
-        return L
-
-    def lagrangian_kinetic(self, coords):
-        assert (len(coords) == self.dof * 2)
-        T = 0.
-        vx, vy = 0., 0.
-        for i in range(self.obj):
-            vx = vx + self.l[i] * coords[self.dof + i] * np.cos(coords[i])
-            vy = vy + self.l[i] * coords[self.dof + i] * np.sin(coords[i])
-            T = T + 0.5 * self.m[i] * (np.power(vx, 2) + np.power(vy, 2))
-        return T
