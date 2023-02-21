@@ -139,15 +139,13 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
 
     def generate_random(self, num, t):
         x0 = self.random_config(num)  # (bs, D)
-        X = self.ode_solve_traj(x0, t).reshape(-1, self.dof * 2).clone().detach() # (bs x T, D)
+        X = self.ode_solve_traj(x0, t).reshape(-1, self.dof * 2).clone().detach()  # (bs x T, D)
         dy = self(None, X).clone().detach()  # (bs, T, D)
-        E = self.energy_fn(X)
-        dataset = (x0, t,  X, dy, E)
+        E = self.energy_fn(X).reshape(num, len(t))
+        dataset = (x0, t, X, dy, E)
 
         for i in range(num):
-            sample_len = len(t)
-            E_sample = E[i * sample_len:(i + 1) * sample_len]
-            plt.plot(E_sample.cpu().detach().numpy())
+            plt.plot(E[i].cpu().detach().numpy())
         plt.show()
         return dataset
 
