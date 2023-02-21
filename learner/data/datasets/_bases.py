@@ -108,10 +108,14 @@ class DynamicsDataset(Dataset):
         self.transform = transform
 
     def __len__(self):
-        return len(self.dataset)
+        x0, t, X, y, E = self.dataset
+        return len(X)
 
     def __getitem__(self, index):
         x0, t, X, y, E = self.dataset
+
+        X = X[index]
+        y = y[index]
 
         if self.transform is not None:
             X = self.transform(X)

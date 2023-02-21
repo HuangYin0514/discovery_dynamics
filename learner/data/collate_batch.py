@@ -12,15 +12,9 @@ def train_collate_fn(batch):
     x0, t,  X, y, E = zip(*batch)
 
     # (N, 100, dof) -> (Nx100, dof)
-    X = torch.cat(X, dim=0)
-    t = torch.cat(t, dim=0)
-    y = torch.cat(y, dim=0)
-
-    # X = X[0]
-    # t = t[0]
-    # y = y[0]
-
-    # X.requires_grad = True
+    X = torch.stack(X, dim=0)
+    t = torch.stack(t, dim=0)
+    y = torch.stack(y, dim=0)
 
     input = (X, t)
     output = y
@@ -31,15 +25,9 @@ def val_collate_fn(batch):
     x0, t,  X, y, E = zip(*batch)
 
     # (N, 100, dof) -> (Nx100, dof)
-    X = torch.cat(X, dim=0)
-    t = torch.cat(t, dim=0)
-    y = torch.cat(y, dim=0)
-
-    # X = X[0]
-    # t = t[0]
-    # y = y[0]
-
-    # X.requires_grad = True
+    X = torch.stack(X, dim=0)
+    t = torch.stack(t, dim=0)
+    y = torch.stack(y, dim=0)
 
     input = (X, t)
     output = y
@@ -50,12 +38,10 @@ def test_collate_fn(batch):
     x0, t,  X, y, E = zip(*batch)
 
     X = torch.stack(X, dim=0).float()
+    y = torch.stack(y, dim=0).float()  # (bs x T, D)
 
-    x0 = torch.stack(x0, dim=0).float()  # (bs, D)
-    x0.requires_grad = True
-
+    x0 =x0[0]  # (bs, D)
     t = t[0]  # (T,)
-    y = torch.stack(y, dim=0).float()  # (bs, T, D)
 
     input = (x0, t)
     output = X
