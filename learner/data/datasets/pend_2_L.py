@@ -127,7 +127,7 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
     def random_config(self, num):
         x0_list = []
         for i in range(num):
-            max_momentum = 1.
+            max_momentum = 10.
             y0 = np.zeros(self.obj * 2)
             for i in range(self.obj):
                 theta = (2 * autograd.numpy.random.rand()) * np.pi
@@ -141,16 +141,7 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
     def generate_random(self, num, t):
         x0 = self.random_config(num)  # (bs, D)
         X = self.ode_solve_traj(x0, t).reshape(-1, self.dof * 2).clone().detach()  # (bs x T, D)
-
-        X_np = X.clone().detach().cpu().numpy()
-        dy_list = []
-        for x_np in X_np:
-            dy_ = self.dynamics_lagrangian_fn(x_np)
-            dy_list.append(dy_)
-        dy = np.stack(dy_list)
-        dy = torch.tensor(dy, dtype=self.Dtype, device=self.Device)
-
-        # dy = self(None, X).clone().detach()  # (bs, T, D)
+        dy = self(None, X).clone().detach()  # (bs, T, D)
         E = self.energy_fn(X).reshape(num, len(t))
         dataset = (x0, t, X, dy, E)
 
