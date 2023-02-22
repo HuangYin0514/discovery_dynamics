@@ -10,12 +10,12 @@ import torch
 from matplotlib import pyplot as plt
 from torch import nn
 
+import autograd
+import autograd.numpy as np
 from ._base_body_dataset import BaseBodyDataset
 from ...integrator import ODESolver
 from ...utils import dfx
 
-import autograd
-import autograd.numpy as np
 
 class Pendulum2_L(BaseBodyDataset, nn.Module):
     """
@@ -148,7 +148,7 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
             dy_ = self.dynamics_lagrangian_fn(x_np)
             dy_list.append(dy_)
         dy = np.stack(dy_list)
-        dy= torch.tensor(dy, dtype=self.Dtype,device=self.Device)
+        dy = torch.tensor(dy, dtype=self.Dtype, device=self.Device)
 
         # dy = self(None, X).clone().detach()  # (bs, T, D)
         E = self.energy_fn(X).reshape(num, len(t))
