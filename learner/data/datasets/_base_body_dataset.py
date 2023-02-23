@@ -32,13 +32,12 @@ class BaseBodyDataset(BaseDynamicsDataset):
 
     def generate_random(self, num, t):
         x0 = self.random_config(num)  # (bs, D)
-        X = self.ode_solve_traj(x0, t).clone().detach()  # (bs, T, D)
-        y = torch.stack(list(map(lambda x: self(None, x), X))).clone().detach()  # (bs, T, D)
-        E = torch.stack([self.energy_fn(y) for y in X])
+        X = self.ode_solve_traj(x0, t).reshape(-1, self.dof * 2).clone().detach()  # (bs x T, D)
+        dy = self(None, X).clone().detach()  # (bs, T, D)
+        E = self.energy_fn(X).reshape(num, len(t))
+        dataset = (x0, t, X, dy, E)
 
-        dataset = []
         for i in range(num):
-            dataset.append((x0[i], t, self.dt, X[i], y[i], E[i]))
             plt.plot(E[i].cpu().detach().numpy())
         plt.show()
         return dataset
