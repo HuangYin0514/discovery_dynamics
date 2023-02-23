@@ -5,12 +5,12 @@
 @time: 2023/1/3 3:50 PM
 @desc:
 """
+import numpy as np
 import torch
 from matplotlib import pyplot as plt
 from torch import nn
 
-import autograd
-import autograd.numpy as np
+
 from ._base_body_dataset import BaseBodyDataset
 from ...integrator import ODESolver
 from ...utils import dfx
@@ -122,33 +122,20 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
         eng = self.kinetic(coords) + self.potential(coords)
         return eng
 
-    # def random_config(self, num):
-    #     x0_list = []
-    #     for i in range(num):
-    #         max_momentum = 10.
-    #         y0 = np.zeros(self.obj * 2)
-    #         for i in range(self.obj):
-    #             theta = (2 * autograd.numpy.random.rand()) * np.pi
-    #             momentum = (2 * autograd.numpy.random.rand() - 1) * max_momentum
-    #             y0[i] = theta
-    #             y0[i + self.obj] = momentum
-    #         x0_list.append(y0)
-    #     x0 = np.stack(x0_list)
-    #     return  torch.tensor(x0, dtype=self.Dtype, device=self.Device)
-    #
     def random_config(self, num):
         x0_list = []
         for i in range(num):
             max_momentum = 10.
-            y0 = torch.zeros((self.obj * 2))
+            y0 = np.zeros(self.obj * 2)
             for i in range(self.obj):
-                theta = (2 * torch.rand(1)) * torch.pi
-                momentum = (2 * torch.rand(1) - 1) * max_momentum
+                theta = (2 * np.random.rand()) * np.pi
+                momentum = (2 * np.random.rand() - 1) * max_momentum
                 y0[i] = theta
                 y0[i + self.obj] = momentum
             x0_list.append(y0)
-        x0 = torch.stack(x0_list)
-        return x0.clone().detach()
+        x0 = np.stack(x0_list)
+        return  torch.tensor(x0, dtype=self.Dtype, device=self.Device)
+
 
     def generate_random(self, num, t):
         x0 = self.random_config(num)  # (bs, D)
