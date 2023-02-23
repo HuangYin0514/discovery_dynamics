@@ -144,7 +144,7 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
             max_momentum = 10.
             y0 = torch.zeros((self.obj*2))
             for i in range(self.obj):
-                theta = (2 * torch.rand(1)) * np.pi
+                theta = (2 * torch.rand(1)) * torch.pi
                 momentum = (2 * torch.rand(1) - 1) * max_momentum
                 y0[i] = theta
                 y0[i + self.obj] = momentum
