@@ -124,33 +124,33 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
         eng = self.kinetic(coords) + self.potential(coords)
         return eng
 
-    # def random_config(self, num):
-    #     x0_list = []
-    #     for i in range(num):
-    #         max_momentum = 10.
-    #         y0 = np.zeros(self.obj * 2)
-    #         for i in range(self.obj):
-    #             theta = (2 * autograd.numpy.random.rand()) * np.pi
-    #             momentum = (2 * autograd.numpy.random.rand() - 1) * max_momentum
-    #             y0[i] = theta
-    #             y0[i + self.obj] = momentum
-    #         x0_list.append(y0)
-    #     x0 = np.stack(x0_list)
-    #     return  torch.tensor(x0, dtype=self.Dtype, device=self.Device)
-
     def random_config(self, num):
         x0_list = []
         for i in range(num):
             max_momentum = 10.
-            y0 = torch.zeros((self.obj*2))
+            y0 = np.zeros(self.obj * 2)
             for i in range(self.obj):
-                theta = (2 * torch.randn(1)) * np.pi
-                momentum = (2 * torch.randn(1) - 1) * max_momentum
+                theta = (2 * autograd.numpy.random.rand()) * np.pi
+                momentum = (2 * autograd.numpy.random.rand() - 1) * max_momentum
                 y0[i] = theta
                 y0[i + self.obj] = momentum
             x0_list.append(y0)
-        x0 = torch.stack(x0_list)
-        return  x0.clone().detach()
+        x0 = np.stack(x0_list)
+        return  torch.tensor(x0, dtype=self.Dtype, device=self.Device)
+
+    # def random_confignfig(self, num):
+    #     x0_list = []
+    #     for i in range(num):
+    #         max_momentum = 10.
+    #         y0 = torch.zeros((self.obj*2))
+    #         for i in range(self.obj):
+    #             theta = (2 * torch.randn(1)) * np.pi
+    #             momentum = (2 * torch.randn(1) - 1) * max_momentum
+    #             y0[i] = theta
+    #             y0[i + self.obj] = momentum
+    #         x0_list.append(y0)
+    #     x0 = torch.stack(x0_list)
+    #     return  x0.clone().detach()
 
     def generate_random(self, num, t):
         x0 = self.random_config(num)  # (bs, D)
@@ -176,37 +176,3 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
             # train stages
             x = ODESolver(self, x0, t, method='dopri5').permute(1, 0, 2)  # (T, D) dopri5 rk4
         return x
-
-    def dynamics_lagrangian_fn(self, coords):
-        grad_lag = autograd.grad(self.lagrangian_fn)
-        jaco_lag = autograd.jacobian(grad_lag)
-        grad = grad_lag(coords)
-        jaco = jaco_lag(coords)
-        size = int(len(coords) / 2)
-        g = autograd.numpy.linalg.inv(jaco[size:, size:]) @ (grad[:size] - jaco[size:, :size] @ coords[size:])
-        return np.append(coords[size:], g)
-
-    def lagrangian_fn(self, coords, eng=False):
-        assert (len(coords) == self.dof * 2)
-        g = self.g
-        U, T = 0., 0.
-        vx, vy = 0., 0.
-        y = 0.
-        for i in range(self.obj):
-            vx = vx + self.l[i] * coords[self.dof + i] * np.cos(coords[i])
-            vy = vy + self.l[i] * coords[self.dof + i] * np.sin(coords[i])
-            T = T + 0.5 * self.m[i] * (np.power(vx, 2) + np.power(vy, 2))
-            y = y - self.l[i] * np.cos(coords[i])
-            U = U + self.m[i] * g * y
-        L = T - U if not eng else T + U
-        return L
-
-    def lagrangian_kinetic(self, coords):
-        assert (len(coords) == self.dof * 2)
-        T = 0.
-        vx, vy = 0., 0.
-        for i in range(self.obj):
-            vx = vx + self.l[i] * coords[self.dof + i] * np.cos(coords[i])
-            vy = vy + self.l[i] * coords[self.dof + i] * np.sin(coords[i])
-            T = T + 0.5 * self.m[i] * (np.power(vx, 2) + np.power(vy, 2))
-        return T
