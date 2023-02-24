@@ -66,7 +66,7 @@ class BaseDataset(abc.ABC):
 
     def get_dynamics_data_info(self, data):
         num_traj = len(data)
-        x0, t, h, X, y, E = data[0]
+        x0, t, X, y, E = data[0]
         num_t = len(t)
         min_t = min(t)
         max_t = max(t)
@@ -116,9 +116,9 @@ class DynamicsDataset(Dataset):
         return len(self.dataset)
 
     def __getitem__(self, index):
-        x0, t, h, X, y, E = self.dataset[index]
+        x0, t, X, y, E = self.dataset[index]
 
         if self.transform is not None:
             X = self.transform(X)
 
-        return x0, t, h, X, y, E
+        return x0, t, X, y, E

@@ -38,7 +38,7 @@ class BaseBodyDataset(BaseDynamicsDataset):
 
         dataset = []
         for i in range(num):
-            dataset.append((x0[i], t, self.dt, X[i], y[i], E[i]))
+            dataset.append((x0[i], t,  X[i], y[i], E[i]))
             plt.plot(E[i].cpu().detach().numpy())
         plt.show()
         return dataset
