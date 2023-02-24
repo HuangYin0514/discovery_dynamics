@@ -7,13 +7,12 @@
 """
 import numpy as np
 import torch
-from matplotlib import pyplot as plt
 from torch import nn
-
 
 from ._base_body_dataset import BaseBodyDataset
 from ...integrator import ODESolver
 from ...utils import dfx
+
 
 class Pendulum2_L(BaseBodyDataset, nn.Module):
     """
@@ -53,7 +52,7 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
         self.t = torch.linspace(t0, t_end, _time_step)
 
         t_end = 30.
-        dt = 0.05
+        dt = 0.02
         _time_step = int((t_end - t0) / dt)
         self.test_t = torch.linspace(t0, t_end, _time_step)
 
@@ -81,17 +80,23 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
 
         for i in range(self.dof):
             dvidvL = dfx(dvL[:, i].sum(), v)
-            dvdvL[:, i, :] += dvidvL
+            if dvidvL is None:
+                break
+            else:
+                dvdvL[:, i, :] += dvidvL
 
         for i in range(self.dof):
             dxidvL = dfx(dvL[:, i].sum(), x)
-            dxdvL[:, i, :] += dxidvL
+            if dxidvL is None:
+                break
+            else:
+                dxdvL[:, i, :] += dxidvL
 
         dvdvL_inv = torch.linalg.inv(dvdvL)
 
         a = dvdvL_inv @ (dxL.unsqueeze(2) - dxdvL @ v.unsqueeze(2))  # (bs, a_dim, 1)
         a = a.squeeze(2)
-        return torch.cat([v, a], dim=-1)
+        return torch.cat([v, a], dim=1)
 
     def kinetic(self, coords):
         """Kinetic energy"""
@@ -126,38 +131,26 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
         x0_list = []
         for i in range(num):
             max_momentum = 1.
-            y0 = np.zeros(self.obj * 2)
+            x0 = torch.zeros((self.obj * 2))
             for i in range(self.obj):
-                theta = (2 * np.random.rand()) * np.pi
-                momentum = (2 * np.random.rand() - 1) * max_momentum
-                y0[i] = theta
-                y0[i + self.obj] = momentum
-            x0_list.append(y0)
-        x0 = np.stack(x0_list)
-        return  torch.tensor(x0, dtype=self.Dtype, device=self.Device)
+                theta = (2 * np.pi) * torch.rand(1, ) + 0  # [0, 2pi]
+                momentum = (2 * torch.rand(1, ) - 1) * max_momentum  # [-1, 1]*max_momentum
+                x0[i] = theta
+                x0[i + self.obj] = momentum
+            x0_list.append(x0)
+        x0 = torch.stack(x0_list)
+        return x0.to(self.Device)
 
-
-    def generate_random(self, num, t):
-        x0 = self.random_config(num)  # (bs, D)
-        X = self.ode_solve_traj(x0, t).reshape(-1, self.dof * 2).clone().detach()  # (bs x T, D)
-        dy = self(None, X).clone().detach()  # (bs, T, D)
-        E = self.energy_fn(X).reshape(num, len(t))
-        dataset = (x0, t, X, dy, E)
-
-        for i in range(num):
-            plt.plot(E[i].cpu().detach().numpy())
-        plt.show()
-        return dataset
-
-    def ode_solve_traj(self, x0, t):
-        x0 = x0.to(self.Device)
-        t = t.to(self.Device)
-        # At small step sizes, the differential equations exhibit stiffness and the rk4 solver cannot solve
-        # the double pendulum task. Therefore, use dopri5 to generate training data.
-        if len(t) == len(self.test_t):
-            # test stages
-            x = ODESolver(self, x0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
-        else:
-            # train stages
-            x = ODESolver(self, x0, t, method='dopri5').permute(1, 0, 2)  # (T, D) dopri5 rk4
-        return x
+    # def random_config(self, num):
+    #     x0_list = []
+    #     for i in range(num):
+    #         max_momentum = 0.8
+    #         x0 = torch.zeros((self.obj * 2))
+    #         for i in range(self.obj):
+    #             theta = (0.5 * np.pi) * torch.rand(1, ) + 0  # [0, 2pi]
+    #             momentum = (2 * torch.rand(1, ) - 1) * max_momentum  # [-1, 1]*max_momentum
+    #             x0[i] = theta
+    #             x0[i + self.obj] = momentum
+    #         x0_list.append(x0)
+    #     x0 = torch.stack(x0_list)
+    #     return x0.to(self.Device)

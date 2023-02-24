@@ -9,13 +9,13 @@ import torch
 from torch import nn, Tensor
 
 
-
 def weights_init_xavier_normal(m):
     classname = m.__class__.__name__
     if classname.find("Linear") != -1:  # find the linear layer class
         nn.init.xavier_normal_(m.weight)
         # if m.bias is not None:
         #     nn.init.constant_(m.bias, 0.0)
+
 
 def weights_init_orthogonal_normal(m):
     classname = m.__class__.__name__

@@ -10,7 +10,7 @@ import torch
 
 from .collate_batch import train_collate_fn, val_collate_fn, test_collate_fn
 from .datasets import get_dataset
-from .datasets._bases import DynamicsDataset
+from .datasets._dynamics_dataset import DynamicsDataset
 from .transforms import build_transforms
 from ..utils import timing
 

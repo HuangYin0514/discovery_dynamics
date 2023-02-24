@@ -37,8 +37,3 @@ class MLP(nn.Module):
         self.input_layer.apply(weights_init_xavier_normal)
         self.hidden_layer.apply(weights_init_xavier_normal)
         self.output_layer.apply(weights_init_xavier_normal)
-
-        # self.input_layer.apply(weights_init_orthogonal_normal)
-        # self.hidden_layer.apply(weights_init_orthogonal_normal)
-        # self.output_layer.apply(weights_init_orthogonal_normal)
-

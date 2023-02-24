@@ -31,20 +31,19 @@ class BaseBodyDataset(BaseDynamicsDataset):
         self.test = test_dataset
 
     def generate_random(self, num, t):
-        x0 = self.random_config(num)  # (bs, D)
-        X = self.ode_solve_traj(x0, t).reshape(-1, self.dof * 2).clone().detach()  # (bs x T, D)
-        dy = self(None, X).clone().detach()  # (bs, T, D)
-        E = self.energy_fn(X).reshape(num, len(t))
-        dataset = (x0, t, X, dy, E)
+        x0 = self.random_config(num)  # (D, )
+        X = self.generate(x0, t).clone().detach()  # (T, D)
+        y = torch.stack(list(map(lambda x: self(None, x), X))).clone().detach()  # (T, D)
+        E = torch.stack([self.energy_fn(y) for y in X])
 
+        dataset = []
         for i in range(num):
+            dataset.append((x0[i], t, self.dt, X[i], y[i], E[i]))
             plt.plot(E[i].cpu().detach().numpy())
         plt.show()
         return dataset
 
-    def ode_solve_traj(self, x0, t):
-        x0 = x0.to(self.Device)
-        t = t.to(self.Device)
+    def generate(self, x0, t):
         x = ODESolver(self, x0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
         return x
 

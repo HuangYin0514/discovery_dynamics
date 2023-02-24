@@ -10,7 +10,6 @@ import torch
 from torch import nn
 
 from ._base_body_dataset import BaseBodyDataset
-from ...integrator import ODESolver
 from ...utils import lazy_property, dfx
 
 
@@ -49,12 +48,12 @@ class Pendulum2(BaseBodyDataset, nn.Module):
         t0 = 0.
         t_end = 10.
         _time_step = int((t_end - t0) / self.dt)
-        self.t = torch.linspace(t0, t_end, _time_step, dtype=self.Dtype, device=self.Device)
+        self.t = torch.linspace(t0, t_end, _time_step)
 
         t_end = 30.
-        dt = 0.05
+        dt = 0.02
         _time_step = int((t_end - t0) / dt)
-        self.test_t = torch.linspace(t0, t_end, _time_step, dtype=self.Dtype, device=self.Device)
+        self.test_t = torch.linspace(t0, t_end, _time_step)
 
     @lazy_property
     def J(self):
@@ -142,26 +141,12 @@ class Pendulum2(BaseBodyDataset, nn.Module):
         x0_list = []
         for i in range(num):
             max_momentum = 1.
-            y0 = np.zeros(self.obj * 2)
+            x0 = torch.zeros((self.obj * 2))
             for i in range(self.obj):
-                theta = (2 * np.random.rand()) * np.pi
-                momentum = (2 * np.random.rand() - 1) * max_momentum
-                y0[i] = theta
-                y0[i + self.obj] = momentum
-            x0_list.append(y0)
-        x0 = np.stack(x0_list)
-        return torch.tensor(x0, dtype=self.Dtype, device=self.Device)
-
-
-    def ode_solve_traj(self, x0, t):
-        x0 = x0.to(self.Device)
-        t = t.to(self.Device)
-        # At small step sizes, the differential equations exhibit stiffness and the rk4 solver cannot solve
-        # the double pendulum task. Therefore, use dopri5 to generate training data.
-        if len(t) == len(self.test_t):
-            # test stages
-            x = ODESolver(self, x0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
-        else:
-            # train stages
-            x = ODESolver(self, x0, t, method='dopri5').permute(1, 0, 2)  # (T, D) dopri5 rk4
-        return x
+                theta = (2 * np.pi) * torch.rand(1, ) + 0  # [0, 2pi]
+                momentum = (2 * torch.rand(1, ) - 1) * max_momentum  # [-1, 1]*max_momentum
+                x0[i] = theta
+                x0[i + self.obj] = momentum
+            x0_list.append(x0)
+        x0 = torch.stack(x0_list)
+        return x0.to(self.Device)

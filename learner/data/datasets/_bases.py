@@ -8,10 +8,13 @@
 import abc
 
 import torch
-from torch.utils.data import Dataset
 
 
 class BaseDataset(abc.ABC):
+    """
+        Base class of dynamics dataset
+    """
+
     def __init__(self):
         super(BaseDataset, self).__init__()
 
@@ -61,12 +64,12 @@ class BaseDataset(abc.ABC):
             return torch.float64
 
     def get_dynamics_data_info(self, data):
-        x0, t, X, y, E = data
-        num_traj = x0.size(0)
+        num_traj = len(data)
+        x0, t, h, X, y, E = data[0]
         num_t = len(t)
         min_t = min(t)
         max_t = max(t)
-        num_states = x0.size(1)
+        num_states = len(x0)
         return num_traj, num_t, min_t, max_t, num_states
 
     @abc.abstractmethod
@@ -98,26 +101,3 @@ class BaseDynamicsDataset(BaseDataset):
                                                                            max_test_t,
                                                                            num_test_states))
         print("  ----------------------------------------------------")
-
-
-class DynamicsDataset(Dataset):
-    """learning dynamics Dataset"""
-
-    def __init__(self, dataset, transform=None):
-        self.dataset = dataset
-        self.transform = transform
-
-    def __len__(self):
-        x0, t, X, y, E = self.dataset
-        return len(X)
-
-    def __getitem__(self, index):
-        x0, t, X, y, E = self.dataset
-
-        X = X[index]
-        y = y[index]
-
-        if self.transform is not None:
-            X = self.transform(X)
-
-        return x0, t, X, y, E

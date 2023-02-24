@@ -53,8 +53,7 @@ class Body3(BaseBodyDataset, nn.Module):
 
         # t_end = 15.
         t_end = 30.
-        dt = 0.01
-        _time_step = int((t_end - t0) / dt)
+        _time_step = int((t_end - t0) / self.dt)
         self.test_t = torch.linspace(t0, t_end, _time_step)
 
         self.k = 1  # body equation parameter
