@@ -102,7 +102,7 @@ class AnalyzeBrain:
 
         # save results ----------------------------------------------------------------
         save_path = osp.join('./outputs/', self.taskname)
-        name = 'gt'
+        name = 'gt_'+self.data[0].__class__.__name__
         save_list = np.array([tensor.detach().cpu().numpy() for tensor in labels_list]).squeeze()
         np.save(save_path + '/result_' + name + '.npy', save_list)
         save_list = np.array([tensor.detach().cpu().numpy() for tensor in pred_list]).squeeze()
