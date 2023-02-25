@@ -88,7 +88,6 @@ class Brain:
                 labels = labels.to(self.device)
 
                 pred = self.net(t, X)
-                # loss = self.__criterion(pred[...,2:], labels[...,2:])
                 loss = self.__criterion(pred, labels)
 
                 # # reg
@@ -147,7 +146,7 @@ class Brain:
     def restore(self):
         if self.loss_history is not None and self.save is True:
             # best_loss_index = np.argmin(self.loss_history[:, -1]) # energy error min
-            best_loss_index = np.argmin(self.loss_history[:, 1])
+            best_loss_index = np.argmin(self.loss_history[:, 2])
 
             iteration = int(self.loss_history[best_loss_index, 0])
             loss_train = self.loss_history[best_loss_index, 1]
