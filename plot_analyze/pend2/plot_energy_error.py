@@ -10,23 +10,6 @@ import torch
 
 from fig_env_set import *
 
-
-def position_err_fn(x, y):
-    bs, times, states = x.shape
-    dof = int(states // 2)
-
-    err_list = []
-    for x_, y_ in zip(x, y):
-        x_position = x_[..., :dof]
-        y_position = y_[..., :dof]
-
-        rel_err = (x_position - y_position).norm(dim=1)
-
-        err_list.append(rel_err)
-
-    err = torch.stack(err_list)
-    return err
-
 def processData(error_fun, gt_data, baseline_data, HNN_data, HnnModScale_data):
     # error_fun=position_err_fn
     # format
