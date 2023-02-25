@@ -1,5 +1,6 @@
 import os.path as osp
 
+import numpy as np
 import torch
 from matplotlib import pyplot as plt
 
@@ -98,6 +99,15 @@ class AnalyzeBrain:
         pred_eng = pred_eng.detach().cpu().numpy()
         pred_kinetic_eng = pred_kinetic_eng.detach().cpu().numpy()
         pred_potential_eng = pred_potential_eng.detach().cpu().numpy()
+
+        # save results ----------------------------------------------------------------
+        save_path = osp.join('./outputs/', self.taskname)
+        name = 'gt'
+        save_list = np.array([tensor.detach().cpu().numpy() for tensor in labels_list]).squeeze()
+        np.save(save_path + '/result_' + name + '.npy', save_list)
+        save_list = np.array([tensor.detach().cpu().numpy() for tensor in pred_list]).squeeze()
+        name = self.net.__class__.__name__
+        np.save(save_path + '/result_' + name + '.npy', save_list)
 
         # plot results ----------------------------------------------------------------
         save_path = osp.join('./outputs/', self.taskname, 'fig-analyze.pdf')
