@@ -145,8 +145,7 @@ class Brain:
 
     def restore(self):
         if self.loss_history is not None and self.save is True:
-            # best_loss_index = np.argmin(self.loss_history[:, -1]) # energy error min
-            best_loss_index = np.argmin(self.loss_history[:, 2])
+            best_loss_index = np.argmin(self.loss_history[:, 1])
 
             iteration = int(self.loss_history[best_loss_index, 0])
             loss_train = self.loss_history[best_loss_index, 1]
