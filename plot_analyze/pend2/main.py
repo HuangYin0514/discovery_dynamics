@@ -6,13 +6,20 @@
 @desc:
 """
 import os
+import sys
 
 import numpy as np
 from matplotlib import pyplot as plt
 
-from plot_analyze.pend2.fig_env_set import result_dir
+from fig_env_set import result_dir
+from plot_position_error import plot_position_error
 from plot_trajectory import plot_pend_trajectory
+THIS_DIR = os.path.dirname(os.path.abspath(__file__))
+PARENT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append('.')
+sys.path.append(PARENT_DIR)
 
+import learner as ln
 
 def main(path='./data'):
     # read data --------------------------------
@@ -28,23 +35,30 @@ def main(path='./data'):
     # result_HnnModScale_pend2 +++
     data_path = path + '/result_HnnModScale_pend2.npy'
     HnnModScale_data = np.load(data_path)
+    # result_ModLaNet_pend2 +++
+    # data_path = path + '/result_HnnModScale_pend2.npy'
+    data_path = path + '/result_ModLaNet_pend2.npy'
+    ModLaNet_data = np.load(data_path)
 
     # plot trajectory --------------------------------
-    index = 1
+    index = 5
     gt_sample = gt_data[index]
     baseline_sample = baseline_data[index]
     HNN_sample = HNN_data[index]
     HnnModScale_sample = HnnModScale_data[index]
+    ModLaNet_sample = ModLaNet_data[index]
 
     true_q, _ = np.split(gt_sample, 2, axis=-1)
     baseline_q, _ = np.split(baseline_sample, 2, axis=-1)
     HNN_q, _ = np.split(HNN_sample, 2, axis=-1)
     HnnModScale_q, _ = np.split(HnnModScale_sample, 2, axis=-1)
+    ModLaNet_q, _ = np.split(ModLaNet_sample, 2, axis=-1)
 
-    plot_pend_trajectory(true_q, HnnModScale_q, baseline_q, HNN_q)
+    plot_pend_trajectory(true_q, HnnModScale_q, baseline_q, HNN_q,ModLaNet_q)
 
     # plot position error --------------------------------
-    plot_position_error(true_q, HnnModScale_q, baseline_q, HNN_q)
+    error_fun = ln.metrics.accuracy.position_err_fn
+    # plot_position_error(error_fun, gt_data, baseline_data, HNN_data, HnnModScale_data)
 
 
 

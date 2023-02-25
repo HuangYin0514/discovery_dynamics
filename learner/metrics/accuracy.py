@@ -24,7 +24,7 @@ def square_err_fn(x, y):
     return position_err
 
 
-def rel_err_fn(x, y):
+def position_err_fn(x, y):
     bs, times, states = x.shape
     dof = int(states // 2)
 
@@ -66,6 +66,6 @@ def accuracy_fn(output_traj, target_traj, energy_function):
          accuracy
      """
     mse_err = square_err_fn(output_traj, target_traj)
-    rel_err = rel_err_fn(output_traj, target_traj)
+    rel_err = position_err_fn(output_traj, target_traj)
     eng_err = energy_err_fn(output_traj, target_traj, energy_function)
     return mse_err, rel_err, eng_err
