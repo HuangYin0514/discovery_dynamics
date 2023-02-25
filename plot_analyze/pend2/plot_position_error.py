@@ -71,13 +71,11 @@ def plot_position_error(*args, **kwargs):
     ax.tick_params(axis="y", direction='in')  # , length=8)
     ax.tick_params(axis="x", direction='in')  # , length=8)
     ax.set_ylim(top=1e1)
-    # ax.set_xlim([-1, 32])
+    ax.set_xlim([-1, 32])
     # ax.set_yticks([0.01, 0.1, 1])
     ax.annotate('$t$', xy=(0.98, -0.025), ha='left', va='top', xycoords='axes fraction')
     ax.annotate('MSE', xy=(-0.07, 1.05), xytext=(-15, 2), ha='left', va='top', xycoords='axes fraction',
                 textcoords='offset points')
 
-    # ax.grid('on')
-    # fig.savefig('{}/pend-2-100traj-pos.png'.format(result_dir))
-    # ax.set_ylabel('MSE of position ($m$)')
-    # ax.set_xlabel('Time ($s$)')
+    fig.savefig('{}/pend2-pos-err.png'.format(result_dir))
+
