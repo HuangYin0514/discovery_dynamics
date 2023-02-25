@@ -5,16 +5,19 @@
 @time: 2023/2/25 7:12 PM
 @desc:
 """
-import numpy as np
-from matplotlib import pyplot as plt
+import torch
 
-from fig_env_set import *
 
 def processData(error_fun, gt_data, baseline_data, HNN_data, HnnModScale_data):
     print(gt_data.shape)
+
+    gt_data = torch.tensor(gt_data)
+    baseline_data = torch.tensor(baseline_data)
     baseline_error = error_fun(gt_data, baseline_data)
-    print(baseline_error.mean())
+
+    print(baseline_error.mean(0))
     pass
+
 
 def plot_position_error(*args, **kwargs):
     processData(*args, **kwargs)

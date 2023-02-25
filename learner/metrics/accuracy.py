@@ -28,13 +28,14 @@ def position_err_fn(x, y):
     bs, times, states = x.shape
     dof = int(states // 2)
 
-
     err_list = []
     for x_, y_ in zip(x, y):
         x_position = x_[..., :dof]
         y_position = y_[..., :dof]
 
-        rel_err = (x_position - y_position).norm() / (x_position.norm() + y_position.norm())
+        rel_err = (x_position - y_position).norm(dim=1) / (x_position.norm(dim=1) + y_position.norm(dim=1))
+        # rel_err = (x_position - y_position).norm() / (x_position.norm() + y_position.norm())
+
         err_list.append(rel_err)
 
     err = torch.stack(err_list)
@@ -48,7 +49,8 @@ def energy_err_fn(x, y, energy_function):
         eng_y = energy_function(y_)
         # eng_y = eng_y[0].repeat(len(eng_y)) # 与真实的eng对比
 
-        rel_err = (eng_x - eng_y).norm() / (eng_x.norm() + eng_y.norm())
+        # rel_err = (eng_x - eng_y).norm() / (eng_x.norm() + eng_y.norm())
+        rel_err = (eng_x - eng_y).norm(dim=1) / (eng_x.norm(dim=1) + eng_y.norm(dim=1))
         err_list.append(rel_err)
 
     E_err = torch.stack(err_list)

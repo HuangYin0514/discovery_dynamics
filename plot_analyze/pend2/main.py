@@ -54,11 +54,11 @@ def main(path='./data'):
     HnnModScale_q, _ = np.split(HnnModScale_sample, 2, axis=-1)
     ModLaNet_q, _ = np.split(ModLaNet_sample, 2, axis=-1)
 
-    plot_pend_trajectory(true_q, HnnModScale_q, baseline_q, HNN_q,ModLaNet_q)
+    # plot_pend_trajectory(true_q, HnnModScale_q, baseline_q, HNN_q,ModLaNet_q)
 
     # plot position error --------------------------------
     error_fun = ln.metrics.accuracy.position_err_fn
-    # plot_position_error(error_fun, gt_data, baseline_data, HNN_data, HnnModScale_data)
+    plot_position_error(error_fun, gt_data, baseline_data, HNN_data, HnnModScale_data)
 
 
 
