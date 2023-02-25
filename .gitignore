@@ -10,7 +10,6 @@
 .DS_Store
 
 # dir
-plot_analyze/
 outputs/
 training_file/
 *.ipynb_checkpoints/
