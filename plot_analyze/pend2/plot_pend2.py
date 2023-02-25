@@ -60,9 +60,6 @@ def main(path='./data'):
     error_fun = ln.metrics.accuracy.position_err_fn
     plot_position_error(error_fun, gt_data, baseline_data, HNN_data, HnnModScale_data)
 
-
-
-
     plt.show()
 
 
