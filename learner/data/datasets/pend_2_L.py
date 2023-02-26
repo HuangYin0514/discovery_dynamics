@@ -132,7 +132,7 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
         for i in range(num):
             max_momentum = 10.
             if num == self.test_num:
-                max_momentum = 1.
+                max_momentum = 10.
             y0 = np.zeros(self.obj * 2)
             for i in range(self.obj):
                 theta = (2 * np.random.rand()) * np.pi

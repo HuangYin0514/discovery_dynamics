@@ -28,7 +28,7 @@ def position_err_fn(x, y):
     return err
 
 def processData(error_fun, gt_data, baseline_data, HNN_data, HnnModScale_data):
-    error_fun=position_err_fn
+    # error_fun=position_err_fn
     # format
     gt_data = torch.from_numpy(gt_data)
     baseline_data = torch.from_numpy(baseline_data)

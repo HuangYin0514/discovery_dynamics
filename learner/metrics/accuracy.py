@@ -24,7 +24,7 @@ def square_err_fn(x, y):
     return position_err
 
 
-def position_err_fn(x, y):
+def position_norm_err_fn(x, y):
     bs, times, states = x.shape
     dof = int(states // 2)
 
@@ -42,7 +42,7 @@ def position_err_fn(x, y):
     return err
 
 
-def energy_err_fn(x, y, energy_function):
+def energy_norm_err_fn(x, y, energy_function):
     err_list = []
     for x_, y_ in zip(x, y):
         eng_x = energy_function(x_).reshape(-1,1)
