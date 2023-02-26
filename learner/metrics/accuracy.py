@@ -31,7 +31,7 @@ def penergy_MSE_err_fn(x, y, energy_function):
         eng_y = energy_function(y_).reshape(-1, 1)
         # eng_y = eng_y[0].repeat(len(eng_y)) # 与真实的eng对比
 
-        rel_err = (eng_x - eng_y).norm()
+        rel_err = (eng_x - eng_y).norm()/len(eng_x)
         err_list.append(rel_err)
 
     E_err = torch.stack(err_list)
