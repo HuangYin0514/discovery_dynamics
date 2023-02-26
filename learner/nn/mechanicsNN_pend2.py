@@ -55,14 +55,14 @@ class MechanicsNN_pend2(LossNN):
     Mechanics neural networks.
     """
 
-    def __init__(self, obj, dim, num_layers=1, hidden_dim=200):
+    def __init__(self, obj, dim):
         super(MechanicsNN_pend2, self).__init__()
 
         q_dim = int(obj * dim)
         p_dim = int(obj * dim)
 
-        self.mass_net = MassNet(q_dim=q_dim, num_layers=num_layers, hidden_dim=hidden_dim)
-        self.dynamics_net = DynamicsNet(q_dim=q_dim, p_dim=p_dim, num_layers=num_layers, hidden_dim=hidden_dim)
+        self.mass_net = MassNet(q_dim=q_dim, num_layers=1, hidden_dim=50)
+        self.dynamics_net = DynamicsNet(q_dim=q_dim, p_dim=p_dim, num_layers=1, hidden_dim=256)
 
     def tril_Minv(self, q):
         """
