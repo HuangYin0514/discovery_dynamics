@@ -142,15 +142,17 @@ class Pendulum2(BaseBodyDataset, nn.Module):
         x0_list = []
         for i in range(num):
             max_momentum = 10.
-            x0 = torch.zeros((self.obj * 2))
+            if num == self.test_num:
+                max_momentum = 10.
+            y0 = np.zeros(self.obj * 2)
             for i in range(self.obj):
-                theta = (2 * np.pi) * torch.rand(1, ) + 0  # [0, 2pi]
-                momentum = (2 * torch.rand(1, ) - 1) * max_momentum  # [-1, 1]*max_momentum
-                x0[i] = theta
-                x0[i + self.obj] = momentum
-            x0_list.append(x0)
-        x0 = torch.stack(x0_list)
-        return x0.to(self.Device)
+                theta = (2 * np.random.rand()) * np.pi
+                momentum = (2 * np.random.rand() - 1) * max_momentum
+                y0[i] = theta
+                y0[i + self.obj] = momentum
+            x0_list.append(y0)
+        x0 = np.stack(x0_list)
+        return torch.tensor(x0, dtype=self.Dtype, device=self.Device)
 
     def ode_solve_traj(self, x0, t):
         x0 = x0.to(self.Device)
