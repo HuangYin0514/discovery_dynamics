@@ -28,7 +28,7 @@ def position_err_fn(x, y):
     return err
 
 def processData(error_fun, gt_data, baseline_data, HNN_data, HnnModScale_data):
-    # error_fun=position_err_fn
+    error_fun=position_err_fn
     # format
     gt_data = torch.from_numpy(gt_data)
     baseline_data = torch.from_numpy(baseline_data)
@@ -70,7 +70,7 @@ def plot_position_error(*args, **kwargs):
     ax.set_yscale('log')
     ax.tick_params(axis="y", direction='in')  # , length=8)
     ax.tick_params(axis="x", direction='in')  # , length=8)
-    ax.set_ylim(top=1e1)
+    # ax.set_ylim(top=1e1)
     ax.set_xlim([-1, 32])
     # ax.set_yticks([0.01, 0.1, 1])
     ax.annotate('$t$', xy=(0.98, -0.025), ha='left', va='top', xycoords='axes fraction')
