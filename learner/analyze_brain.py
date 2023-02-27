@@ -50,7 +50,6 @@ class AnalyzeBrain:
             X, t = X.to(self.device), t.to(self.device)
             _labels = labels.to(self.device)
 
-            # pred ----------------------------------------------------------------
             _preds = self.net.integrate(X, t)  # (bs, T, states)
 
             pred_list.append(_preds)
