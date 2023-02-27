@@ -6,13 +6,13 @@
 @desc:
 """
 import torch
-from torch import nn, Tensor
+from torch import nn
 
 from ._base_module import LossNN
 from .mlp import MLP
-from .utils_nn import ReshapeNet, CosSinNet
 from ..integrator import ODESolver
 from ..utils import dfx
+
 
 #
 # class MassNet(nn.Module):
@@ -96,8 +96,6 @@ class HnnModScale_pend2(LossNN):
         self.global_dim = 2
         self.global_dof = int(obj * self.global_dim)
 
-
-
         self.global4x = GlobalPositionTransform(input_dim=self.dim,
                                                 hidden_dim=16,
                                                 output_dim=self.global_dim,
@@ -116,6 +114,7 @@ class HnnModScale_pend2(LossNN):
 
         self.mass = torch.nn.Linear(1, 1, bias=False)
         torch.nn.init.ones_(self.mass.weight)
+
     def M(self, x):
         N = self.obj
         M = torch.zeros((x.shape[0], N, N), dtype=self.Dtype, device=self.Device)
