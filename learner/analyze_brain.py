@@ -48,13 +48,13 @@ class AnalyzeBrain:
             inputs, labels = test_data
             X, t = inputs
             X, t = X.to(self.device), t.to(self.device)
-            labels = labels.to(self.device)
+            _labels = labels.to(self.device)
 
             # pred ----------------------------------------------------------------
-            preds = self.net.integrate(X, t)  # (bs, T, states)
+            _preds = self.net.integrate(X, t)  # (bs, T, states)
 
-            pred_list.append(preds)
-            labels_list.append(labels)
+            pred_list.append(_preds)
+            labels_list.append(_labels)
 
         # error ----------------------------------------------------------------
         preds = torch.cat(pred_list, dim=0)
