@@ -73,6 +73,7 @@ class HnnModScale_pend2(LossNN):
 
         T = 0.
         v = torch.matmul(self.Minv(q), p.unsqueeze(-1))
+
         T = 0.5 * torch.matmul(p.unsqueeze(1), v).squeeze(-1).squeeze(-1)
 
         # Calculate the Hamilton Derivative --------------------------------------------------------------
