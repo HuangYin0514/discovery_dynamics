@@ -2,24 +2,15 @@
 """
 @author: Yin Huang
 @contact: hy1071324110@gmail.com
-@time: 2023/2/12 9:56 AM
-@desc:
-"""
-from torch import nn
-
-from .mlp import MLP
-from .utils_nn import ReshapeNet
-
-# encoding: utf-8
-"""
-@author: Yin Huang
-@contact: hy1071324110@gmail.com
 @time: 2023/1/18 4:41 PM
 @desc:
 """
 import torch
+from torch import nn, Tensor
 
 from ._base_module import LossNN
+from .mlp import MLP
+from .utils_nn import ReshapeNet
 from ..integrator import ODESolver
 from ..utils import dfx
 
@@ -35,6 +26,7 @@ class GlobalPositionTransform(nn.Module):
                        act=act)
 
     def forward(self, x, x_0):
+        x = torch.cat(x, dim=1)
         y = self.mlp(x) + x_0
         return y
 
@@ -50,6 +42,7 @@ class MassNet(nn.Module):
         )
 
     def forward(self, x):
+        x = torch.cat(x, dim=1)
         out = self.net(x)
         return out
 
@@ -63,6 +56,7 @@ class PotentialEnergyCell(nn.Module):
                        act=act)
 
     def forward(self, x):
+        x = torch.cat(x, dim=1)
         y = self.mlp(x)
         return y
 
@@ -105,28 +99,45 @@ class HnnModScale_pend2(LossNN):
         self.mass = torch.nn.Linear(1, 1, bias=False)
         torch.nn.init.ones_(self.mass.weight)
 
-    def M(self, x):
-        N = self.obj
-        M = torch.zeros((x.shape[0], N, N), dtype=self.Dtype, device=self.Device)
-        for i in range(N):
-            for k in range(N):
-                m_sum = 0
-                j = i if i >= k else k
-                for tmp in range(j, N):
-                    m_sum += 1.0
-                M[:, i, k] = torch.cos(x[:, i] - x[:, k]) * m_sum
-        return M
+    def tril_Minv(self, q):
+        """
+        Computes the inverse of a matrix M^{-1}(q)
+        But only get the lower triangle of the inverse matrix  M^{-1}(q)
+        to get lower triangle of  M^{-1}(q)  = [x, 0]
+                                               [x, x]
+        """
+        mass_net_q = self.mass_net(q)
+        res = torch.triu(mass_net_q, diagonal=1)
+        res = res + torch.diag_embed(
+            torch.nn.functional.softplus(torch.diagonal(mass_net_q, dim1=-2, dim2=-1)),
+            dim1=-2,
+            dim2=-1,
+        )
+        res = res.transpose(-1, -2)  # Make lower triangular
+        return res
 
-    def Minv(self, x):
-        return torch.linalg.inv(self.M(x))
+    def Minv(self, q: Tensor, eps=1e-4) -> Tensor:
+        """Compute the learned inverse mass matrix M^{-1}(q)
+            M = LU
+            M^{-1} = (LU)^{-1} = U^{-1} @ L^{-1}
+            M^{-1}(q) = [x, 0] @ [x, x]
+                        [x, x]   [0, x]
+        Args:
+            q: bs x D Tensor representing the position
+        """
+        assert q.ndim == 2
+        lower_triangular = self.tril_Minv(q)
+        assert lower_triangular.ndim == 3
+        diag_noise = eps * torch.eye(lower_triangular.size(-1), dtype=q.dtype, device=q.device)
+        Minv = lower_triangular.matmul(lower_triangular.transpose(-2, -1)) + diag_noise
+        return Minv
 
     def forward(self, t, coords):
         __x, __p = torch.chunk(coords, 2, dim=-1)
         coords = torch.cat([__x % (2 * torch.pi), __p], dim=-1).clone().detach().requires_grad_(True)
 
-        coords = coords.clone().detach().requires_grad_(True)
         bs = coords.size(0)
-        q, p = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
+        x, p = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
 
         # position transformations ----------------------------------------------------------------
         x_global = torch.zeros((bs, self.global_dof), dtype=self.Dtype, device=self.Device)
@@ -136,7 +147,7 @@ class HnnModScale_pend2(LossNN):
                 x_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim] += x_global[:, (j) * self.global_dim:
                                                                                              (j + 1) * self.global_dim]
             x_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = self.global4x(
-                q[:, (i) * self.dim: (i + 1) * self.dim],
+                x[:, (i) * self.dim: (i + 1) * self.dim],
                 x_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim])
 
         # Calculate the potential energy for i-th element ------------------------------------------------------------
@@ -159,34 +170,27 @@ class HnnModScale_pend2(LossNN):
                         0.5 * self.mass(self.Potential2(x_ij)) + 0.5 * self.mass(self.Potential2(x_ji)))
 
         # Calculate the kinetic --------------------------------------------------------------
-        # T = self.dataset.kinetic(torch.cat([x, p], dim=-1).reshape(-1))
         T = 0.
-        v = torch.matmul(self.Minv(q), p.unsqueeze(-1))
-        T = 0.5 * torch.matmul(p.unsqueeze(1), v).squeeze(-1).squeeze(-1)
+        T = (0.5 * p.unsqueeze(1) @ self.Minv(x) @ p.unsqueeze(-1)).squeeze(-1)
 
         # Calculate the Hamilton Derivative --------------------------------------------------------------
         H = U + T
-        dqH = dfx(H.sum(), q)
+        dqH = dfx(H.sum(), x)
         dpH = dfx(H.sum(), p)
 
-        v_global = self.Minv(q).matmul(p.unsqueeze(-1)).squeeze(-1)
+        v_global = self.Minv(x).matmul(p.unsqueeze(-1)).squeeze(-1)
 
         # Calculate the Derivative ----------------------------------------------------------------
-        # dq_dt = torch.zeros((bs, self.dof), dtype=self.Dtype, device=self.Device)
-        # dp_dt = torch.zeros((bs, self.dof), dtype=self.Dtype, device=self.Device)
-        # for i in range(self.obj):
-        #     dq_dt[:, i * self.dim:(i + 1) * self.dim] = dpH[:, i * self.dim: (i + 1) * self.dim]
-        #     dp_dt[:, i * self.dim:(i + 1) * self.dim] = -dqH[:, i * self.dim:(i + 1) * self.dim]
-        # dz_dt = torch.cat([dq_dt, dp_dt], dim=-1)
-        dq_dt = torch.zeros((bs, self.dof), dtype=self.Dtype)
-        dp_dt = torch.zeros((bs, self.dof), dtype=self.Dtype)
-
-        dq_dt = dpH
-        dp_dt = -dqH
-
+        dq_dt = torch.zeros((bs, self.dof), dtype=self.Dtype, device=self.Device)
+        dp_dt = torch.zeros((bs, self.dof), dtype=self.Dtype, device=self.Device)
+        for i in range(self.obj):
+            # dq_dt[:, i * self.dim:(i + 1) * self.dim] = v_global[:, i * self.dim: (i + 1) * self.dim]
+            dq_dt[:, i * self.dim:(i + 1) * self.dim] = v_global[:, i * self.dim: (i + 1) * self.dim]
+            dp_dt[:, i * self.dim:(i + 1) * self.dim] = -dqH[:, i * self.dim:(i + 1) * self.dim]
         dz_dt = torch.cat([dq_dt, dp_dt], dim=-1)
+
         return dz_dt
 
     def integrate(self, X0, t):
-        out = ODESolver(self, X0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
+        out = ODESolver(self, X0, t, method='rk4').permute(1, 0, 2)  # (T, D)
         return out
