@@ -106,6 +106,10 @@ class HnnModScale_pend2(LossNN):
         Minv = self.Minv(q)
         # dq_dt = v = Minv @ p
         dq_dt = Minv.matmul(p.unsqueeze(-1)).squeeze(-1)
+
+
+
+
         # dp_dt = A(q, v)
         dp_dt = self.dynamics_net(q, p)
 
@@ -113,12 +117,7 @@ class HnnModScale_pend2(LossNN):
         return dz_dt
 
     def integrate(self, X0, t):
-        def angle_forward(t, coords):
-            q, p = torch.chunk(coords, 2, dim=-1)
-            new_q = q % (2 * torch.pi)
-            new_coords = torch.cat([new_q, p], dim=-1).clone().detach().requires_grad_(True)
-            return self(t, new_coords)
 
-        coords = ODESolver(angle_forward, X0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
+        coords = ODESolver(self, X0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
 
         return coords
