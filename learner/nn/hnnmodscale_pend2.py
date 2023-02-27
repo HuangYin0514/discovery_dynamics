@@ -160,7 +160,6 @@ class HnnModScale_pend2(LossNN):
 
         # Calculate the kinetic --------------------------------------------------------------
         # T = self.dataset.kinetic(torch.cat([x, p], dim=-1).reshape(-1))
-
         T = 0.
         v = torch.matmul(self.Minv(q), p.unsqueeze(-1))
         T = 0.5 * torch.matmul(p.unsqueeze(1), v).squeeze(-1).squeeze(-1)
