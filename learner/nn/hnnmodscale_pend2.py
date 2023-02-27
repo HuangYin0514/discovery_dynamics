@@ -21,11 +21,26 @@ class GlobalPositionTransform(nn.Module):
     def __init__(self, input_dim, hidden_dim, output_dim, num_layers=1, act=nn.Tanh):
         super(GlobalPositionTransform, self).__init__()
 
-        self.mlp = MLP(input_dim=input_dim, hidden_dim=hidden_dim, output_dim=output_dim,
+        hidden_bock = nn.Sequential(
+            nn.Linear(input_dim, input_dim * 6),
+            nn.Tanh()
+        )
+        self.hidden_layer = nn.ModuleList([hidden_bock for _ in range(6)])
+
+        self.mlp = MLP(input_dim=input_dim * 6 * 6 + 2 * input_dim, hidden_dim=hidden_dim, output_dim=output_dim,
                        num_layers=num_layers,
                        act=act)
 
     def forward(self, x, x_0):
+        input_list = []
+        scale_list = [1 / 8 * x, 1 / 4 * x, 1 / 2 * x, x, 2 * x, 4 * x, 8 * x]
+        for idx in range(len(self.hidden_layer)):
+            input = scale_list[idx]
+            output = self.hidden_layer[idx](input)
+            input_list.append(output)
+        input_list.append(torch.sin(x))
+        input_list.append(torch.cos(x))
+        x = torch.cat(input_list, dim=1)
         y = self.mlp(x) + x_0
         return y
 
@@ -33,14 +48,28 @@ class GlobalPositionTransform(nn.Module):
 class MassNet(nn.Module):
     def __init__(self, input_dim, hidden_dim=30, num_layers=3, act=nn.Tanh):
         super(MassNet, self).__init__()
+        hidden_bock = nn.Sequential(
+            nn.Linear(input_dim, input_dim * 6),
+            nn.Tanh()
+        )
+        self.hidden_layer = nn.ModuleList([hidden_bock for _ in range(6)])
 
         self.net = nn.Sequential(
-            MLP(input_dim=input_dim, hidden_dim=hidden_dim, output_dim=input_dim * input_dim,
+            MLP(input_dim=input_dim * 6 * 6 + 2 * input_dim, hidden_dim=hidden_dim, output_dim=input_dim * input_dim,
                 num_layers=num_layers, act=act),
             ReshapeNet(-1, input_dim, input_dim)
         )
 
     def forward(self, x):
+        input_list = []
+        scale_list = [1 / 8 * x, 1 / 4 * x, 1 / 2 * x, x, 2 * x, 4 * x, 8 * x]
+        for idx in range(len(self.hidden_layer)):
+            input = scale_list[idx]
+            output = self.hidden_layer[idx](input)
+            input_list.append(output)
+        input_list.append(torch.sin(x))
+        input_list.append(torch.cos(x))
+        x = torch.cat(input_list, dim=1)
         out = self.net(x)
         return out
 
@@ -49,11 +78,26 @@ class PotentialEnergyCell(nn.Module):
     def __init__(self, input_dim, hidden_dim, output_dim, num_layers=1, act=nn.Tanh):
         super(PotentialEnergyCell, self).__init__()
 
-        self.mlp = MLP(input_dim=input_dim, hidden_dim=hidden_dim, output_dim=output_dim,
+        hidden_bock = nn.Sequential(
+            nn.Linear(input_dim, input_dim * 6),
+            nn.Tanh()
+        )
+        self.hidden_layer = nn.ModuleList([hidden_bock for _ in range(6)])
+
+        self.mlp = MLP(input_dim=input_dim * 6 * 6 + 2 * input_dim, hidden_dim=hidden_dim, output_dim=output_dim,
                        num_layers=num_layers,
                        act=act)
 
     def forward(self, x):
+        input_list = []
+        scale_list = [1 / 8 * x, 1 / 4 * x, 1 / 2 * x, x, 2 * x, 4 * x, 8 * x]
+        for idx in range(len(self.hidden_layer)):
+            input = scale_list[idx]
+            output = self.hidden_layer[idx](input)
+            input_list.append(output)
+        input_list.append(torch.sin(x))
+        input_list.append(torch.cos(x))
+        x = torch.cat(input_list, dim=1)
         y = self.mlp(x)
         return y
 
