@@ -26,7 +26,6 @@ class GlobalPositionTransform(nn.Module):
                        act=act)
 
     def forward(self, x, x_0):
-        x = torch.cat(x, dim=1)
         y = self.mlp(x) + x_0
         return y
 
@@ -42,7 +41,6 @@ class MassNet(nn.Module):
         )
 
     def forward(self, x):
-        x = torch.cat(x, dim=1)
         out = self.net(x)
         return out
 
@@ -56,7 +54,6 @@ class PotentialEnergyCell(nn.Module):
                        act=act)
 
     def forward(self, x):
-        x = torch.cat(x, dim=1)
         y = self.mlp(x)
         return y
 
