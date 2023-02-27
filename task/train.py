@@ -23,7 +23,7 @@ parser.add_argument('--dim', default=1, type=int, help='coordinate dimension')
 # data
 parser.add_argument('--data_name', default='Pendulum2', type=str,
                     help='choose dataset '
-                         '[Pendulum2 Pendulum2_L '
+                         '[Pendulum2 Pendulum2_L Pendulum2_H'
                          'Body3 Body3_L '
                          ']'
                     )

@@ -62,10 +62,7 @@ class Pendulum2_H(BaseBodyDataset, nn.Module):
 
         coords = coords.clone().detach().requires_grad_(True)
         bs = coords.size(0)
-        x, v = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
-
-        q = x
-        p = torch.matmul(self.M(x), v.unsqueeze(-1))
+        q, p = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
 
         # Calculate the potential energy for i-th element ------------------------------------------------------------
         U = self.potential(torch.cat([x, v], dim=-1))
@@ -144,7 +141,13 @@ class Pendulum2_H(BaseBodyDataset, nn.Module):
                 y0[i + self.obj] = momentum
             x0_list.append(y0)
         x0 = np.stack(x0_list)
-        return torch.tensor(x0, dtype=self.Dtype, device=self.Device)
+        x0 = torch.tensor(x0, dtype=self.Dtype, device=self.Device)
+
+        # to hamilton coordinates
+        x, v = x0.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
+        q = x
+        p = torch.matmul(self.M(x), v.unsqueeze(-1)).squeeze(-1)
+        return torch.cat([q, p], dim=-1)
 
     def ode_solve_traj(self, x0, t):
         x0 = x0.to(self.Device)
