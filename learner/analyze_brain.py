@@ -51,15 +51,16 @@ class AnalyzeBrain:
             labels = labels.to(self.device)
 
             # pred ----------------------------------------------------------------
-            pred = self.net.integrate(X, t)  # (bs, T, states)
+            preds = self.net.integrate(X, t)  # (bs, T, states)
 
-            pred_list.append(pred)
+            pred_list.append(preds)
             labels_list.append(labels)
 
         # error ----------------------------------------------------------------
-        pred = torch.cat(pred_list, dim=0)
+        preds = torch.cat(pred_list, dim=0)
         labels = torch.cat(labels_list, dim=0)
-        err = accuracy_fn(pred, labels, self.energy_fn)
+
+        err = accuracy_fn(preds, labels, self.energy_fn)
         pos_err, eng_err = err
         result = ('net: {}'.format(self.net.__class__.__name__)
                   + '\n'
@@ -71,7 +72,7 @@ class AnalyzeBrain:
         # solutions forms ----------------------------------------------------------------
         check_index = 1
         ground_true = labels[check_index]
-        net_pred = pred[check_index]
+        net_pred = preds[check_index]
         true_q, true_p = ground_true.chunk(2, dim=-1)  # (T, states)
         pred_q, pred_p = net_pred.chunk(2, dim=-1)  # (T, states)
 
@@ -100,10 +101,10 @@ class AnalyzeBrain:
 
         # save results ----------------------------------------------------------------
         save_path = osp.join('./outputs/', self.taskname)
-        name = 'gt_'+self.data[0].__class__.__name__
-        save_list = np.array([tensor.detach().cpu().numpy() for tensor in labels_list]).squeeze()
+        name = 'gt_' + self.data[0].__class__.__name__
+        save_list = preds.detach().cpu().numpy()
         np.save(save_path + '/result_' + name + '.npy', save_list)
-        save_list = np.array([tensor.detach().cpu().numpy() for tensor in pred_list]).squeeze()
+        save_list = labels.detach().cpu().numpy()
         name = self.net.__class__.__name__
         np.save(save_path + '/result_' + name + '.npy', save_list)
 
