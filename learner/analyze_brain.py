@@ -102,9 +102,9 @@ class AnalyzeBrain:
         # save results ----------------------------------------------------------------
         save_path = osp.join('./outputs/', self.taskname)
         name = 'gt_' + self.data[0].__class__.__name__
-        save_list = preds.detach().cpu().numpy()
-        np.save(save_path + '/result_' + name + '.npy', save_list)
         save_list = labels.detach().cpu().numpy()
+        np.save(save_path + '/result_' + name + '.npy', save_list)
+        save_list = preds.detach().cpu().numpy()
         name = self.net.__class__.__name__
         np.save(save_path + '/result_' + name + '.npy', save_list)
 
