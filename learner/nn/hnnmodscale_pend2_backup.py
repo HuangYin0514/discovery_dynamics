@@ -51,12 +51,6 @@ class PotentialEnergyCell(nn.Module):
     def __init__(self, input_dim, hidden_dim, output_dim, num_layers=1, act=nn.Tanh):
         super(PotentialEnergyCell, self).__init__()
 
-        hidden_bock = nn.Sequential(
-            nn.Linear(input_dim, input_dim * 6),
-            nn.Tanh()
-        )
-        self.hidden_layer = nn.ModuleList([hidden_bock for _ in range(6)])
-
         self.mlp = MLP(input_dim=input_dim, hidden_dim=hidden_dim, output_dim=output_dim,
                        num_layers=num_layers,
                        act=act)
