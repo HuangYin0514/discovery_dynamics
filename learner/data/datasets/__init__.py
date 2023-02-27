@@ -14,11 +14,13 @@ from learner.utils import download_file_from_google_drive
 from .body3 import Body3
 from .body3_L import Body3_L
 from .pend_2 import Pendulum2
+from .pend_2_H import Pendulum2_H
 from .pend_2_L import Pendulum2_L
 
 __dataset_factory = {
     'Pendulum2': Pendulum2,
     'Pendulum2_L': Pendulum2_L,
+    'Pendulum2_H': Pendulum2_H,
     'Body3': Body3,
     'Body3_L': Body3_L,
 }
