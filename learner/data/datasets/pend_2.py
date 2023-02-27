@@ -107,13 +107,7 @@ class Pendulum2(BaseBodyDataset, nn.Module):
         return M
 
     def Minv(self, x):
-        tmp_list = []
-        M = self.M(x)
-        for _M in M:
-            inv_M = torch.linalg.inv(_M)
-            tmp_list.append(inv_M)
-        return torch.stack(tmp_list, dim=0)
-        # return torch.linalg.inv(self.M(x))
+        return torch.linalg.inv(self.M(x))
 
     def kinetic(self, coords):
         """Kinetic energy"""
