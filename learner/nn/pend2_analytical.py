@@ -51,17 +51,7 @@ class Pend2_analytical(LossNN):
         return M
 
     def Minv(self, x):
-        M = self.M(x)
-        # 假设 input_tensor 的值已经被设置好了
-        batch_size = M.shape[0]
-
-        # 创建一个空的结果张量
-        M_inv = torch.empty_like(M)
-
-        # 对每个矩阵进行求逆
-        for i in range(batch_size):
-            M_inv[i] = torch.linalg.inv(M[i])
-        return M_inv
+        return torch.linalg.inv(self.M(x))
 
     def forward(self, t, coords):
         __x, __p = torch.chunk(coords, 2, dim=-1)
