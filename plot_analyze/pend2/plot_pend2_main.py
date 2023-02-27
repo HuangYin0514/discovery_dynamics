@@ -7,7 +7,6 @@
 """
 import os
 import sys
-from functools import partial
 
 import numpy as np
 from matplotlib import pyplot as plt
@@ -45,7 +44,7 @@ def main(path='./data'):
     ModLaNet_data = np.load(data_path)
 
     # plot trajectory --------------------------------
-    index = 5
+    index = 3
     gt_sample = gt_data[index]
     baseline_sample = baseline_data[index]
     HNN_sample = HNN_data[index]
@@ -58,17 +57,17 @@ def main(path='./data'):
     HnnModScale_q, _ = np.split(HnnModScale_sample, 2, axis=-1)
     ModLaNet_q, _ = np.split(ModLaNet_sample, 2, axis=-1)
 
-    # plot_pend_trajectory(true_q, HnnModScale_q, baseline_q, HNN_q,ModLaNet_q)
+    plot_pend_trajectory(true_q, HnnModScale_q, baseline_q, HNN_q,ModLaNet_q)
 
     # plot position error --------------------------------
-    error_fun = ln.metrics.accuracy.position_err_fn
-    plot_position_error(error_fun, gt_data, baseline_data, HNN_data, HnnModScale_data)
+    error_fun = ln.metrics.accuracy.position_MSE_err_fn
+    # plot_position_error(error_fun, gt_data, baseline_data, HNN_data, HnnModScale_data)
 
     # plot position error --------------------------------
-    error_fun_H = ln.metrics.accuracy.energy_err_fn
+    error_fun_H = ln.metrics.accuracy.energy_MSE_err_fn
     energy_function = ln.data.datasets.Pendulum2(train_num=1, test_num=1, obj=2, dim=1).energy_fn
 
-    plot_energy_error(error_fun_H, energy_function,gt_data, baseline_data, HNN_data, HnnModScale_data)
+    # plot_energy_error(error_fun_H, energy_function, gt_data, baseline_data, HNN_data, HnnModScale_data)
 
     plt.show()
 

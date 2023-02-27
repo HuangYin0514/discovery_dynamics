@@ -24,7 +24,7 @@ def position_MSE_err_fn(x, y):
     return position_err
 
 
-def penergy_MSE_err_fn(x, y, energy_function):
+def energy_MSE_err_fn(x, y, energy_function):
     err_list = []
     for x_, y_ in zip(x, y):
         eng_x = energy_function(x_).reshape(-1, 1)
@@ -82,7 +82,7 @@ def accuracy_fn(output_traj, target_traj, energy_function):
          accuracy
      """
     pos_err = position_MSE_err_fn(output_traj, target_traj)
-    eng_err = penergy_MSE_err_fn(output_traj, target_traj, energy_function)
+    eng_err = energy_MSE_err_fn(output_traj, target_traj, energy_function)
     # pos_err = position_BE_err_fn(output_traj, target_traj)
     # eng_err = energy_BE_err_fn(output_traj, target_traj, energy_function)
     return pos_err, eng_err

@@ -45,10 +45,9 @@ def get_dataset(data_name, taskname, obj, dim, device, dtype, download_data=Fals
         print('Start downloading dataset.')
         os.makedirs(data_path) if not os.path.exists(data_path) else None
         download_file_from_google_drive(dataset.dataset_url, filename)
-
-    if os.path.exists(filename):
-        print('Start loading dataset from {} .'.format(filename))
-        dataset = np.load(filename, allow_pickle=True).item()
+        if os.path.exists(filename):
+            print('Start loading dataset from {} .'.format(filename))
+            dataset = np.load(filename, allow_pickle=True).item()
     else:
         print('Start generating dataset.')
         dataset.Init_data()
