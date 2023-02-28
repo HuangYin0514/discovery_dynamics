@@ -3,6 +3,7 @@ import os.path as osp
 import numpy as np
 import torch
 from matplotlib import pyplot as plt
+from tqdm import tqdm
 
 from .analyze import plot_energy, plot_compare_energy, plot_compare_state, plot_field, plot_trajectory
 from .metrics import accuracy_fn
@@ -44,7 +45,9 @@ class AnalyzeBrain:
 
         pred_list = []
         labels_list = []
-        for test_data in self.test_loader:
+
+        pbar = tqdm(self.test_loader, desc='Processing')
+        for test_data in pbar:
             inputs, labels = test_data
             X, t = inputs
             X, t = X.to(self.device), t.to(self.device)
