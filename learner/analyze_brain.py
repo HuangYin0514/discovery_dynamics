@@ -50,8 +50,9 @@ class AnalyzeBrain:
         for _ in pbar:
             x0 = self.data.random_config(self.batch_size)  # (D, )
             _labels = self.data.ode_solve_traj(x0, self.data.test_t).clone().detach()  # (T, D)
+            _preds = self.data.ode_solve_traj(x0, self.data.test_t).clone().detach()  # (T, D)
 
-            _preds = self.net.integrate(x0, self.data.test_t)  # (bs, T, states)
+            # _preds = self.net.integrate(x0, self.data.test_t)  # (bs, T, states)
 
             pred_list.append(_preds)
             labels_list.append(_labels)
