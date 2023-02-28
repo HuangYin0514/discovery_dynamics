@@ -5,12 +5,11 @@
 @time: 2023/1/4 11:14 PM
 @desc:
 """
-
 from .pend_2 import Pendulum2
 
 __dataset_factory = {
     'Pendulum2': Pendulum2,
-    # 'Pendulum2_L': Pendulum2_L,
+    'Pendulum2_L': Pendulum2,
     # 'Body3': Body3,
     # 'Body3_L': Body3_L,
 }

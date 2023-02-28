@@ -29,7 +29,7 @@ parser.add_argument('--obj', default=2, type=int, help='number of objects')
 parser.add_argument('--dim', default=1, type=int, help='coordinate dimension')
 
 # data
-parser.add_argument('--data_name', default='Pendulum2', type=str, help='choose dataset')
+parser.add_argument('--data_name', default='Pendulum2_L', type=str, help='choose dataset')
 parser.add_argument('--train_num', default=0, type=int, help='the number of train sampling trajectories')
 parser.add_argument('--test_num', default=0, type=int, help='the number of test sampling trajectories')
 parser.add_argument('--download_data', default='False', type=str, help='Download dataset from Internet')

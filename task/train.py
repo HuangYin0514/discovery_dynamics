@@ -21,7 +21,7 @@ parser.add_argument('--obj', default=2, type=int, help='number of objects')
 parser.add_argument('--dim', default=1, type=int, help='coordinate dimension')
 
 # data
-parser.add_argument('--data_name', default='Pendulum2', type=str,
+parser.add_argument('--data_name', default='Pendulum2_L', type=str,
                     help='choose dataset '
                          '[Pendulum2 Pendulum2_L '
                          'Body3 Body3_L '
@@ -75,6 +75,8 @@ def run():
     arguments = {
         'taskname': args.taskname,
         'data_name': args.data_name,
+        'obj': args.obj,
+        'dim': args.dim,
         'dataset_path': './outputs/data/dataset_'+args.data_name,
         'download_data': args.download_data,
         'num_workers': args.num_workers,
