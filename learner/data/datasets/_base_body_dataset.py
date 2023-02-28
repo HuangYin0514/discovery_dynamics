@@ -31,10 +31,10 @@ class BaseBodyDataset(BaseDynamicsDataset):
         self.test = test_dataset
 
     def generate_random(self, num, t):
-        x0 = self.random_config(num)  # (D, )
+        x0 = self.random_config(num).clone().detach()  # (D, )
         X = self.ode_solve_traj(x0, t).clone().detach()  # (T, D)
         y = torch.stack(list(map(lambda x: self(None, x), X))).clone().detach()  # (T, D)
-        E = torch.stack([self.energy_fn(y) for y in X])
+        E = torch.stack([self.energy_fn(y) for y in X]).clone().detach()
 
         dataset = []
         for i in range(num):
