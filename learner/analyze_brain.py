@@ -48,7 +48,7 @@ class AnalyzeBrain:
         labels_list = []
         pbar = tqdm(range(0, self.data.test_num, self.batch_size), desc='Processing')
         for _ in pbar:
-            x0 = self.data.random_config(self.batch_size)  # (D, )
+            x0 = self.data.random_config(self.batch_size).clone().detach()  # (D, )
             t = self.data.test_t.to(x0.device)
             _labels = self.data.ode_solve_traj(x0, t).clone().detach()  # (T, D)
 
