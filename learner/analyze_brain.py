@@ -3,6 +3,7 @@ import os.path as osp
 import numpy as np
 import torch
 from matplotlib import pyplot as plt
+from tqdm import tqdm
 
 from .analyze import plot_energy, plot_compare_energy, plot_compare_state, plot_field, plot_trajectory
 from .metrics import accuracy_fn
@@ -22,12 +23,13 @@ class AnalyzeBrain:
     def Run(cls):
         cls.analyze_brain.run()
 
-    def __init__(self, taskname, data, net, dtype, device):
+    def __init__(self, taskname, data, net, dtype, device,batch_size):
         self.taskname = taskname
         self.data = data
         self.net = net
         self.dtype = dtype
         self.device = device
+        self.batch_size = batch_size
 
         self.loss_history = None
         self.encounter_nan = False
@@ -44,13 +46,12 @@ class AnalyzeBrain:
 
         pred_list = []
         labels_list = []
-        for test_data in self.test_loader:
-            inputs, labels = test_data
-            X, t = inputs
-            X, t = X.to(self.device), t.to(self.device)
-            _labels = labels.to(self.device)
+        pbar = tqdm(range(0, self.data.test_num, self.batch_size), desc='Processing')
+        for _ in pbar:
+            x0 = self.data.random_config(self.batch_size)  # (D, )
+            _labels = self.data.ode_solve_traj(x0, self.data.test_t).clone().detach()  # (T, D)
 
-            _preds = self.net.integrate(X, t)  # (bs, T, states)
+            _preds = self.net.integrate(x0, self.data.test_t)  # (bs, T, states)
 
             pred_list.append(_preds)
             labels_list.append(_labels)
@@ -82,7 +83,7 @@ class AnalyzeBrain:
         pred_kinetic_eng = self.kinetic_fn(net_pred)
         pred_potential_eng = self.potential_fn(net_pred)
 
-        t = t.detach().cpu().numpy()
+        t = self.data.test_t.detach().cpu().numpy()
 
         ground_true = ground_true.detach().cpu().numpy()
         true_q = true_q.detach().cpu().numpy()
@@ -100,7 +101,7 @@ class AnalyzeBrain:
 
         # save results ----------------------------------------------------------------
         save_path = osp.join('./outputs/', self.taskname)
-        name = 'gt_' + self.data[0].__class__.__name__
+        name = 'gt_' + self.data_name
         save_list = labels.detach().cpu().numpy()
         np.save(save_path + '/result_' + name + '.npy', save_list)
         save_list = preds.detach().cpu().numpy()
@@ -132,11 +133,9 @@ class AnalyzeBrain:
         self.__init_net()
 
     def __init_data(self):
-        dataset, _, _, test_loader = self.data
+        dataset = self.data
 
         self.data_name = dataset.__class__.__name__
-        # dataloader
-        self.test_loader = test_loader
 
         # energy function
         self.energy_fn = dataset.energy_fn

@@ -9,7 +9,7 @@ import torch
 
 
 def train_collate_fn(batch):
-    x0, t,  X, y, E = zip(*batch)
+    x0, t, X, y, E = zip(*batch)
 
     X = torch.stack(X, dim=0).float()
     t = torch.stack(t, dim=0).float()
@@ -28,7 +28,7 @@ def train_collate_fn(batch):
 
 
 def val_collate_fn(batch):
-    x0, t,  X, y, E = zip(*batch)
+    x0, t, X, y, E = zip(*batch)
 
     X = torch.stack(X, dim=0).float()
     t = torch.stack(t, dim=0).float()
@@ -47,7 +47,7 @@ def val_collate_fn(batch):
 
 
 def test_collate_fn(batch):
-    x0, t,  X, y, E = zip(*batch)
+    x0, t, X, y, E = zip(*batch)
 
     X = torch.stack(X, dim=0).float()
 
