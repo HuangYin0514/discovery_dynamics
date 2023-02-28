@@ -30,11 +30,11 @@ class BaseBodyDataset(BaseDynamicsDataset):
             E = self.energy_fn(X[0]).clone().detach()
 
             dataset = {
-                'x0': x0.numpy(),
-                't': t.numpy(),
-                'X': X[0].numpy(),
-                'dX': y.numpy(),
-                'E': E.numpy()
+                'x0': x0.cpu().numpy(),
+                't': t.cpu().numpy(),
+                'X': X[0].cpu().numpy(),
+                'dX': y.cpu().numpy(),
+                'E': E.cpu().numpy()
             }
 
             num_states = X.shape[-1]
