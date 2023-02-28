@@ -52,7 +52,7 @@ class Pendulum2(BaseBodyDataset, nn.Module):
         self.t = torch.linspace(t0, t_end, _time_step, dtype=self.Dtype)
 
         t_end = 30.
-        test_dt = 0.1
+        test_dt = 0.01
         _time_step = int((t_end - t0) / test_dt)
         self.test_t = torch.linspace(t0, t_end, _time_step, dtype=self.Dtype)
 
