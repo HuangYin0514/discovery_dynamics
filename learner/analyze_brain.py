@@ -23,7 +23,7 @@ class AnalyzeBrain:
     def Run(cls):
         cls.analyze_brain.run()
 
-    def __init__(self, taskname, data, net, dtype, device,batch_size):
+    def __init__(self, taskname, data, net, dtype, device, batch_size):
         self.taskname = taskname
         self.data = data
         self.net = net
@@ -49,10 +49,10 @@ class AnalyzeBrain:
         pbar = tqdm(range(0, self.data.test_num, self.batch_size), desc='Processing')
         for _ in pbar:
             x0 = self.data.random_config(self.batch_size)  # (D, )
-            t=  self.data.test_t.to(x0.device)
-            _labels = self.data.ode_solve_traj(x0, self.data.test_t).clone().detach()  # (T, D)
+            t = self.data.test_t.to(x0.device)
+            _labels = self.data.ode_solve_traj(x0, t).clone().detach()  # (T, D)
 
-            _preds = self.net.integrate(x0, self.data.test_t)  # (bs, T, states)
+            _preds = self.net.integrate(x0, t)  # (bs, T, states)
 
             pred_list.append(_preds)
             labels_list.append(_labels)
