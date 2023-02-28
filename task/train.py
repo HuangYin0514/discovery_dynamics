@@ -75,10 +75,7 @@ def run():
     arguments = {
         'taskname': args.taskname,
         'data_name': args.data_name,
-        'obj': args.obj,
-        'dim': args.dim,
-        'train_num': args.train_num,
-        'test_num': args.test_num,
+        'dataset_path': './outputs/data/dataset_'+args.data_name,
         'download_data': args.download_data,
         'num_workers': args.num_workers,
         'dtype': args.dtype,

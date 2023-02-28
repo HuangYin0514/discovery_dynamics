@@ -9,10 +9,12 @@ import numpy as np
 import torch
 from torch import nn
 
+from gendata.dataset._base_body_dataset import BaseBodyDataset
+from learner.integrator import ODESolver
 from learner.utils import dfx
 
 
-class Pendulum2_L( nn.Module):
+class Pendulum2_L( BaseBodyDataset,nn.Module):
     """
     Pendulum with 2 bodies
     Reference:
@@ -24,11 +26,9 @@ class Pendulum2_L( nn.Module):
     # dim: 1
     """
 
-    def __init__(self, train_num, test_num, obj, dim, m=None, l=None, **kwargs):
+    def __init__(self, obj, dim, m=None, l=None, **kwargs):
         super(Pendulum2_L, self).__init__()
 
-        self.train_num = train_num
-        self.test_num = test_num
         self.dataset_url = ''
 
         self.__init_dynamic_variable(obj, dim)
@@ -98,7 +98,7 @@ class Pendulum2_L( nn.Module):
 
     def kinetic(self, coords):
         """Kinetic energy"""
-        s, num_states = coords.shape
+        bs, num_states = coords.shape
         assert num_states == self.dof * 2
         x, v = torch.chunk(coords, 2, dim=1)
 
@@ -129,8 +129,6 @@ class Pendulum2_L( nn.Module):
         x0_list = []
         for i in range(num):
             max_momentum = 10.
-            if num == self.test_num:
-                max_momentum = 10.
             y0 = np.zeros(self.obj * 2)
             for i in range(self.obj):
                 theta = (2 * np.random.rand()) * np.pi
@@ -148,7 +146,7 @@ class Pendulum2_L( nn.Module):
         # the double pendulum task. Therefore, use dopri5 to generate training data.
         if len(t) == len(self.test_t):
             # test stages
-            x = ODESolver(self, x0, t, method='dopri5').permute(1, 0, 2)  # (T, D) dopri5 rk4
+            x = ODESolver(self, x0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
         else:
             # train stages
             x = ODESolver(self, x0, t, method='dopri5').permute(1, 0, 2)  # (T, D) dopri5 rk4

@@ -6,17 +6,17 @@ from .datasets import get_dataset
 from .datasets._bases import DynamicsDataset
 from .transforms import build_transforms
 from ..utils import timing
-from .gen_data import gen_dataset
+
 
 @timing
-def get_dataloader(data_name, num_workers=0, **kwargs):
+def get_dataloader(data_name, dataset_path, num_workers=0, **kwargs):
     num_workers = num_workers
 
     '''transforms'''
     train_transforms = build_transforms(is_train=True, **kwargs)
     val_transforms = build_transforms(is_train=False, **kwargs)
 
-    dataset = get_dataset(data_name, **kwargs)
+    dataset = get_dataset(data_name, root=dataset_path)
 
     '''dataset'''
     train_set = DynamicsDataset(dataset.train, train_transforms)

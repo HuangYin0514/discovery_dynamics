@@ -5,6 +5,7 @@ import torch
 from matplotlib import pyplot as plt
 from tqdm import tqdm
 
+import gendata
 from .analyze import plot_energy, plot_compare_energy, plot_compare_state, plot_field, plot_trajectory
 from .metrics import accuracy_fn
 from .utils import timing
@@ -23,8 +24,10 @@ class AnalyzeBrain:
     def Run(cls):
         cls.analyze_brain.run()
 
-    def __init__(self, taskname, data, net, dtype, device):
+    def __init__(self, taskname,obj,dim, data, net, dtype, device):
         self.taskname = taskname
+        self.obj=obj
+        self.dim = dim
         self.data = data
         self.net = net
         self.dtype = dtype
@@ -143,9 +146,10 @@ class AnalyzeBrain:
         self.test_loader = test_loader
 
         # energy function
-        self.energy_fn = dataset.energy_fn
-        self.kinetic_fn = dataset.kinetic
-        self.potential_fn = dataset.potential
+        dataclass = getattr(gendata.dataset, self.data_name)(self.obj,self.dim)
+        self.energy_fn = dataclass.energy_fn
+        self.kinetic_fn = dataclass.kinetic
+        self.potential_fn = dataclass.potential
 
     def __init_net(self):
         self.net.device = self.device

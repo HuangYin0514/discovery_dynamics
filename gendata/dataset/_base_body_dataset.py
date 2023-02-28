@@ -25,19 +25,23 @@ class BaseBodyDataset(BaseDynamicsDataset):
     def generate_random(self, num, t, path):
         for i in range(num):
             x0 = self.random_config(1).clone().detach()  # (D, )
-            X = self.ode_solve_traj(x0, t)[0].clone().detach()  # (T, D)
-            y = self(None, X).clone().detach()  # (T, D)
-            E = self.energy_fn(X).clone().detach()
+            X = self.ode_solve_traj(x0, t).clone().detach()  # (T, D)
+            y = self(None, X[0]).clone().detach()  # (T, D)
+            E = self.energy_fn(X[0]).clone().detach()
 
             dataset = {
                 'x0': x0.numpy(),
                 't': t.numpy(),
-                'X': X.numpy(),
+                'X': X[0].numpy(),
                 'dX': y.numpy(),
                 'E': E.numpy()
             }
 
-            filename = osp.join(path, 'dataset_{}'.format(i))
+            num_states = X.shape[-1]
+            min_t = min(t)
+            max_t = max(t)
+            len_t = len(t)
+            filename = osp.join(path, 'dataset_{}_{}_{}_{}_{}'.format(num_states, min_t,max_t,len_t,i))
             np.save(filename, dataset)
 
             plt.plot(E.cpu().detach().numpy())
