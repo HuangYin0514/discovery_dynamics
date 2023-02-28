@@ -43,7 +43,7 @@ class BaseBodyDataset(BaseDynamicsDataset):
             #     'E': E.cpu().numpy()
             # }
             dataset = {
-                'x0': x0[i].cpu().numpy(),
+                'x0': x0[i,None].cpu().numpy(),
                 't': t.cpu().numpy(),
                 'X': X[i].cpu().numpy(),
                 'dX': y[i].cpu().numpy(),
