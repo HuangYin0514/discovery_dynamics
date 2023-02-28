@@ -30,7 +30,10 @@ def choose_dataset(dataset_name, obj, dim, train_num, test_num, **kwargs):
     dataset = __dataset_factory[dataset_name](train_num, test_num, obj, dim)
     return dataset
 
-def get_dataset(data_name, taskname, obj, dim, device, dtype, download_data=False, **kwargs):
+
+def get_dataset(data_name, taskname, obj, dim, device, dtype,
+                download_data=False, generate_data=False, **kwargs):
+
     print('Start get dataset.')
     dataset = choose_dataset(data_name, obj, dim, **kwargs)
     dataset.device = device
