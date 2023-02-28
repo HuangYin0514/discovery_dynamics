@@ -13,6 +13,7 @@ from gendata.dataset.body3 import Body3
 from gendata.dataset.body3_L import Body3_L
 from gendata.dataset.pend_2 import Pendulum2
 from gendata.dataset.pend_2_L import Pendulum2_L
+from learner.utils import timing
 
 __dataset_factory = {
     'Pendulum2': Pendulum2,
@@ -28,7 +29,7 @@ def choose_dataset(dataset_name, obj, dim, **kwargs):
     dataset = __dataset_factory[dataset_name](obj, dim)
     return dataset
 
-
+@timing
 def gen_dataset(data_name, taskname, obj, dim, train_num, val_num,test_num,
                 device, dtype,
                 download_data=False, generate_data=False,

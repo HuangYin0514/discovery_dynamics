@@ -9,6 +9,7 @@ import abc
 import os.path as osp
 
 import numpy as np
+import torch
 from matplotlib import pyplot as plt
 
 from learner.data.datasets._bases import BaseDynamicsDataset
@@ -19,22 +20,34 @@ class BaseBodyDataset(BaseDynamicsDataset):
     def __init__(self):
         super(BaseBodyDataset, self).__init__()
 
-    def gen_data(self,train_num, t, path):
-        self.generate_random(train_num, t, path)
+    def gen_data(self,sample_num, t, path):
+        self.generate_random(sample_num, t, path)
 
     def generate_random(self, num, t, path):
-        for i in range(num):
-            x0 = self.random_config(1).clone().detach()  # (D, )
-            X = self.ode_solve_traj(x0, t).clone().detach()  # (T, D)
-            y = self(None, X[0]).clone().detach()  # (T, D)
-            E = self.energy_fn(X[0]).clone().detach()
+        x0 = self.random_config(num)  # (D, )
+        X = self.ode_solve_traj(x0, t).clone().detach()  # (T, D)
+        y = torch.stack(list(map(lambda x: self(None, x), X))).clone().detach()  # (T, D)
+        E = torch.stack([self.energy_fn(y) for y in X])
 
+        for i in range(num):
+            # x0 = self.random_config(1).clone().detach()  # (D, )
+            # X = self.ode_solve_traj(x0, t).clone().detach()  # (T, D)
+            # y = self(None, X[0]).clone().detach()  # (T, D)
+            # E = self.energy_fn(X[0]).clone().detach()
+
+            # dataset = {
+            #     'x0': x0.cpu().numpy(),
+            #     't': t.cpu().numpy(),
+            #     'X': X[0].cpu().numpy(),
+            #     'dX': y.cpu().numpy(),
+            #     'E': E.cpu().numpy()
+            # }
             dataset = {
-                'x0': x0.cpu().numpy(),
+                'x0': x0[i].cpu().numpy(),
                 't': t.cpu().numpy(),
-                'X': X[0].cpu().numpy(),
-                'dX': y.cpu().numpy(),
-                'E': E.cpu().numpy()
+                'X': X[i].cpu().numpy(),
+                'dX': y[i].cpu().numpy(),
+                'E': E[i].cpu().numpy()
             }
 
             num_states = X.shape[-1]
