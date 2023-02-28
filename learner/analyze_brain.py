@@ -54,6 +54,9 @@ class AnalyzeBrain:
 
             _preds = self.net.integrate(x0, self.data.test_t)  # (bs, T, states)
 
+            print(x0.device)
+            print(self.data.test_t.device)
+
             pred_list.append(_preds)
             labels_list.append(_labels)
 
