@@ -50,11 +50,11 @@ class AnalyzeBrain:
         for test_data in pbar:
             inputs, labels = test_data
             X, t = inputs
-            X, t = X.to(self.device), t.to(self.device)
-            labels = labels.to(self.device)
+            X, t = X.to(self.device).clone().detach(), t.to(self.device).clone().detach()
+            labels = labels.to(self.device).clone().detach()
 
             # pred ----------------------------------------------------------------
-            preds = self.net.integrate(X, t)  # (bs, T, states)
+            preds = self.net.integrate(X, t).clone().detach()  # (bs, T, states)
 
             pred_list.append(preds)
             labels_list.append(labels)
