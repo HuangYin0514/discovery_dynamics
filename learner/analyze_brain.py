@@ -49,13 +49,10 @@ class AnalyzeBrain:
         pbar = tqdm(range(0, self.data.test_num, self.batch_size), desc='Processing')
         for _ in pbar:
             x0 = self.data.random_config(self.batch_size)  # (D, )
+            t=  self.data.test_t.to(x0.device)
             _labels = self.data.ode_solve_traj(x0, self.data.test_t).clone().detach()  # (T, D)
-            # _preds = self.data.ode_solve_traj(x0, self.data.test_t).clone().detach()  # (T, D)
 
             _preds = self.net.integrate(x0, self.data.test_t)  # (bs, T, states)
-
-            print(x0.device)
-            print(self.data.test_t.device)
 
             pred_list.append(_preds)
             labels_list.append(_labels)
