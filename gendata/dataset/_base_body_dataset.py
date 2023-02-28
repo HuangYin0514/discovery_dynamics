@@ -57,7 +57,7 @@ class BaseBodyDataset(BaseDynamicsDataset):
             filename = osp.join(path, 'dataset_{}_{}_{}_{}_{}'.format(num_states, min_t,max_t,len_t,i))
             np.save(filename, dataset)
 
-            plt.plot(E.cpu().detach().numpy())
+            plt.plot(E[i].cpu().detach().numpy())
         plt.show()
 
     @abc.abstractmethod
