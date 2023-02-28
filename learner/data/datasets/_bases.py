@@ -65,12 +65,14 @@ class BaseDataset(abc.ABC):
             return torch.float64
 
     def get_dynamics_data_info(self, data):
-        num_traj = len(data)
-        x0, t, X, y, E = data[0]
+        x0 = data['x0']
+        t = data['t']
+
         num_t = len(t)
         min_t = min(t)
         max_t = max(t)
-        num_states = len(x0)
+        num_traj = x0.shape[0]
+        num_states = x0.shape[1]
         return num_traj, num_t, min_t, max_t, num_states
 
     @abc.abstractmethod

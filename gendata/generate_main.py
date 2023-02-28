@@ -4,9 +4,11 @@ import sys
 
 import torch
 
+from gendata.generate_brain import gen_dataset
+
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 PARENT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append('.')
+sys.path.append('../task')
 sys.path.append(PARENT_DIR)
 
 import learner as ln
@@ -28,33 +30,10 @@ parser.add_argument('--data_name', default='Pendulum2', type=str,
                          ']'
                     )
 parser.add_argument('--train_num', default=3, type=int, help='the number of train sampling trajectories')
+parser.add_argument('--val_num', default=1, type=int, help='the number of val sampling trajectories')
 parser.add_argument('--test_num', default=2, type=int, help='the number of test sampling trajectories')
 parser.add_argument('--download_data', default='False', type=str, help='Download dataset from Internet')
 parser.add_argument('--num_workers', default=0, type=int, help='how many subprocesses to use for data loading. ')
-
-# net
-parser.add_argument('--net_name', default='HnnModScale_pend2', type=str,
-                    help='Select model to train '
-                         '[Baseline_pend2 Baseline_body3'
-                         'HNN_pend2 HNN_body3'
-                         'LNN_pend2 LNN_body3'
-                         'MechanicsNN_pend2 MechanicsNN_body3'
-                         'ModLaNet_pend2 ModLaNet_body3'
-                         'HnnMod_pend2 HnnMod_body3'
-                         'HnnModScale_pend2 HnnModScale_body3'
-                         'Pend2_analytical body3_analytical'
-                         ']'
-                    )
-parser.add_argument('--net_url', default='', type=str, help='Download net from Internet')
-parser.add_argument('--load_net_path', default='', type=str, help='The path to load the pretrained network')
-
-# For training settings
-parser.add_argument('--lr', default=0.9, type=float, help='learning rate')
-parser.add_argument('--criterion', default='L2_loss', type=str, help='Select criterion to learn')
-parser.add_argument('--optimizer', default='adam', type=str, help='Select optimizer to learn')
-parser.add_argument('--scheduler', default='LambdaLR', type=str, help='Select scheduler to learn')
-parser.add_argument('--iterations', default=20, type=int, help='end of training epoch')
-parser.add_argument('--print_every', default=10, type=int, help='number of gradient steps between prints')
 
 # For other settings
 parser.add_argument('--dtype', default='float', type=str, help='Types of data and models')
@@ -78,15 +57,14 @@ def run():
         'obj': args.obj,
         'dim': args.dim,
         'train_num': args.train_num,
+        'val_num': args.val_num,
         'test_num': args.test_num,
         'download_data': args.download_data,
         'num_workers': args.num_workers,
         'dtype': args.dtype,
         'device': device
     }
-    data = ln.data.get_dataloader(**arguments)
-
-
+    gen_dataset(**arguments)
 
 def main():
     run()

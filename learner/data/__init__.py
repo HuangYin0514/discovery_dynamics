@@ -6,7 +6,7 @@ from .datasets import get_dataset
 from .datasets._bases import DynamicsDataset
 from .transforms import build_transforms
 from ..utils import timing
-
+from .gen_data import gen_dataset
 
 @timing
 def get_dataloader(data_name, num_workers=0, **kwargs):

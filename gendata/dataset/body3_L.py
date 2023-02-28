@@ -9,25 +9,13 @@ import numpy as np
 import torch
 from torch import nn
 
-from ._base_body_dataset import BaseBodyDataset
-from ...integrator import ODESolver
-from ...utils import dfx
+from learner.utils import dfx
 
 
-class Pendulum2_L(BaseBodyDataset, nn.Module):
-    """
-    Pendulum with 2 bodies
-    Reference:
-    # ref: Simplifying Hamiltonian and Lagrangian Neural Networks via Explicit Constraints
-    # URL: https://proceedings.neurips.cc/paper/2020/file/9f655cc8884fda7ad6d8a6fb15cc001e-Paper.pdf
-    Dataset statistics:
-    # type: hamilton
-    # obj: 2
-    # dim: 1
-    """
+class Body3_L( nn.Module):
 
     def __init__(self, train_num, test_num, obj, dim, m=None, l=None, **kwargs):
-        super(Pendulum2_L, self).__init__()
+        super(Body3_L, self).__init__()
 
         self.train_num = train_num
         self.test_num = test_num
@@ -44,22 +32,20 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
         self.dim = dim
         self.dof = self.obj * self.dim  # degree of freedom
 
-        self.dt = 0.1
+        self.dt = 0.05
 
         t0 = 0.
         t_end = 10.
         _time_step = int((t_end - t0) / self.dt)
         self.t = torch.linspace(t0, t_end, _time_step)
 
-        t_end = 30.
-        dt = 0.05
-        _time_step = int((t_end - t0) / dt)
+        t_end = 15.
+        _time_step = int((t_end - t0) / self.dt)
         self.test_t = torch.linspace(t0, t_end, _time_step)
 
-    def forward(self, t, coords):
-        __x, __p = torch.chunk(coords, 2, dim=-1)
-        coords = torch.cat([__x % (2 * torch.pi), __p], dim=-1).clone().detach().requires_grad_(True)
+        self.k = 1  # body equation parameter
 
+    def forward(self, t, coords):
         coords = coords.clone().detach().requires_grad_(True)
         bs = coords.size(0)
         x, v = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
@@ -80,19 +66,13 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
 
         for i in range(self.dof):
             dvidvL = dfx(dvL[:, i].sum(), v)
-            if dvidvL is None:
-                break
-            else:
-                dvdvL[:, i, :] += dvidvL
+            dvdvL[:, i, :] += dvidvL
 
         for i in range(self.dof):
             dxidvL = dfx(dvL[:, i].sum(), x)
-            if dxidvL is None:
-                break
-            else:
-                dxdvL[:, i, :] += dxidvL
+            dxdvL[:, i, :] += dxidvL
 
-        dvdvL_inv = torch.linalg.inv(dvdvL)
+        dvdvL_inv = torch.linalg.pinv(dvdvL)
 
         a = dvdvL_inv @ (dxL.unsqueeze(2) - dxdvL @ v.unsqueeze(2))  # (bs, a_dim, 1)
         a = a.squeeze(2)
@@ -105,21 +85,22 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
         x, v = torch.chunk(coords, 2, dim=1)
 
         T = 0.
-        vx, vy = 0., 0.
-        for i in range(self.dof):
-            vx = vx + self.l[i] * v[:, i] * torch.cos(x[:, i])
-            vy = vy + self.l[i] * v[:, i] * torch.sin(x[:, i])
-            T = T + 0.5 * self.m[i] * (torch.pow(vx, 2) + torch.pow(vy, 2))
+        for i in range(self.obj):
+            T = T + 0.5 * self.m[i] * torch.sum(v[:, 2 * i: 2 * i + 2] ** 2, dim=1)
         return T
 
     def potential(self, coords):
-        bs, num_states = coords.shape
+        s, num_states = coords.shape
         assert num_states == self.dof * 2
+        x, v = torch.chunk(coords, 2, dim=1)
+
+        k = self.k
         U = 0.
-        y = 0.
         for i in range(self.obj):
-            y = y - self.l[i] * torch.cos(coords[:, i])
-            U = U + self.m[i] * self.g * y
+            for j in range(i):
+                U = U - k * self.m[i] * self.m[j] / (
+                        (x[:, 2 * i] - x[:, 2 * j]) ** 2 +
+                        (x[:, 2 * i + 1] - x[:, 2 * j + 1]) ** 2) ** 0.5
         return U
 
     def energy_fn(self, coords):
@@ -127,31 +108,49 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
         eng = self.kinetic(coords) + self.potential(coords)
         return eng
 
+    @staticmethod
+    def rotate2d(p, theta):
+        c, s = np.cos(theta), np.sin(theta)
+        R = np.array([[c, -s], [s, c]])
+        return (R @ p.reshape(2, 1)).squeeze()
+
     def random_config(self, num):
+        # for n objects evenly distributed around the circle,
+        # which means angle(obj_i, obj_{i+1}) = 2*pi/n
+        # we made the requirement there that m is the same
+        # for every obejct to simplify the formula.
+        # But it can be improved.
+        nu = 0.5
+        min_radius = 1
+        max_radius = 5
+        system = 'hnn'
+
         x0_list = []
         for i in range(num):
-            max_momentum = 10.
-            if num == self.test_num:
-                max_momentum = 10.
-            y0 = np.zeros(self.obj * 2)
-            for i in range(self.obj):
-                theta = (2 * np.random.rand()) * np.pi
-                momentum = (2 * np.random.rand() - 1) * max_momentum
-                y0[i] = theta
-                y0[i + self.obj] = momentum
-            x0_list.append(y0)
-        x0 = np.stack(x0_list)
-        return torch.tensor(x0, dtype=self.Dtype, device=self.Device)
+            state = np.zeros(self.dof * 2)
 
-    def ode_solve_traj(self, x0, t):
-        x0 = x0.to(self.Device)
-        t = t.to(self.Device)
-        # At small step sizes, the differential equations exhibit stiffness and the rk4 solver cannot solve
-        # the double pendulum task. Therefore, use dopri5 to generate training data.
-        if len(t) == len(self.test_t):
-            # test stages
-            x = ODESolver(self, x0, t, method='dopri5').permute(1, 0, 2)  # (T, D) dopri5 rk4
-        else:
-            # train stages
-            x = ODESolver(self, x0, t, method='dopri5').permute(1, 0, 2)  # (T, D) dopri5 rk4
-        return x
+            p0 = 2 * np.random.rand(2) - 1
+            r = np.random.rand() * (max_radius - min_radius) + min_radius
+
+            theta = 2 * np.pi / self.obj
+            p0 *= r / np.sqrt(np.sum((p0 ** 2)))
+            for i in range(self.obj):
+                state[2 * i: 2 * i + 2] = self.rotate2d(p0, theta=i * theta)
+
+            # # velocity that yields a circular orbit
+            dirction = p0 / np.sqrt((p0 * p0).sum())
+            v0 = self.rotate2d(dirction, theta=np.pi / 2)
+            k = self.k / (2 * r)
+            for i in range(self.obj):
+                v = v0 * np.sqrt(
+                    k * sum(
+                        [self.m[j % self.obj] / np.sin((j - i) * theta / 2) for j in range(i + 1, self.obj + i)]))
+                # make the circular orbits slightly chaotic
+                if system == 'hnn':
+                    v *= (1 + nu * (2 * np.random.rand(2) - 1))
+                else:
+                    v *= self.m[i] * (1 + nu * (2 * np.random.rand(2) - 1))
+                state[self.dof + 2 * i: self.dof + 2 * i + 2] = self.rotate2d(v, theta=i * theta)
+            x0_list.append(torch.tensor(state).float())
+        x0 = torch.stack(x0_list)
+        return x0

@@ -9,8 +9,8 @@ import numpy as np
 import torch
 from torch import nn
 
-from ._base_body_dataset import BaseBodyDataset
-from ...utils import dfx
+from gendata.dataset._base_body_dataset import BaseBodyDataset
+from learner.utils import dfx
 
 
 class Body3(BaseBodyDataset, nn.Module):
