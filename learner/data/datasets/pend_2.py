@@ -31,7 +31,7 @@ class Pendulum2(BaseBodyDataset, nn.Module):
 
         self.train_num = train_num
         self.test_num = test_num
-        self.dataset_url = ''
+        self.dataset_url = 'https://drive.google.com/file/d/1gFpZaOsaL8-ooXs6Cn-yfisT8U6S12Qk/view?usp=share_link'
 
         self.__init_dynamic_variable(obj, dim)
 
@@ -49,12 +49,12 @@ class Pendulum2(BaseBodyDataset, nn.Module):
         t0 = 0.
         t_end = 10.
         _time_step = int((t_end - t0) / self.dt)
-        self.t = torch.linspace(t0, t_end, _time_step, dtype=self.Dtype)
+        self.t = torch.linspace(t0, t_end, _time_step)
 
         t_end = 30.
-        test_dt = 0.01
-        _time_step = int((t_end - t0) / test_dt)
-        self.test_t = torch.linspace(t0, t_end, _time_step, dtype=self.Dtype)
+        dt = 0.01
+        _time_step = int((t_end - t0) / dt)
+        self.test_t = torch.linspace(t0, t_end, _time_step)
 
     @lazy_property
     def J(self):

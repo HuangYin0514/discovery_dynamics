@@ -30,27 +30,25 @@ def choose_dataset(dataset_name, obj, dim, train_num, test_num, **kwargs):
     dataset = __dataset_factory[dataset_name](train_num, test_num, obj, dim)
     return dataset
 
-
-def get_dataset(data_name, taskname, obj, dim, device, dtype, download_data=False, test_flag=False, **kwargs):
+def get_dataset(data_name, taskname, obj, dim, device, dtype, download_data=False, **kwargs):
     print('Start get dataset.')
     dataset = choose_dataset(data_name, obj, dim, **kwargs)
     dataset.device = device
     dataset.dtype = dtype
 
-    if test_flag:
-        return dataset
-
-    # example: ./outputs/dataset_Pendulum2.npy
     data_path = osp.join('./outputs/', taskname)
+
+    # example: dataset_Pendulum2.npy
     filename = osp.join(data_path, 'dataset_{}.npy'.format(data_name))
 
     if download_data == 'True':
         print('Start downloading dataset.')
         os.makedirs(data_path) if not os.path.exists(data_path) else None
         download_file_from_google_drive(dataset.dataset_url, filename)
-        if os.path.exists(filename):
-            print('Start loading dataset from {} .'.format(filename))
-            dataset = np.load(filename, allow_pickle=True).item()
+
+    if os.path.exists(filename):
+        print('Start loading dataset from {} .'.format(filename))
+        dataset = np.load(filename, allow_pickle=True).item()
     else:
         print('Start generating dataset.')
         dataset.Init_data()
