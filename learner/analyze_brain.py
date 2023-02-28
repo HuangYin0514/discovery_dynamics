@@ -147,6 +147,8 @@ class AnalyzeBrain:
 
         # energy function
         dataclass = getattr(gendata.dataset, self.data_name)(self.obj,self.dim)
+        dataclass.device = self.device
+        dataclass.dtype = self.dtype
         self.energy_fn = dataclass.energy_fn
         self.kinetic_fn = dataclass.kinetic
         self.potential_fn = dataclass.potential
