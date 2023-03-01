@@ -36,7 +36,7 @@ parser.add_argument('--download_data', default='False', type=str, help='Download
 parser.add_argument('--num_workers', default=0, type=int, help='how many subprocesses to use for data loading. ')
 
 # net
-parser.add_argument('--net_name', default='Pend2_analytical', type=str, help='Select model to train')
+parser.add_argument('--net_name', default='Baseline_pend2', type=str, help='Select model to train')
 parser.add_argument('--net_url', default='', type=str, help='Download net from Internet')
 
 # For other settings
@@ -71,7 +71,10 @@ def main():
     arguments = {
         'taskname': args.taskname,
         'data_name': args.data_name,
-        'dataset_path': './outputs/data/dataset_' + args.data_name,
+        'obj': args.obj,
+        'dim': args.dim,
+        'train_num': args.train_num,
+        'test_num': args.test_num,
         'download_data': args.download_data,
         'num_workers': args.num_workers,
         'dtype': args.dtype,
@@ -84,9 +87,7 @@ def main():
         'data': data,
         'dtype': args.dtype,
         'device': device,
-        'net': net,
-        'obj': args.obj,
-        'dim': args.dim
+        'net': net
     }
     ln.AnalyzeBrain.Init(**arguments)
     ln.AnalyzeBrain.Run()

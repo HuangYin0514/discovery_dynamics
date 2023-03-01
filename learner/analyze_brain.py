@@ -3,9 +3,7 @@ import os.path as osp
 import numpy as np
 import torch
 from matplotlib import pyplot as plt
-from tqdm import tqdm
 
-import gendata
 from .analyze import plot_energy, plot_compare_energy, plot_compare_state, plot_field, plot_trajectory
 from .metrics import accuracy_fn
 from .utils import timing
@@ -24,10 +22,8 @@ class AnalyzeBrain:
     def Run(cls):
         cls.analyze_brain.run()
 
-    def __init__(self, taskname,obj,dim, data, net, dtype, device):
+    def __init__(self, taskname, data, net, dtype, device):
         self.taskname = taskname
-        self.obj=obj
-        self.dim = dim
         self.data = data
         self.net = net
         self.dtype = dtype
@@ -48,37 +44,36 @@ class AnalyzeBrain:
 
         pred_list = []
         labels_list = []
-
-        pbar = tqdm(self.test_loader, desc='Processing')
-        for test_data in pbar:
+        for test_data in self.test_loader:
             inputs, labels = test_data
             X, t = inputs
             X, t = X.to(self.device), t.to(self.device)
             labels = labels.to(self.device)
 
             # pred ----------------------------------------------------------------
-            preds = self.net.integrate(X, t).clone().detach()  # (bs, T, states)
+            pred = self.net.integrate(X, t)  # (bs, T, states)
 
-            pred_list.append(preds)
+            pred_list.append(pred)
             labels_list.append(labels)
 
         # error ----------------------------------------------------------------
-        preds = torch.cat(pred_list, dim=0)
+        pred = torch.cat(pred_list, dim=0)
         labels = torch.cat(labels_list, dim=0)
-
-        err = accuracy_fn(preds, labels, self.energy_fn)
-        pos_err, eng_err = err
+        err = accuracy_fn(pred, labels, self.energy_fn)
+        mse_err, rel_err, eng_err = err
         result = ('net: {}'.format(self.net.__class__.__name__)
                   + '\n'
-                  + 'pos_err: {:.3e} +/- {:.3e}'.format(pos_err.mean(), pos_err.std())
+                  + 'mse_err: {:.3e} +/- {:.3e}'.format(mse_err.mean(), mse_err.std())
+                  + '\n'
+                  + 'rel_err: {:.3e} +/- {:.3e}'.format(rel_err.mean(), rel_err.std())
                   + '\n'
                   + 'eng_err: {:.3e} +/- {:.3e}'.format(eng_err.mean(), eng_err.std()))
         print(result)
 
         # solutions forms ----------------------------------------------------------------
-        check_index = 0
+        check_index = 1
         ground_true = labels[check_index]
-        net_pred = preds[check_index]
+        net_pred = pred[check_index]
         true_q, true_p = ground_true.chunk(2, dim=-1)  # (T, states)
         pred_q, pred_p = net_pred.chunk(2, dim=-1)  # (T, states)
 
@@ -107,10 +102,10 @@ class AnalyzeBrain:
 
         # save results ----------------------------------------------------------------
         save_path = osp.join('./outputs/', self.taskname)
-        name = 'gt_' + self.data[0].__class__.__name__
-        save_list = preds.detach().cpu().numpy()
+        name = 'gt_'+self.data[0].__class__.__name__
+        save_list = np.array([tensor.detach().cpu().numpy() for tensor in labels_list]).squeeze()
         np.save(save_path + '/result_' + name + '.npy', save_list)
-        save_list = labels.detach().cpu().numpy()
+        save_list = np.array([tensor.detach().cpu().numpy() for tensor in pred_list]).squeeze()
         name = self.net.__class__.__name__
         np.save(save_path + '/result_' + name + '.npy', save_list)
 
@@ -146,12 +141,9 @@ class AnalyzeBrain:
         self.test_loader = test_loader
 
         # energy function
-        dataclass = getattr(gendata.dataset, self.data_name)(self.obj,self.dim)
-        dataclass.device = self.device
-        dataclass.dtype = self.dtype
-        self.energy_fn = dataclass.energy_fn
-        self.kinetic_fn = dataclass.kinetic
-        self.potential_fn = dataclass.potential
+        self.energy_fn = dataset.energy_fn
+        self.kinetic_fn = dataset.kinetic
+        self.potential_fn = dataset.potential
 
     def __init_net(self):
         self.net.device = self.device

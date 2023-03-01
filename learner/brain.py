@@ -261,7 +261,7 @@ class Brain:
         self.train_loader = train_loader
         self.val_loader = val_loader
         # energy function
-        # self.energy_fn = dataset.energy_fn
+        self.energy_fn = dataset.energy_fn
 
     def __init_net(self):
         self.net.device = self.device

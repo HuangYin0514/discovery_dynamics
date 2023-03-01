@@ -8,7 +8,7 @@
 import torch
 
 
-def position_MSE_err_fn(x, y):
+def square_err_fn(x, y):
     bs, times, states = x.shape
     dof = int(states // 2)
 
@@ -24,21 +24,7 @@ def position_MSE_err_fn(x, y):
     return position_err
 
 
-def penergy_MSE_err_fn(x, y, energy_function):
-    err_list = []
-    for x_, y_ in zip(x, y):
-        eng_x = energy_function(x_).reshape(-1, 1)
-        eng_y = energy_function(y_).reshape(-1, 1)
-        # eng_y = eng_y[0].repeat(len(eng_y)) # 与真实的eng对比
-
-        rel_err = (eng_x - eng_y).norm()/len(eng_x)
-        err_list.append(rel_err)
-
-    E_err = torch.stack(err_list)
-    return E_err
-
-
-def position_BE_err_fn(x, y):
+def position_err_fn(x, y):
     bs, times, states = x.shape
     dof = int(states // 2)
 
@@ -56,11 +42,11 @@ def position_BE_err_fn(x, y):
     return err
 
 
-def energy_BE_err_fn(x, y, energy_function):
+def energy_err_fn(x, y, energy_function):
     err_list = []
     for x_, y_ in zip(x, y):
-        eng_x = energy_function(x_).reshape(-1, 1)
-        eng_y = energy_function(y_).reshape(-1, 1)
+        eng_x = energy_function(x_).reshape(-1,1)
+        eng_y = energy_function(y_).reshape(-1,1)
         # eng_y = eng_y[0].repeat(len(eng_y)) # 与真实的eng对比
 
         # rel_err = (eng_x - eng_y).norm() / (eng_x.norm() + eng_y.norm())
@@ -81,8 +67,7 @@ def accuracy_fn(output_traj, target_traj, energy_function):
      Returns:
          accuracy
      """
-    pos_err = position_MSE_err_fn(output_traj, target_traj)
-    eng_err = penergy_MSE_err_fn(output_traj, target_traj, energy_function)
-    # pos_err = position_BE_err_fn(output_traj, target_traj)
-    # eng_err = energy_BE_err_fn(output_traj, target_traj, energy_function)
-    return pos_err, eng_err
+    mse_err = square_err_fn(output_traj, target_traj)
+    rel_err = position_err_fn(output_traj, target_traj)
+    eng_err = energy_err_fn(output_traj, target_traj, energy_function)
+    return mse_err, rel_err, eng_err

@@ -9,16 +9,28 @@ import numpy as np
 import torch
 from torch import nn
 
-from learner.utils import dfx
+from ._base_body_dataset import BaseBodyDataset
+from ...utils import dfx
 
 
-class Body3_L( nn.Module):
+class Body3(BaseBodyDataset, nn.Module):
+    """
+    Pendulum with 2 bodies
+    Reference:
+    # ref: Simplifying Hamiltonian and Lagrangian Neural Networks via Explicit Constraints
+    # URL: https://proceedings.neurips.cc/paper/2020/file/9f655cc8884fda7ad6d8a6fb15cc001e-Paper.pdf
+    Dataset statistics:
+    # type: hamilton
+    # obj: 2
+    # dim: 1
+    """
 
     def __init__(self, train_num, test_num, obj, dim, m=None, l=None, **kwargs):
-        super(Body3_L, self).__init__()
+        super(Body3, self).__init__()
 
         self.train_num = train_num
         self.test_num = test_num
+
         self.dataset_url = ''
 
         self.__init_dynamic_variable(obj, dim)
@@ -39,7 +51,8 @@ class Body3_L( nn.Module):
         _time_step = int((t_end - t0) / self.dt)
         self.t = torch.linspace(t0, t_end, _time_step)
 
-        t_end = 15.
+        # t_end = 15.
+        t_end = 30.
         _time_step = int((t_end - t0) / self.dt)
         self.test_t = torch.linspace(t0, t_end, _time_step)
 
@@ -48,65 +61,58 @@ class Body3_L( nn.Module):
     def forward(self, t, coords):
         coords = coords.clone().detach().requires_grad_(True)
         bs = coords.size(0)
-        x, v = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
+        x, p = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
 
         # Calculate the potential energy for i-th element ------------------------------------------------------------
-        U = self.potential(torch.cat([x, v], dim=-1))
+        U = self.potential(torch.cat([x, p], dim=-1))
 
         # Calculate the kinetic --------------------------------------------------------------
-        T = self.kinetic(torch.cat([x, v], dim=-1))
+        T = self.kinetic(torch.cat([x, p], dim=-1))
 
         # Calculate the Hamilton Derivative --------------------------------------------------------------
-        L = T - U
-        dvL = dfx(L.sum(), v)
-        dxL = dfx(L.sum(), x)
+        H = U + T
+        dqH = dfx(H.sum(), x)
+        dpH = dfx(H.sum(), p)
 
-        dvdvL = torch.zeros((bs, self.dof, self.dof), dtype=self.Dtype, device=self.Device)
-        dxdvL = torch.zeros((bs, self.dof, self.dof), dtype=self.Dtype, device=self.Device)
+        # Calculate the Derivative ----------------------------------------------------------------
+        dq_dt = torch.zeros((bs, self.dof), dtype=self.Dtype, device=self.Device)
+        dp_dt = torch.zeros((bs, self.dof), dtype=self.Dtype, device=self.Device)
 
-        for i in range(self.dof):
-            dvidvL = dfx(dvL[:, i].sum(), v)
-            dvdvL[:, i, :] += dvidvL
+        dq_dt = dpH
+        dp_dt = -dqH
 
-        for i in range(self.dof):
-            dxidvL = dfx(dvL[:, i].sum(), x)
-            dxdvL[:, i, :] += dxidvL
+        dz_dt = torch.cat([dq_dt, dp_dt], dim=-1)
 
-        dvdvL_inv = torch.linalg.pinv(dvdvL)
-
-        a = dvdvL_inv @ (dxL.unsqueeze(2) - dxdvL @ v.unsqueeze(2))  # (bs, a_dim, 1)
-        a = a.squeeze(2)
-        return torch.cat([v, a], dim=1)
+        return dz_dt
 
     def kinetic(self, coords):
-        """Kinetic energy"""
         s, num_states = coords.shape
         assert num_states == self.dof * 2
-        x, v = torch.chunk(coords, 2, dim=1)
+        q, p = torch.chunk(coords, 2, dim=1)
 
         T = 0.
         for i in range(self.obj):
-            T = T + 0.5 * self.m[i] * torch.sum(v[:, 2 * i: 2 * i + 2] ** 2, dim=1)
+            T = T + 0.5 * torch.sum(p[:, 2 * i:  2 * i + 2] ** 2, dim=1) / self.m[i]
         return T
 
     def potential(self, coords):
         s, num_states = coords.shape
         assert num_states == self.dof * 2
-        x, v = torch.chunk(coords, 2, dim=1)
+        q, p = torch.chunk(coords, 2, dim=1)
 
         k = self.k
         U = 0.
         for i in range(self.obj):
             for j in range(i):
                 U = U - k * self.m[i] * self.m[j] / (
-                        (x[:, 2 * i] - x[:, 2 * j]) ** 2 +
-                        (x[:, 2 * i + 1] - x[:, 2 * j + 1]) ** 2) ** 0.5
+                        (q[:, 2 * i] - q[:, 2 * j]) ** 2 +
+                        (q[:, 2 * i + 1] - q[:, 2 * j + 1]) ** 2) ** 0.5
         return U
 
     def energy_fn(self, coords):
-        """energy function """
-        eng = self.kinetic(coords) + self.potential(coords)
-        return eng
+        T, U = self.kinetic(coords), self.potential(coords)
+        H = T + U
+        return H
 
     @staticmethod
     def rotate2d(p, theta):

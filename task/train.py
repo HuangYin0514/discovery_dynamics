@@ -33,7 +33,7 @@ parser.add_argument('--download_data', default='False', type=str, help='Download
 parser.add_argument('--num_workers', default=0, type=int, help='how many subprocesses to use for data loading. ')
 
 # net
-parser.add_argument('--net_name', default='HnnModScale_pend2', type=str,
+parser.add_argument('--net_name', default='Baseline_pend2', type=str,
                     help='Select model to train '
                          '[Baseline_pend2 Baseline_body3'
                          'HNN_pend2 HNN_body3'
@@ -77,7 +77,8 @@ def run():
         'data_name': args.data_name,
         'obj': args.obj,
         'dim': args.dim,
-        'dataset_path': './outputs/data/dataset_'+args.data_name,
+        'train_num': args.train_num,
+        'test_num': args.test_num,
         'download_data': args.download_data,
         'num_workers': args.num_workers,
         'dtype': args.dtype,

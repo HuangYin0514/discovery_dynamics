@@ -6,9 +6,7 @@
 @desc:
 """
 import abc
-import os.path as osp
 
-import numpy as np
 import torch
 from torch.utils.data import Dataset
 
@@ -67,12 +65,16 @@ class BaseDataset(abc.ABC):
             return torch.float64
 
     def get_dynamics_data_info(self, data):
-        num_train_traj = len(data)
-        _, states, min_t, max_t, len_t = data[0]
-        return num_train_traj, len_t, min_t, max_t, states
+        num_traj = len(data)
+        x0, t, X, y, E = data[0]
+        num_t = len(t)
+        min_t = min(t)
+        max_t = max(t)
+        num_states = len(x0)
+        return num_traj, num_t, min_t, max_t, num_states
 
     @abc.abstractmethod
-    def print_dataset_statistics(self, name, data):
+    def print_dataset_statistics(self, train_ds, test_ds):
         raise NotImplementedError
 
 
@@ -81,36 +83,26 @@ class BaseDynamicsDataset(BaseDataset):
     def __init__(self):
         super(BaseDynamicsDataset, self).__init__()
 
-    def print_dataset_statistics(self, name, data):
-        num_train_traj, num_train_t, min_train_t, max_train_t, num_train_states = self.get_dynamics_data_info(data)
+    def print_dataset_statistics(self, train_ds, test_ds):
+        num_train_traj, num_train_t, min_train_t, max_train_t, num_train_states = self.get_dynamics_data_info(train_ds)
+        num_test_traj, num_test_t, min_test_t, max_test_t, num_test_states = self.get_dynamics_data_info(test_ds)
 
         print("Dataset statistics:")
         print("  ----------------------------------------------------")
         print("  subset   | # traj| # t -> [t_min, t_max]  | # states")
         print("  ----------------------------------------------------")
-        print("  {}    | {:5d} | {:9d} -> [{:.3},{:.3}] | {:5d}".format(name,
-                                                                        num_train_traj,
-                                                                        num_train_t,
-                                                                        min_train_t,
-                                                                        max_train_t,
-                                                                        num_train_states))
+        print("  train    | {:5d} | {:9d} -> [{:.3},{:.3}] | {:5d}".format(num_train_traj,
+                                                                           num_train_t,
+                                                                           min_train_t,
+                                                                           max_train_t,
+                                                                           num_train_states))
+        print("  test     | {:5d} | {:9d} -> [{:.3},{:.3}] | {:5d}".format(num_test_traj,
+                                                                           num_test_t,
+                                                                           min_test_t,
+                                                                           max_test_t,
+                                                                           num_test_states))
         print("  ----------------------------------------------------")
 
-
-def read_data(data_path):
-    """Keep reading image until succeed.
-    This can avoid IOError incurred by heavy IO process."""
-    got_img = False
-    if not osp.exists(data_path):
-        raise IOError("{} does not exist".format(data_path))
-    while not got_img:
-        try:
-            loaded_data = np.load(data_path, allow_pickle=True).item()
-            got_img = True
-        except IOError:
-            print("IOError incurred when reading '{}'. Will redo. Don't worry. Just chill.".format(data_path))
-            pass
-    return loaded_data
 
 
 class DynamicsDataset(Dataset):
@@ -120,24 +112,13 @@ class DynamicsDataset(Dataset):
         self.dataset = dataset
         self.transform = transform
 
-        self.data_path, states, min_t, max_t, len_t = self.dataset[0]
-
-
     def __len__(self):
-        readed_data = read_data(self.data_path)
-        return len(readed_data['x0'])
+        return len(self.dataset)
 
     def __getitem__(self, index):
-        readed_data = read_data(self.data_path)
-        x0 = readed_data['x0'][index]
-        X = readed_data['X'][index]
-        dX = readed_data['dX'][index]
-        t = readed_data['t']
+        x0, t, X, y, E = self.dataset[index]
 
         if self.transform is not None:
-            x0 = self.transform(x0)
             X = self.transform(X)
-            dX = self.transform(dX)
-            t = self.transform(t)
 
-        return x0, X, dX, t
+        return x0, t, X, y, E

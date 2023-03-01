@@ -5,15 +5,16 @@
 @time: 2023/1/3 3:50 PM
 @desc:
 """
-import glob
-import os
-import os.path as osp
+import numpy as np
+import torch
+from torch import nn
 
-from learner.data.datasets._bases import BaseDynamicsDataset
-from learner.utils import download_file_from_google_drive
+from ._base_body_dataset import BaseBodyDataset
+from ...integrator import ODESolver
+from ...utils import dfx
 
 
-class Pendulum2_L(BaseDynamicsDataset):
+class Pendulum2_L(BaseBodyDataset, nn.Module):
     """
     Pendulum with 2 bodies
     Reference:
@@ -25,68 +26,132 @@ class Pendulum2_L(BaseDynamicsDataset):
     # dim: 1
     """
 
-    dataset_dir = ''
-
-    train_url = '1'
-    val_url = ''
-    test_url = ''
-
-    def __init__(self, root='',download_data=True, **kwargs):
+    def __init__(self, train_num, test_num, obj, dim, m=None, l=None, **kwargs):
         super(Pendulum2_L, self).__init__()
-        self.dataset_dir = osp.join(root, self.dataset_dir)
-        self.train_dir = osp.join(self.dataset_dir, 'train')
-        self.val_dir = osp.join(self.dataset_dir, 'val')
-        self.test_dir = osp.join(self.dataset_dir, 'test')
 
-        if download_data == 'True':
-            print('Start downloading dataset.')
-            os.makedirs(self.train_dir) if not os.path.exists(self.train_dir) else None
-            os.makedirs(self.val_dir) if not os.path.exists(self.val_dir) else None
-            os.makedirs(self.test_dir) if not os.path.exists(self.test_dir) else None
-            download_file_from_google_drive(self.train_url, self.train_dir)
-            download_file_from_google_drive(self.val_url, self.val_dir)
-            download_file_from_google_drive(self.test_url, self.test_dir)
+        self.train_num = train_num
+        self.test_num = test_num
+        self.dataset_url = ''
 
-        self._check_before_run()
+        self.__init_dynamic_variable(obj, dim)
 
-        train = self._process_dir(self.train_dir)
-        val = self._process_dir(self.val_dir)
-        test = self._process_dir(self.test_dir)
+    def __init_dynamic_variable(self, obj, dim):
+        self.m = [1 for i in range(obj)]
+        self.l = [1 for i in range(obj)]
+        self.g = 9.8
 
-        print("=> Pendulum2 loaded")
-        self.print_dataset_statistics('train', train)
-        self.print_dataset_statistics('val', val)
-        self.print_dataset_statistics('test', test)
+        self.obj = obj
+        self.dim = dim
+        self.dof = self.obj * self.dim  # degree of freedom
 
-        self.train = train
-        self.val = val
-        self.test = test
+        self.dt = 0.1
 
-    def _check_before_run(self):
-        """Check if all files are available before going deeper"""
-        if not osp.exists(self.dataset_dir):
-            raise RuntimeError("'{}' is not available".format(self.dataset_dir))
-        if not osp.exists(self.train_dir):
-            raise RuntimeError("'{}' is not available".format(self.train_dir))
-        if not osp.exists(self.val_dir):
-            raise RuntimeError("'{}' is not available".format(self.val_dir))
-        if not osp.exists(self.test_dir):
-            raise RuntimeError("'{}' is not available".format(self.test_dir))
+        t0 = 0.
+        t_end = 10.
+        _time_step = int((t_end - t0) / self.dt)
+        self.t = torch.linspace(t0, t_end, _time_step)
 
-    def _process_dir(self, dir_path, ):
-        data_paths = glob.glob(osp.join(dir_path, '*.npy'))
-        pattern = r'dataset_(\d+)_(\d+\.\d+)_(\d+\.\d+)_(\d+)_(\d+)\.npy'
+        t_end = 30.
+        dt = 0.05
+        _time_step = int((t_end - t0) / dt)
+        self.test_t = torch.linspace(t0, t_end, _time_step)
 
-        dataset = []
-        for data_path in data_paths:
-            parts = data_path.split('/')
-            parts = parts[-1].split('.npy')[:-1]
-            dataset_info = parts[-1].split('_')
-            states = int(dataset_info[1])
-            min_t = float(dataset_info[2])
-            max_t = float(dataset_info[3])
-            len_t = int(dataset_info[4])
+    def forward(self, t, coords):
+        __x, __p = torch.chunk(coords, 2, dim=-1)
+        coords = torch.cat([__x % (2 * torch.pi), __p], dim=-1).clone().detach().requires_grad_(True)
 
-            dataset.append((data_path, states, min_t, max_t, len_t))
+        coords = coords.clone().detach().requires_grad_(True)
+        bs = coords.size(0)
+        x, v = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
 
-        return dataset
+        # Calculate the potential energy for i-th element ------------------------------------------------------------
+        U = self.potential(torch.cat([x, v], dim=-1))
+
+        # Calculate the kinetic --------------------------------------------------------------
+        T = self.kinetic(torch.cat([x, v], dim=-1))
+
+        # Calculate the Hamilton Derivative --------------------------------------------------------------
+        L = T - U
+        dvL = dfx(L.sum(), v)
+        dxL = dfx(L.sum(), x)
+
+        dvdvL = torch.zeros((bs, self.dof, self.dof), dtype=self.Dtype, device=self.Device)
+        dxdvL = torch.zeros((bs, self.dof, self.dof), dtype=self.Dtype, device=self.Device)
+
+        for i in range(self.dof):
+            dvidvL = dfx(dvL[:, i].sum(), v)
+            if dvidvL is None:
+                break
+            else:
+                dvdvL[:, i, :] += dvidvL
+
+        for i in range(self.dof):
+            dxidvL = dfx(dvL[:, i].sum(), x)
+            if dxidvL is None:
+                break
+            else:
+                dxdvL[:, i, :] += dxidvL
+
+        dvdvL_inv = torch.linalg.inv(dvdvL)
+
+        a = dvdvL_inv @ (dxL.unsqueeze(2) - dxdvL @ v.unsqueeze(2))  # (bs, a_dim, 1)
+        a = a.squeeze(2)
+        return torch.cat([v, a], dim=1)
+
+    def kinetic(self, coords):
+        """Kinetic energy"""
+        s, num_states = coords.shape
+        assert num_states == self.dof * 2
+        x, v = torch.chunk(coords, 2, dim=1)
+
+        T = 0.
+        vx, vy = 0., 0.
+        for i in range(self.dof):
+            vx = vx + self.l[i] * v[:, i] * torch.cos(x[:, i])
+            vy = vy + self.l[i] * v[:, i] * torch.sin(x[:, i])
+            T = T + 0.5 * self.m[i] * (torch.pow(vx, 2) + torch.pow(vy, 2))
+        return T
+
+    def potential(self, coords):
+        bs, num_states = coords.shape
+        assert num_states == self.dof * 2
+        U = 0.
+        y = 0.
+        for i in range(self.obj):
+            y = y - self.l[i] * torch.cos(coords[:, i])
+            U = U + self.m[i] * self.g * y
+        return U
+
+    def energy_fn(self, coords):
+        """energy function """
+        eng = self.kinetic(coords) + self.potential(coords)
+        return eng
+
+    def random_config(self, num):
+        x0_list = []
+        for i in range(num):
+            max_momentum = 10.
+            if num == self.test_num:
+                max_momentum = 1.
+            y0 = np.zeros(self.obj * 2)
+            for i in range(self.obj):
+                theta = (2 * np.random.rand()) * np.pi
+                momentum = (2 * np.random.rand() - 1) * max_momentum
+                y0[i] = theta
+                y0[i + self.obj] = momentum
+            x0_list.append(y0)
+        x0 = np.stack(x0_list)
+        return torch.tensor(x0, dtype=self.Dtype, device=self.Device)
+
+    def ode_solve_traj(self, x0, t):
+        x0 = x0.to(self.Device)
+        t = t.to(self.Device)
+        # At small step sizes, the differential equations exhibit stiffness and the rk4 solver cannot solve
+        # the double pendulum task. Therefore, use dopri5 to generate training data.
+        if len(t) == len(self.test_t):
+            # test stages
+            x = ODESolver(self, x0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
+        else:
+            # train stages
+            x = ODESolver(self, x0, t, method='dopri5').permute(1, 0, 2)  # (T, D) dopri5 rk4
+        return x
