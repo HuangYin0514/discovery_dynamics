@@ -13,7 +13,7 @@ from learner.data.datasets._bases import BaseDynamicsDataset
 from learner.utils import download_file_from_google_drive
 
 
-class Pendulum2(BaseDynamicsDataset):
+class Pendulum2_L(BaseDynamicsDataset):
     """
     Pendulum with 2 bodies
     Reference:
@@ -31,8 +31,8 @@ class Pendulum2(BaseDynamicsDataset):
     val_url = ''
     test_url = ''
 
-    def __init__(self, root='',download_data=False, **kwargs):
-        super(Pendulum2, self).__init__()
+    def __init__(self, root='',download_data=True, **kwargs):
+        super(Pendulum2_L, self).__init__()
         self.dataset_dir = osp.join(root, self.dataset_dir)
         self.train_dir = osp.join(self.dataset_dir, 'train')
         self.val_dir = osp.join(self.dataset_dir, 'val')
@@ -44,8 +44,8 @@ class Pendulum2(BaseDynamicsDataset):
             os.makedirs(self.val_dir) if not os.path.exists(self.val_dir) else None
             os.makedirs(self.test_dir) if not os.path.exists(self.test_dir) else None
             download_file_from_google_drive(self.train_url, self.train_dir)
-            download_file_from_google_drive(self.val_url, self.train_dir)
-            download_file_from_google_drive(self.test_url, self.train_dir)
+            download_file_from_google_drive(self.val_url, self.val_dir)
+            download_file_from_google_drive(self.test_url, self.test_dir)
 
         self._check_before_run()
 
