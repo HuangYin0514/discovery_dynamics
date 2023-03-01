@@ -158,4 +158,4 @@ class Pendulum2(BaseBodyDataset, nn.Module):
 
         spring_ivp = solve_ivp(fun=dynamics_fn, t_span=[min(t), max(t)], y0=x0, t_eval=t, rtol=1e-12)
 
-        return spring_ivp.y.T.astype(np.float)
+        return torch.tensor(spring_ivp.y.T, dtype=self.Dtype, device=self.Device)
