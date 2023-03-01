@@ -38,7 +38,11 @@ class BaseBodyDataset(BaseDynamicsDataset):
 
         dataset = []
         for i in range(num):
-            dataset.append((x0[i], t,  X[i], y[i], E[i]))
+            dataset.append((x0[i].cpu().numpy(),
+                            t.cpu().numpy(),
+                            X[i].cpu().numpy(),
+                            y[i].cpu().numpy(),
+                            E[i].cpu().numpy()))
             plt.plot(E[i].cpu().detach().numpy())
         plt.show()
         return dataset
@@ -48,8 +52,6 @@ class BaseBodyDataset(BaseDynamicsDataset):
         t = t.to(self.Device)
         x = ODESolver(self, x0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
         return x
-
-
 
     @abc.abstractmethod
     def random_config(self, num):

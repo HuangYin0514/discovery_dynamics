@@ -104,7 +104,6 @@ class BaseDynamicsDataset(BaseDataset):
         print("  ----------------------------------------------------")
 
 
-
 class DynamicsDataset(Dataset):
     """learning dynamics Dataset"""
 
@@ -120,5 +119,8 @@ class DynamicsDataset(Dataset):
 
         if self.transform is not None:
             X = self.transform(X)
+            t = self.transform(t)
+            x0 = self.transform(x0)
+            y = self.transform(y)
 
         return x0, t, X, y, E
