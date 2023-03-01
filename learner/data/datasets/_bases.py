@@ -121,7 +121,9 @@ class DynamicsDataset(Dataset):
         self.transform = transform
 
     def __len__(self):
-        return len(self.dataset[0]['x0'])
+        data_path, states, min_t, max_t, len_t = self.dataset[0]
+        readed_data = read_data(data_path)
+        return len(readed_data['x0'])
 
     def __getitem__(self, index):
         data_path, states, min_t, max_t, len_t = self.dataset[index]
