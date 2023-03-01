@@ -120,14 +120,15 @@ class DynamicsDataset(Dataset):
         self.dataset = dataset
         self.transform = transform
 
+        self.data_path, states, min_t, max_t, len_t = self.dataset[0]
+
+
     def __len__(self):
-        data_path, states, min_t, max_t, len_t = self.dataset[0]
-        readed_data = read_data(data_path)
+        readed_data = read_data(self.data_path)
         return len(readed_data['x0'])
 
     def __getitem__(self, index):
-        data_path, states, min_t, max_t, len_t = self.dataset[0]
-        readed_data = read_data(data_path)
+        readed_data = read_data(self.data_path)
         x0 = readed_data['x0'][index]
         X = readed_data['X'][index]
         dX = readed_data['dX'][index]

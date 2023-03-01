@@ -45,7 +45,7 @@ def val_collate_fn(batch):
 def test_collate_fn(batch):
     x0, X, dX, t = zip(*batch)
 
-    x0 = torch.cat(x0, dim=0).float()
+    x0 = torch.stack(x0, dim=0).float()
     X = torch.stack(X, dim=0).float()
 
     # x0 = torch.flatten(x0, start_dim=0, end_dim=1)

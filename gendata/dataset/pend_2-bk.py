@@ -11,7 +11,6 @@ from scipy.integrate import solve_ivp
 from torch import nn
 
 from gendata.dataset._base_body_dataset import BaseBodyDataset
-from learner.integrator import ODESolver
 from learner.utils import dfx, lazy_property
 
 
@@ -137,30 +136,26 @@ class Pendulum2(BaseBodyDataset, nn.Module):
         H = self.kinetic(coords) + self.potential(coords)
         return H
 
-    def random_config(self, num):
-        x0_list = []
-        for i in range(num):
-            max_momentum = 1.
-            y0 = np.zeros(self.obj * 2)
-            for i in range(self.obj):
-                theta = (2 * np.random.rand()) * np.pi
-                momentum = (2 * np.random.rand() - 1) * max_momentum
-                y0[i] = theta
-                y0[i + self.obj] = momentum
-            x0_list.append(y0)
-        x0 = np.stack(x0_list)
-        return torch.tensor(x0, dtype=self.Dtype, device=self.Device)
+    def random_config(self):
+        max_momentum = 10.
+        y0 = np.zeros(self.obj * 2)
+        for i in range(self.obj):
+            theta = (2 * np.random.rand()) * np.pi
+            momentum = (2 * np.random.rand() - 1) * max_momentum
+            y0[i] = theta
+            y0[i + self.obj] = momentum
+        return y0
 
 
     def ode_solve_traj(self, x0, t):
-        x0 = x0.to(self.Device)
-        t = t.to(self.Device)
-        # At small step sizes, the differential equations exhibit stiffness and the rk4 solver cannot solve
-        # the double pendulum task. Therefore, use dopri5 to generate training data.
-        if len(t) == len(self.test_t):
-            # test stages
-            x = ODESolver(self, x0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
-        else:
-            # train stages
-            x = ODESolver(self, x0, t, method='dopri5').permute(1, 0, 2)  # (T, D) dopri5 rk4
-        return x
+        t = t.cpu().numpy()
+        x0 = x0.astype(np.float).reshape(-1)
+
+        def dynamics_fn(t, np_x):
+            x = torch.tensor(np_x, dtype=self.Dtype, device=self.Device).view(1, -1)
+            dx = self(None, x).data.cpu().numpy()
+            return dx
+
+        spring_ivp = solve_ivp(fun=dynamics_fn, t_span=[min(t), max(t)], y0=x0, t_eval=t, rtol=1e-12)
+
+        return torch.tensor(spring_ivp.y.T, dtype=self.Dtype, device=self.Device)

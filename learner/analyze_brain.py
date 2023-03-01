@@ -63,7 +63,7 @@ class AnalyzeBrain:
             labels_list.append(labels)
 
         # error ----------------------------------------------------------------
-        preds = torch.stack(pred_list, dim=0)
+        preds = torch.cat(pred_list, dim=0)
         labels = torch.cat(labels_list, dim=0)
 
         err = accuracy_fn(preds, labels, self.energy_fn)

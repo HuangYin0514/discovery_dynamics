@@ -5,7 +5,6 @@
 @time: 2023/2/12 9:56 AM
 @desc:
 """
-from scipy.integrate import solve_ivp
 
 # encoding: utf-8
 """
@@ -99,14 +98,5 @@ class Pend2_analytical(LossNN):
         return dz_dt
 
     def integrate(self, X0, t):
-        t = t.cpu().numpy()
-        x0 = X0.cpu().numpy().reshape(-1)
-
-        def dynamics_fn(t, np_x):
-            x = torch.tensor(np_x, dtype=self.Dtype, device=self.Device).view(1, -1)
-            dx = self(None, x).data.cpu().numpy()
-            return dx
-
-        spring_ivp = solve_ivp(fun=dynamics_fn, t_span=[min(t), max(t)], y0=x0, t_eval=t, rtol=1e-12)
-
-        return torch.tensor(spring_ivp.y.T, dtype=self.Dtype, device=self.Device)
+        out = ODESolver(self, X0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
+        return out
