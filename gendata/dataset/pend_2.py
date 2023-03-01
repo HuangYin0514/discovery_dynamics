@@ -149,7 +149,7 @@ class Pendulum2(BaseBodyDataset, nn.Module):
 
     def ode_solve_traj(self, x0, t):
         t = t.cpu().numpy()
-        x0 = x0.reshape(-1)
+        x0 = x0.float().reshape(-1)
 
         def dynamics_fn(t, np_x):
             x = torch.tensor(np_x, dtype=self.Dtype, device=self.Device).view(1, -1)
