@@ -76,7 +76,7 @@ class AnalyzeBrain:
         print(result)
 
         # solutions forms ----------------------------------------------------------------
-        check_index = 1
+        check_index = 0
         ground_true = labels[check_index]
         net_pred = preds[check_index]
         true_q, true_p = ground_true.chunk(2, dim=-1)  # (T, states)
