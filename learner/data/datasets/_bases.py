@@ -126,9 +126,9 @@ class DynamicsDataset(Dataset):
     def __getitem__(self, index):
         data_path, states, min_t, max_t, len_t = self.dataset[index]
         readed_data = read_data(data_path)
-        x0 = readed_data['x0']
-        X = readed_data['X']
-        dX = readed_data['dX']
+        x0 = readed_data['x0'][index]
+        X = readed_data['X'][index]
+        dX = readed_data['dX'][index]
         t = readed_data['t']
 
         if self.transform is not None:

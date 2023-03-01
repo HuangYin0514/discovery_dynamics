@@ -65,6 +65,7 @@ class Pendulum2(BaseDynamicsDataset):
         dataset = []
         for data_path in data_paths:
             parts = data_path.split('/')
+            parts = parts[-1].split('.npy')[:-1]
             dataset_info = parts[-1].split('_')
             states = int(dataset_info[1])
             min_t = float(dataset_info[2])

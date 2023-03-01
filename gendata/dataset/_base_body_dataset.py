@@ -9,51 +9,59 @@ import abc
 import os.path as osp
 
 import numpy as np
-import torch
 from matplotlib import pyplot as plt
 from tqdm import tqdm
 
 from learner.data.datasets._bases import BaseDynamicsDataset
-from learner.integrator import ODESolver
 
 
 class BaseBodyDataset(BaseDynamicsDataset):
     def __init__(self):
         super(BaseBodyDataset, self).__init__()
 
-    def gen_data(self,sample_num, t, path):
+    def gen_data(self, sample_num, t, path):
         self.generate_random(sample_num, t, path)
 
     def generate_random(self, num, t, path):
-
+        dataset = []
+        x0s =[]
+        Xs= []
+        dXs = []
+        Es = []
         pbar = tqdm(range(num), desc='Processing')
         for i in pbar:
             x0 = self.random_config()  # (D, )
-            X = self.ode_solve_traj(x0, t) # (T, D)
+            X = self.ode_solve_traj(x0, t)  # (T, D)
             dX = self(None, X).clone().detach()  # (T, D)
             E = self.energy_fn(X)
 
-            dataset = {
-                'x0': x0,
-                't': t.cpu().numpy(),
-                'X': X.cpu().numpy(),
-                'dX': dX.cpu().numpy(),
-                'E': E.cpu().numpy()
-            }
-
-
-            num_states = X.shape[-1]
-            min_t = min(t)
-            max_t = max(t)
-            len_t = len(t)
-            filename = osp.join(path, 'dataset_{}_{}_{}_{}_{}'.format(num_states, min_t,max_t,len_t,i))
-            np.save(filename, dataset)
+            x0s.append(x0)
+            Xs.append(X)
+            dXs.append(dX)
+            Es.append(E)
 
             plt.plot(E.cpu().detach().numpy())
+
+        num_states = X.shape[-1]
+        min_t = min(t)
+        max_t = max(t)
+        len_t = len(t)
         plt.show()
 
+        dataset = {
+            'x0': x0s,
+            't': t,
+            'X': Xs,
+            'dX': dXs,
+            'E': Es
+        }
+
+        filename = osp.join(path, 'dataset_{}_{}_{}_{}.npy'.format(num_states, min_t, max_t, len_t))
+        np.save(filename, dataset)
+
+
     @abc.abstractmethod
-    def random_config(self, num):
+    def random_config(self):
         pass
 
     @abc.abstractmethod
