@@ -140,7 +140,7 @@ class Pendulum2(BaseBodyDataset, nn.Module):
     def random_config(self, num):
         x0_list = []
         for i in range(num):
-            max_momentum = 1.
+            max_momentum = 10.
             y0 = np.zeros(self.obj * 2)
             for i in range(self.obj):
                 theta = (2 * np.random.rand()) * np.pi
