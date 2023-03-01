@@ -100,7 +100,7 @@ class Pend2_analytical(LossNN):
 
     def integrate(self, X0, t):
         t = t.cpu().numpy()
-        x0 = X0.reshape(-1)
+        x0 = X0.cpu().numpy().reshape(-1)
 
         def dynamics_fn(t, np_x):
             x = torch.tensor(np_x, dtype=self.Dtype, device=self.Device).view(1, -1)
