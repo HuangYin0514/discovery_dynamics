@@ -65,34 +65,35 @@ class Pendulum2(BaseBodyDataset, nn.Module):
         return torch.tensor(res).float()
 
     def forward(self, t, coords):
-        __x, __p = torch.chunk(coords, 2, dim=-1)
-        coords = torch.cat([__x % (2 * torch.pi), __p], dim=-1).clone().detach().requires_grad_(True)
+        with torch.enable_grad():
+            __x, __p = torch.chunk(coords, 2, dim=-1)
+            coords = torch.cat([__x % (2 * torch.pi), __p], dim=-1).clone().detach().requires_grad_(True)
 
-        coords = coords.clone().detach().requires_grad_(True)
-        bs = coords.size(0)
-        q, p = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
+            coords = coords.clone().detach().requires_grad_(True)
+            bs = coords.size(0)
+            q, p = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
 
-        # Calculate the potential energy for i-th element ------------------------------------------------------------
-        U = self.potential(torch.cat([q, p], dim=-1))
+            # Calculate the potential energy for i-th element ------------------------------------------------------------
+            U = self.potential(torch.cat([q, p], dim=-1))
 
-        # Calculate the kinetic --------------------------------------------------------------
-        T = self.kinetic(torch.cat([q, p], dim=-1))
+            # Calculate the kinetic --------------------------------------------------------------
+            T = self.kinetic(torch.cat([q, p], dim=-1))
 
-        # Calculate the Hamilton Derivative --------------------------------------------------------------
-        H = U + T
-        dqH = dfx(H.sum(), q)
-        dpH = dfx(H.sum(), p)
+            # Calculate the Hamilton Derivative --------------------------------------------------------------
+            H = U + T
+            dqH = dfx(H.sum(), q)
+            dpH = dfx(H.sum(), p)
 
-        # Calculate the Derivative ----------------------------------------------------------------
-        dq_dt = torch.zeros((bs, self.dof), dtype=self.Dtype, device=self.Device)
-        dp_dt = torch.zeros((bs, self.dof), dtype=self.Dtype, device=self.Device)
+            # Calculate the Derivative ----------------------------------------------------------------
+            dq_dt = torch.zeros((bs, self.dof), dtype=self.Dtype, device=self.Device)
+            dp_dt = torch.zeros((bs, self.dof), dtype=self.Dtype, device=self.Device)
 
-        dq_dt = dpH
-        dp_dt = -dqH
+            dq_dt = dpH
+            dp_dt = -dqH
 
-        dz_dt = torch.cat([dq_dt, dp_dt], dim=-1)
+            dz_dt = torch.cat([dq_dt, dp_dt], dim=-1)
 
-        return dz_dt
+            return dz_dt
 
     def M(self, x):
         N = self.obj
