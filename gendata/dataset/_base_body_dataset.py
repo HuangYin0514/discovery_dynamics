@@ -26,7 +26,7 @@ class BaseBodyDataset(BaseDynamicsDataset):
 
     def generate_random(self, num, t, path):
 
-        pbar = tqdm(num, desc='Processing')
+        pbar = tqdm(range(num), desc='Processing')
         for i in pbar:
             x0 = self.random_config()  # (D, )
             X = self.ode_solve_traj(x0, t) # (T, D)
