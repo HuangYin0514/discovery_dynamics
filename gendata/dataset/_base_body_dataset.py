@@ -11,6 +11,7 @@ import os.path as osp
 import numpy as np
 import torch
 from matplotlib import pyplot as plt
+from tqdm import tqdm
 
 from learner.data.datasets._bases import BaseDynamicsDataset
 from learner.integrator import ODESolver
@@ -25,8 +26,8 @@ class BaseBodyDataset(BaseDynamicsDataset):
 
     def generate_random(self, num, t, path):
 
-
-        for i in range(num):
+        pbar = tqdm(num, desc='Processing')
+        for i in pbar:
             x0 = self.random_config()  # (D, )
             X = self.ode_solve_traj(x0, t) # (T, D)
             tensor_X = torch.from_numpy(X).to(self.Dtype).to(self.Device)
