@@ -31,7 +31,7 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
 
         self.train_num = train_num
         self.test_num = test_num
-        self.dataset_url = ''
+        self.dataset_url = 'https://drive.google.com/file/d/1Zri2w8Top4Na601kgAirtKvEtDHsu9AY/view?usp=share_link'
 
         self.__init_dynamic_variable(obj, dim)
 
