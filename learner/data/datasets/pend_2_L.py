@@ -57,46 +57,48 @@ class Pendulum2_L(BaseBodyDataset, nn.Module):
         self.test_t = torch.linspace(t0, t_end, _time_step)
 
     def forward(self, t, coords):
-        __x, __p = torch.chunk(coords, 2, dim=-1)
-        coords = torch.cat([__x % (2 * torch.pi), __p], dim=-1).clone().detach().requires_grad_(True)
+        with torch.enable_grad():
 
-        coords = coords.clone().detach().requires_grad_(True)
-        bs = coords.size(0)
-        x, v = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
+            __x, __p = torch.chunk(coords, 2, dim=-1)
+            coords = torch.cat([__x % (2 * torch.pi), __p], dim=-1).clone().detach().requires_grad_(True)
 
-        # Calculate the potential energy for i-th element ------------------------------------------------------------
-        U = self.potential(torch.cat([x, v], dim=-1))
+            coords = coords.clone().detach().requires_grad_(True)
+            bs = coords.size(0)
+            x, v = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
 
-        # Calculate the kinetic --------------------------------------------------------------
-        T = self.kinetic(torch.cat([x, v], dim=-1))
+            # Calculate the potential energy for i-th element ------------------------------------------------------------
+            U = self.potential(torch.cat([x, v], dim=-1))
 
-        # Calculate the Hamilton Derivative --------------------------------------------------------------
-        L = T - U
-        dvL = dfx(L.sum(), v)
-        dxL = dfx(L.sum(), x)
+            # Calculate the kinetic --------------------------------------------------------------
+            T = self.kinetic(torch.cat([x, v], dim=-1))
 
-        dvdvL = torch.zeros((bs, self.dof, self.dof), dtype=self.Dtype, device=self.Device)
-        dxdvL = torch.zeros((bs, self.dof, self.dof), dtype=self.Dtype, device=self.Device)
+            # Calculate the Hamilton Derivative --------------------------------------------------------------
+            L = T - U
+            dvL = dfx(L.sum(), v)
+            dxL = dfx(L.sum(), x)
 
-        for i in range(self.dof):
-            dvidvL = dfx(dvL[:, i].sum(), v)
-            if dvidvL is None:
-                break
-            else:
-                dvdvL[:, i, :] += dvidvL
+            dvdvL = torch.zeros((bs, self.dof, self.dof), dtype=self.Dtype, device=self.Device)
+            dxdvL = torch.zeros((bs, self.dof, self.dof), dtype=self.Dtype, device=self.Device)
 
-        for i in range(self.dof):
-            dxidvL = dfx(dvL[:, i].sum(), x)
-            if dxidvL is None:
-                break
-            else:
-                dxdvL[:, i, :] += dxidvL
+            for i in range(self.dof):
+                dvidvL = dfx(dvL[:, i].sum(), v)
+                if dvidvL is None:
+                    break
+                else:
+                    dvdvL[:, i, :] += dvidvL
 
-        dvdvL_inv = torch.linalg.inv(dvdvL)
+            for i in range(self.dof):
+                dxidvL = dfx(dvL[:, i].sum(), x)
+                if dxidvL is None:
+                    break
+                else:
+                    dxdvL[:, i, :] += dxidvL
 
-        a = dvdvL_inv @ (dxL.unsqueeze(2) - dxdvL @ v.unsqueeze(2))  # (bs, a_dim, 1)
-        a = a.squeeze(2)
-        return torch.cat([v, a], dim=1)
+            dvdvL_inv = torch.linalg.inv(dvdvL)
+
+            a = dvdvL_inv @ (dxL.unsqueeze(2) - dxdvL @ v.unsqueeze(2))  # (bs, a_dim, 1)
+            a = a.squeeze(2)
+            return torch.cat([v, a], dim=1)
 
     def kinetic(self, coords):
         """Kinetic energy"""
