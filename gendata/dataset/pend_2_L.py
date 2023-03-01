@@ -128,7 +128,7 @@ class Pendulum2_L( BaseBodyDataset,nn.Module):
     def random_config(self, num):
         x0_list = []
         for i in range(num):
-            max_momentum = 10.
+            max_momentum = 1.
             y0 = np.zeros(self.obj * 2)
             for i in range(self.obj):
                 theta = (2 * np.random.rand()) * np.pi
@@ -139,6 +139,7 @@ class Pendulum2_L( BaseBodyDataset,nn.Module):
         x0 = np.stack(x0_list)
         return torch.tensor(x0, dtype=self.Dtype, device=self.Device)
 
+
     def ode_solve_traj(self, x0, t):
         x0 = x0.to(self.Device)
         t = t.to(self.Device)
@@ -146,7 +147,7 @@ class Pendulum2_L( BaseBodyDataset,nn.Module):
         # the double pendulum task. Therefore, use dopri5 to generate training data.
         if len(t) == len(self.test_t):
             # test stages
-            x = ODESolver(self, x0, t, method='dopri5').permute(1, 0, 2)  # (T, D) dopri5 rk4
+            x = ODESolver(self, x0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
         else:
             # train stages
             x = ODESolver(self, x0, t, method='dopri5').permute(1, 0, 2)  # (T, D) dopri5 rk4
