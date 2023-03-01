@@ -53,8 +53,8 @@ class AnalyzeBrain:
         for test_data in pbar:
             inputs, labels = test_data
             X, t = inputs
-            X, t = X.to(self.device).clone().detach(), t.to(self.device).clone().detach()
-            labels = labels.to(self.device).clone().detach()
+            X, t = X.to(self.device), t.to(self.device)
+            labels = labels.to(self.device)
 
             # pred ----------------------------------------------------------------
             preds = self.net.integrate(X, t).clone().detach()  # (bs, T, states)
@@ -63,7 +63,7 @@ class AnalyzeBrain:
             labels_list.append(labels)
 
         # error ----------------------------------------------------------------
-        preds = torch.cat(pred_list, dim=0)
+        preds = torch.stack(pred_list, dim=0)
         labels = torch.cat(labels_list, dim=0)
 
         err = accuracy_fn(preds, labels, self.energy_fn)

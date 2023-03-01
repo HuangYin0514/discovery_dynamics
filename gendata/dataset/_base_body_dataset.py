@@ -24,31 +24,23 @@ class BaseBodyDataset(BaseDynamicsDataset):
         self.generate_random(sample_num, t, path)
 
     def generate_random(self, num, t, path):
-        x0 = self.random_config(num)  # (D, )
-        X = self.ode_solve_traj(x0, t).clone().detach()  # (T, D)
-        y = torch.stack(list(map(lambda x: self(None, x), X))).clone().detach()  # (T, D)
-        E = torch.stack([self.energy_fn(y) for y in X])
+
 
         for i in range(num):
-            # x0 = self.random_config(1).clone().detach()  # (D, )
-            # X = self.ode_solve_traj(x0, t).clone().detach()  # (T, D)
-            # y = self(None, X[0]).clone().detach()  # (T, D)
-            # E = self.energy_fn(X[0]).clone().detach()
+            x0 = self.random_config()  # (D, )
+            X = self.ode_solve_traj(x0, t) # (T, D)
+            tensor_X = torch.from_numpy(X).to(self.Dtype)
+            dX = self(None, tensor_X).clone().detach()  # (T, D)
+            E = self.energy_fn(tensor_X)
 
-            # dataset = {
-            #     'x0': x0.cpu().numpy(),
-            #     't': t.cpu().numpy(),
-            #     'X': X[0].cpu().numpy(),
-            #     'dX': y.cpu().numpy(),
-            #     'E': E.cpu().numpy()
-            # }
             dataset = {
-                'x0': x0[i,None].cpu().numpy(),
+                'x0': x0,
                 't': t.cpu().numpy(),
-                'X': X[i].cpu().numpy(),
-                'dX': y[i].cpu().numpy(),
-                'E': E[i].cpu().numpy()
+                'X': X,
+                'dX': dX.cpu().numpy(),
+                'E': E.cpu().numpy()
             }
+
 
             num_states = X.shape[-1]
             min_t = min(t)
@@ -57,7 +49,7 @@ class BaseBodyDataset(BaseDynamicsDataset):
             filename = osp.join(path, 'dataset_{}_{}_{}_{}_{}'.format(num_states, min_t,max_t,len_t,i))
             np.save(filename, dataset)
 
-            plt.plot(E[i].cpu().detach().numpy())
+            plt.plot(E.cpu().detach().numpy())
         plt.show()
 
     @abc.abstractmethod
