@@ -126,7 +126,7 @@ class DynamicsDataset(Dataset):
         return len(readed_data['x0'])
 
     def __getitem__(self, index):
-        data_path, states, min_t, max_t, len_t = self.dataset[index]
+        data_path, states, min_t, max_t, len_t = self.dataset[0]
         readed_data = read_data(data_path)
         x0 = readed_data['x0'][index]
         X = readed_data['X'][index]
