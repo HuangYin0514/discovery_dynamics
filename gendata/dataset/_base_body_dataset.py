@@ -29,7 +29,7 @@ class BaseBodyDataset(BaseDynamicsDataset):
         for i in range(num):
             x0 = self.random_config()  # (D, )
             X = self.ode_solve_traj(x0, t) # (T, D)
-            tensor_X = torch.from_numpy(X).to(self.Dtype)
+            tensor_X = torch.from_numpy(X).to(self.Dtype).to(self.Device)
             dX = self(None, tensor_X).clone().detach()  # (T, D)
             E = self.energy_fn(tensor_X)
 
