@@ -31,26 +31,28 @@ class HNN_pend2(LossNN):
         return torch.tensor(res, dtype=self.Dtype, device=self.Device)
 
     def forward(self, t, coords):
-        __x, __p = torch.chunk(coords, 2, dim=-1)
-        coords = torch.cat([__x % (2 * torch.pi), __p], dim=-1).clone().detach().requires_grad_(True)
+        with torch.enable_grad():
 
-        bs = coords.size(0)
-        q, p = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
+            __x, __p = torch.chunk(coords, 2, dim=-1)
+            coords = torch.cat([__x % (2 * torch.pi), __p], dim=-1).clone().detach().requires_grad_(True)
 
-        H = self.baseline(torch.cat([q, p], dim=-1))
+            bs = coords.size(0)
+            q, p = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
 
-        dqH = dfx(H.sum(), q)
-        dpH = dfx(H.sum(), p)
+            H = self.baseline(torch.cat([q, p], dim=-1))
 
-        # Calculate the Derivative ----------------------------------------------------------------
-        dq_dt = torch.zeros((bs, self.dof), dtype=self.Dtype, device=self.Device)
-        dp_dt = torch.zeros((bs, self.dof), dtype=self.Dtype, device=self.Device)
+            dqH = dfx(H.sum(), q)
+            dpH = dfx(H.sum(), p)
 
-        dq_dt = dpH
-        dp_dt = -dqH
+            # Calculate the Derivative ----------------------------------------------------------------
+            dq_dt = torch.zeros((bs, self.dof), dtype=self.Dtype, device=self.Device)
+            dp_dt = torch.zeros((bs, self.dof), dtype=self.Dtype, device=self.Device)
 
-        dz_dt = torch.cat([dq_dt, dp_dt], dim=-1)
-        return dz_dt
+            dq_dt = dpH
+            dp_dt = -dqH
+
+            dz_dt = torch.cat([dq_dt, dp_dt], dim=-1)
+            return dz_dt
 
     def integrate(self, X0, t):
         coords = ODESolver(self, X0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4

@@ -98,20 +98,22 @@ class MechanicsNN_pend2(LossNN):
         return Minv
 
     def forward(self, t, coords):
-        __x, __p = torch.chunk(coords, 2, dim=-1)
-        coords = torch.cat([__x % (2 * torch.pi), __p], dim=-1).clone().detach().requires_grad_(True)
+        with torch.enable_grad():
 
-        assert (coords.ndim == 2)
-        q, p = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
+            __x, __p = torch.chunk(coords, 2, dim=-1)
+            coords = torch.cat([__x % (2 * torch.pi), __p], dim=-1).clone().detach().requires_grad_(True)
 
-        Minv = self.Minv(q)
-        # dq_dt = v = Minv @ p
-        dq_dt = Minv.matmul(p.unsqueeze(-1)).squeeze(-1)
-        # dp_dt = A(q, v)
-        dp_dt = self.dynamics_net(q, p)
+            assert (coords.ndim == 2)
+            q, p = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
 
-        dz_dt = torch.cat([dq_dt, dp_dt], dim=-1)
-        return dz_dt
+            Minv = self.Minv(q)
+            # dq_dt = v = Minv @ p
+            dq_dt = Minv.matmul(p.unsqueeze(-1)).squeeze(-1)
+            # dp_dt = A(q, v)
+            dp_dt = self.dynamics_net(q, p)
+
+            dz_dt = torch.cat([dq_dt, dp_dt], dim=-1)
+            return dz_dt
 
     def integrate(self, X0, t):
         def angle_forward(t, coords):
