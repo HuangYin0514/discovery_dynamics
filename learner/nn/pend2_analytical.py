@@ -55,7 +55,6 @@ class Pend2_analytical(LossNN):
 
     def forward(self, t, coords):
         with torch.enable_grad():
-
             __x, __p = torch.chunk(coords, 2, dim=-1)
             coords = torch.cat([__x % (2 * torch.pi), __p], dim=-1).clone().detach().requires_grad_(True)
 
