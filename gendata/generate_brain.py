@@ -49,14 +49,13 @@ def gen_dataset(data_name, taskname, obj, dim, train_num, val_num,test_num,
     os.makedirs(val_path) if not os.path.exists(val_path) else None
     os.makedirs(test_path) if not os.path.exists(test_path) else None
 
-    print('Start generating dataset.')
-
     if download_data == 'True':
         print('Start downloading dataset.')
         download_file_from_google_drive(dataset.train_url, train_path)
         download_file_from_google_drive(dataset.val_url, val_path)
         download_file_from_google_drive(dataset.test_url, test_path)
-
-    dataset.gen_data(train_num, dataset.t, train_path)
-    dataset.gen_data(val_num, dataset.t, val_path)
-    dataset.gen_data(test_num, dataset.test_t, test_path)
+    else:
+        print('Start generating dataset.')
+        dataset.gen_data(train_num, dataset.t, train_path)
+        dataset.gen_data(val_num, dataset.t, val_path)
+        dataset.gen_data(test_num, dataset.test_t, test_path)
