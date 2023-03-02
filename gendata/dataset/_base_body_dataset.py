@@ -23,7 +23,7 @@ class BaseBodyDataset(BaseDynamicsDataset):
     def gen_data(self, sample_num, t, path):
         self.generate_random(sample_num, t, path)
 
-    def generate_random(self, num, t, path):
+    def generate_random(self, num, t, filename):
         x0 = self.random_config(num).clone().detach()  # (D, )
         X = self.ode_solve_traj(x0, t).clone().detach()  # (T, D)
         dX = torch.stack(list(map(lambda x: self(None, x), X))).clone().detach()  # (T, D)
@@ -41,12 +41,7 @@ class BaseBodyDataset(BaseDynamicsDataset):
             'E': E.cpu().numpy()
         }
 
-        num_states = X.shape[-1]
-        min_t = min(t)
-        max_t = max(t)
-        len_t = len(t)
 
-        filename = osp.join(path, 'dataset_{}_{}_{}_{}_{}.npy'.format(num, num_states, min_t, max_t, len_t))
         np.save(filename, dataset)
 
         return dataset
