@@ -38,14 +38,7 @@ class Pendulum2(BaseDynamicsDataset):
         self.val_dir = osp.join(self.dataset_dir, 'val')
         self.test_dir = osp.join(self.dataset_dir, 'test')
 
-        if download_data == 'True':
-            print('Start downloading dataset.')
-            os.makedirs(self.train_dir) if not os.path.exists(self.train_dir) else None
-            os.makedirs(self.val_dir) if not os.path.exists(self.val_dir) else None
-            os.makedirs(self.test_dir) if not os.path.exists(self.test_dir) else None
-            download_file_from_google_drive(self.train_url, self.train_dir)
-            download_file_from_google_drive(self.val_url, self.train_dir)
-            download_file_from_google_drive(self.test_url, self.train_dir)
+
 
         self._check_before_run()
 

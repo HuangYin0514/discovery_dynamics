@@ -30,7 +30,9 @@ class Pendulum2(BaseBodyDataset, nn.Module):
     def __init__(self, obj, dim, m=None, l=None, **kwargs):
         super(Pendulum2, self).__init__()
 
-        self.dataset_url = 'https://drive.google.com/file/d/1gFpZaOsaL8-ooXs6Cn-yfisT8U6S12Qk/view?usp=share_link'
+        self.train_url = 'https://drive.google.com/file/d/1kTP5WtPT78rX7HBcMo2BBU9ug6RGpZ8E/view?usp=share_link'
+        self.val_url = 'https://drive.google.com/file/d/1RXTP-fxTECHY6ZCP_rqkaL90k8EQd_f7/view?usp=share_link'
+        self.test_url = 'https://drive.google.com/file/d/1kTP5WtPT78rX7HBcMo2BBU9ug6RGpZ8E/view?usp=share_link'
 
         self.__init_dynamic_variable(obj, dim)
 
