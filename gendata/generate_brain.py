@@ -56,7 +56,6 @@ def gen_dataset(data_name, taskname, obj, dim, train_num, val_num, test_num,
     len_t = len(dataset.t)
     filename = 'dataset_{}_{}_{}_{}_{}.npy'.format(train_num, num_states, min_t, max_t, len_t)
     train_filename = osp.join(train_path, filename)
-    num_states = int(obj * dim)
     min_t = min(dataset.t)
     max_t = max(dataset.t)
     len_t = len(dataset.t)
