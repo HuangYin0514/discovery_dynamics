@@ -5,16 +5,15 @@
 @time: 2023/1/3 3:50 PM
 @desc:
 """
-import numpy as np
-import torch
-from torch import nn
+import glob
+import os
+import os.path as osp
 
-from ._base_body_dataset import BaseBodyDataset
-from ...integrator import ODESolver
-from ...utils import lazy_property, dfx
+from learner.data.datasets._bases import BaseDynamicsDataset
+from learner.utils import download_file_from_google_drive
 
 
-class Pendulum2(BaseBodyDataset, nn.Module):
+class Pendulum2(BaseDynamicsDataset):
     """
     Pendulum with 2 bodies
     Reference:
@@ -26,142 +25,68 @@ class Pendulum2(BaseBodyDataset, nn.Module):
     # dim: 1
     """
 
-    def __init__(self, train_num, test_num, obj, dim, m=None, l=None, **kwargs):
+    dataset_dir = ''
+
+    train_url = '1'
+    val_url = ''
+    test_url = ''
+
+    def __init__(self, root='',download_data=False, **kwargs):
         super(Pendulum2, self).__init__()
+        self.dataset_dir = osp.join(root, self.dataset_dir)
+        self.train_dir = osp.join(self.dataset_dir, 'train')
+        self.val_dir = osp.join(self.dataset_dir, 'val')
+        self.test_dir = osp.join(self.dataset_dir, 'test')
 
-        self.train_num = train_num
-        self.test_num = test_num
-        self.dataset_url = 'https://drive.google.com/file/d/15vl0NMdlknJehzQ1JWuEmcRZUEduFAhg/view?usp=share_link'
+        if download_data == 'True':
+            print('Start downloading dataset.')
+            os.makedirs(self.train_dir) if not os.path.exists(self.train_dir) else None
+            os.makedirs(self.val_dir) if not os.path.exists(self.val_dir) else None
+            os.makedirs(self.test_dir) if not os.path.exists(self.test_dir) else None
+            download_file_from_google_drive(self.train_url, self.train_dir)
+            download_file_from_google_drive(self.val_url, self.train_dir)
+            download_file_from_google_drive(self.test_url, self.train_dir)
 
-        self.__init_dynamic_variable(obj, dim)
+        self._check_before_run()
 
-    def __init_dynamic_variable(self, obj, dim):
-        self.m = [1 for i in range(obj)]
-        self.l = [1 for i in range(obj)]
-        self.g = 9.8
+        train = self._process_dir(self.train_dir)
+        val = self._process_dir(self.val_dir)
+        test = self._process_dir(self.test_dir)
 
-        self.obj = obj
-        self.dim = dim
-        self.dof = self.obj * self.dim  # degree of freedom
+        print("=> Pendulum2 loaded")
+        self.print_dataset_statistics('train', train)
+        self.print_dataset_statistics('val', val)
+        self.print_dataset_statistics('test', test)
 
-        self.dt = 0.1
+        self.train = train
+        self.val = val
+        self.test = test
 
-        t0 = 0.
-        t_end = 10.
-        _time_step = int((t_end - t0) / self.dt)
-        self.t = torch.linspace(t0, t_end, _time_step)
+    def _check_before_run(self):
+        """Check if all files are available before going deeper"""
+        if not osp.exists(self.dataset_dir):
+            raise RuntimeError("'{}' is not available".format(self.dataset_dir))
+        if not osp.exists(self.train_dir):
+            raise RuntimeError("'{}' is not available".format(self.train_dir))
+        if not osp.exists(self.val_dir):
+            raise RuntimeError("'{}' is not available".format(self.val_dir))
+        if not osp.exists(self.test_dir):
+            raise RuntimeError("'{}' is not available".format(self.test_dir))
 
-        t_end = 30.
-        dt = 0.01
-        _time_step = int((t_end - t0) / dt)
-        self.test_t = torch.linspace(t0, t_end, _time_step)
+    def _process_dir(self, dir_path, ):
+        data_paths = glob.glob(osp.join(dir_path, '*.npy'))
+        pattern = r'dataset_(\d+)_(\d+\.\d+)_(\d+\.\d+)_(\d+)_(\d+)\.npy'
 
-    @lazy_property
-    def J(self):
-        # [ 0, I]
-        # [-I, 0]
-        d = self._dof
-        res = np.eye(self._dof * 2, k=d) - np.eye(self._dof * 2, k=-d)
-        return torch.tensor(res).float()
+        dataset = []
+        for data_path in data_paths:
+            parts = data_path.split('/')
+            parts = parts[-1].split('.npy')[:-1]
+            dataset_info = parts[-1].split('_')
+            states = int(dataset_info[1])
+            min_t = float(dataset_info[2])
+            max_t = float(dataset_info[3])
+            len_t = int(dataset_info[4])
 
-    def forward(self, t, coords):
-        with torch.enable_grad():
-            __x, __p = torch.chunk(coords, 2, dim=-1)
-            coords = torch.cat([__x % (2 * torch.pi), __p], dim=-1).clone().detach().requires_grad_(True)
+            dataset.append((data_path, states, min_t, max_t, len_t))
 
-            coords = coords.clone().detach().requires_grad_(True)
-            bs = coords.size(0)
-            q, p = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
-
-            # Calculate the potential energy for i-th element ------------------------------------------------------------
-            U = self.potential(torch.cat([q, p], dim=-1))
-
-            # Calculate the kinetic --------------------------------------------------------------
-            T = self.kinetic(torch.cat([q, p], dim=-1))
-
-            # Calculate the Hamilton Derivative --------------------------------------------------------------
-            H = U + T
-            dqH = dfx(H.sum(), q)
-            dpH = dfx(H.sum(), p)
-
-            # Calculate the Derivative ----------------------------------------------------------------
-            dq_dt = torch.zeros((bs, self.dof), dtype=self.Dtype, device=self.Device)
-            dp_dt = torch.zeros((bs, self.dof), dtype=self.Dtype, device=self.Device)
-
-            dq_dt = dpH
-            dp_dt = -dqH
-
-            dz_dt = torch.cat([dq_dt, dp_dt], dim=-1)
-
-            return dz_dt
-
-    def M(self, x):
-        N = self.obj
-        M = torch.zeros((x.shape[0], N, N), dtype=self.Dtype, device=self.Device)
-        for i in range(N):
-            for k in range(N):
-                m_sum = 0
-                j = i if i >= k else k
-                for tmp in range(j, N):
-                    m_sum += 1.0
-                M[:, i, k] = torch.cos(x[:, i] - x[:, k]) * m_sum
-        return M
-
-    def Minv(self, x):
-        return torch.linalg.inv(self.M(x))
-
-    def kinetic(self, coords):
-        """Kinetic energy"""
-        s, num_states = coords.shape
-        assert num_states == self.dof * 2
-
-        q, p = torch.chunk(coords, 2, dim=-1)
-        T = 0.
-        M_inv = self.Minv(q)
-        v = torch.matmul(M_inv, p.unsqueeze(-1))
-        T = 0.5 * torch.matmul(p.unsqueeze(1), v).squeeze(-1).squeeze(-1)
-        return T
-
-    def potential(self, coords):
-        bs, num_states = coords.shape
-        assert num_states == self.dof * 2
-        q, p = torch.chunk(coords, 2, dim=-1)
-
-        U = 0.
-        y = 0.
-        for i in range(self.obj):
-            y = y - self.l[i] * torch.cos(q[:, i])
-            U = U + self.m[i] * self.g * y
-        return U
-
-    def energy_fn(self, coords):
-        """energy function """
-        H = self.kinetic(coords) + self.potential(coords)
-        return H
-
-    def random_config(self, num):
-        x0_list = []
-        for i in range(num):
-            max_momentum = 10.
-            x0 = torch.zeros((self.obj * 2))
-            for i in range(self.obj):
-                theta = (2 * np.pi) * torch.rand(1, ) + 0  # [0, 2pi]
-                momentum = (2 * torch.rand(1, ) - 1) * max_momentum  # [-1, 1]*max_momentum
-                x0[i] = theta
-                x0[i + self.obj] = momentum
-            x0_list.append(x0)
-        x0 = torch.stack(x0_list)
-        return x0.to(self.Device)
-
-    def ode_solve_traj(self, x0, t):
-        x0 = x0.to(self.Device)
-        t = t.to(self.Device)
-        # At small step sizes, the differential equations exhibit stiffness and the rk4 solver cannot solve
-        # the double pendulum task. Therefore, use dopri5 to generate training data.
-        if len(t) == len(self.test_t):
-            # test stages
-            x = ODESolver(self, x0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
-        else:
-            # train stages
-            x = ODESolver(self, x0, t, method='dopri5').permute(1, 0, 2)  # (T, D) dopri5 rk4
-        return x
+        return dataset

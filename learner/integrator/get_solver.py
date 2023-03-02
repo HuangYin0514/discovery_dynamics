@@ -5,8 +5,7 @@
 @time: 2023/1/7 10:39 AM
 @desc:
 """
-# from .torchdiffeq import odeint
-from .torchdiffeq import odeint_adjoint as odeint
+from .torchdiffeq import odeint
 
 
 def ODESolver(func, y0, t, method='dopri5', rtol=1e-7, atol=1e-9, **kwargs):

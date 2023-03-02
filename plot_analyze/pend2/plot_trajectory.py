@@ -42,7 +42,7 @@ def plot_pend_trajectory(true_q, HnnModScale_q, baseline_q, HNN_q, ModLaNet_q):
     fig = plt.figure(figsize=(16, 4), dpi=DPI)
 
     tpad = 4
-    time = time = min(300, len(truth_pos) - 1)
+    time = time = min(200, len(truth_pos) - 1)
     legendsize = 12
 
     # plot ground truth -----------------------------------------------------------------
@@ -71,7 +71,7 @@ def plot_pend_trajectory(true_q, HnnModScale_q, baseline_q, HNN_q, ModLaNet_q):
                 label='_nolegend_', alpha=1, zorder=3)
 
     plt.xlim(min(truth_pos[:, 2]) - 1, max(truth_pos[:, 2]) + 1)
-    plt.ylim(min(truth_pos[:, 3]), max(truth_pos[:, 3]) + 2)
+    plt.ylim(min(truth_pos[:, 3]), max(truth_pos[:, 3]) + 1)
     plt.legend(fontsize=legendsize)
 
     # plot SMHNet  -----------------------------------------------------------------
@@ -110,7 +110,7 @@ def plot_pend_trajectory(true_q, HnnModScale_q, baseline_q, HNN_q, ModLaNet_q):
                 label='_nolegend_', alpha=1, zorder=3)
 
     plt.xlim(min(truth_pos[:, 2]) - 1, max(truth_pos[:, 2]) + 1)
-    plt.ylim(min(truth_pos[:, 3]), max(truth_pos[:, 3]) + 2)
+    plt.ylim(min(truth_pos[:, 3]), max(truth_pos[:, 3]) + 1)
     plt.legend(fontsize=legendsize)
 
     # plot HNN  -----------------------------------------------------------------
@@ -142,7 +142,7 @@ def plot_pend_trajectory(true_q, HnnModScale_q, baseline_q, HNN_q, ModLaNet_q):
                 label='_nolegend_', alpha=1, zorder=3)
 
     plt.xlim(min(truth_pos[:, 2]) - 1, max(truth_pos[:, 2]) + 1)
-    plt.ylim(min(truth_pos[:, 3]), max(truth_pos[:, 3]) + 2)
+    plt.ylim(min(truth_pos[:, 3]), max(truth_pos[:, 3]) + 1)
     plt.legend(fontsize=legendsize)
 
     # # plot baseline_pos  -----------------------------------------------------------------
@@ -179,7 +179,7 @@ def plot_pend_trajectory(true_q, HnnModScale_q, baseline_q, HNN_q, ModLaNet_q):
                 label='_nolegend_', alpha=1, zorder=3)
 
     plt.xlim(min(truth_pos[:, 2]) - 1, max(truth_pos[:, 2]) + 1)
-    plt.ylim(min(truth_pos[:, 3]), max(truth_pos[:, 3]) + 2)
+    plt.ylim(min(truth_pos[:, 3]), max(truth_pos[:, 3]) + 1)
     plt.legend(fontsize=legendsize)
 
     # plot modlanet  -----------------------------------------------------------------

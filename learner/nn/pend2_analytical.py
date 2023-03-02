@@ -54,51 +54,49 @@ class Pend2_analytical(LossNN):
         return torch.linalg.inv(self.M(x))
 
     def forward(self, t, coords):
-        with torch.enable_grad():
-            __x, __p = torch.chunk(coords, 2, dim=-1)
-            coords = torch.cat([__x % (2 * torch.pi), __p], dim=-1).clone().detach().requires_grad_(True)
+        __x, __p = torch.chunk(coords, 2, dim=-1)
+        coords = torch.cat([__x % (2 * torch.pi), __p], dim=-1).clone().detach().requires_grad_(True)
 
-            coords = coords.clone().detach().requires_grad_(True)
-            bs = coords.size(0)
-            q, p = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
+        bs = coords.size(0)
+        q, p = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
 
-            # Calculate the potential energy for i-th element ------------------------------------------------------------
-            U = 0.
-            y = 0.
-            for i in range(self.obj):
-                y = y - torch.cos(q[:, i])
-                U = U + 9.8 * y
+        # Calculate the potential energy for i-th element ------------------------------------------------------------
+        U = 0.
+        y = 0.
+        for i in range(self.obj):
+            y = y - torch.cos(q[:, i])
+            U = U + 9.8 * y
 
-            # Calculate the kinetic --------------------------------------------------------------
-            # T = self.dataset.kinetic(torch.cat([x, p], dim=-1).reshape(-1))
+        # Calculate the kinetic --------------------------------------------------------------
+        # T = self.dataset.kinetic(torch.cat([x, p], dim=-1).reshape(-1))
 
-            T = 0.
-            v = torch.matmul(self.Minv(q), p.unsqueeze(-1))
-            T = 0.5 * torch.matmul(p.unsqueeze(1), v).squeeze(-1).squeeze(-1)
+        T = 0.
+        v = torch.matmul(self.Minv(q), p.unsqueeze(-1))
+        T = 0.5 * torch.matmul(p.unsqueeze(1), v).squeeze(-1).squeeze(-1)
 
-            # Calculate the Hamilton Derivative --------------------------------------------------------------
-            H = U + T
-            dqH = dfx(H.sum(), q)
-            dpH = dfx(H.sum(), p)
+        # Calculate the Hamilton Derivative --------------------------------------------------------------
+        H = U + T
+        dqH = dfx(H.sum(), q)
+        dpH = dfx(H.sum(), p)
 
-            v_global = self.Minv(q).matmul(p.unsqueeze(-1)).squeeze(-1)
+        v_global = self.Minv(q).matmul(p.unsqueeze(-1)).squeeze(-1)
 
-            # Calculate the Derivative ----------------------------------------------------------------
-            # dq_dt = torch.zeros((bs, self.dof), dtype=self.Dtype, device=self.Device)
-            # dp_dt = torch.zeros((bs, self.dof), dtype=self.Dtype, device=self.Device)
-            # for i in range(self.obj):
-            #     dq_dt[:, i * self.dim:(i + 1) * self.dim] = dpH[:, i * self.dim: (i + 1) * self.dim]
-            #     dp_dt[:, i * self.dim:(i + 1) * self.dim] = -dqH[:, i * self.dim:(i + 1) * self.dim]
-            # dz_dt = torch.cat([dq_dt, dp_dt], dim=-1)
-            dq_dt = torch.zeros((bs, self.dof), dtype=self.Dtype)
-            dp_dt = torch.zeros((bs, self.dof), dtype=self.Dtype)
+        # Calculate the Derivative ----------------------------------------------------------------
+        # dq_dt = torch.zeros((bs, self.dof), dtype=self.Dtype, device=self.Device)
+        # dp_dt = torch.zeros((bs, self.dof), dtype=self.Dtype, device=self.Device)
+        # for i in range(self.obj):
+        #     dq_dt[:, i * self.dim:(i + 1) * self.dim] = dpH[:, i * self.dim: (i + 1) * self.dim]
+        #     dp_dt[:, i * self.dim:(i + 1) * self.dim] = -dqH[:, i * self.dim:(i + 1) * self.dim]
+        # dz_dt = torch.cat([dq_dt, dp_dt], dim=-1)
+        dq_dt = torch.zeros((bs, self.dof), dtype=self.Dtype)
+        dp_dt = torch.zeros((bs, self.dof), dtype=self.Dtype)
 
-            dq_dt = dpH
-            dp_dt = -dqH
+        dq_dt = dpH
+        dp_dt = -dqH
 
-            dz_dt = torch.cat([dq_dt, dp_dt], dim=-1)
-            return dz_dt
+        dz_dt = torch.cat([dq_dt, dp_dt], dim=-1)
+        return dz_dt
 
     def integrate(self, X0, t):
-        out = ODESolver(self, X0, t, method='dopri5').permute(1, 0, 2)  # (T, D) dopri5 rk4
+        out = ODESolver(self, X0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
         return out

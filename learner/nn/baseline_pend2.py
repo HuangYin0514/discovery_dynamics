@@ -20,12 +20,10 @@ class Baseline_pend2(LossNN):
                             act=nn.Tanh)
 
     def forward(self, t, coords):
-        with torch.enable_grad():
+        __x, __p = torch.chunk(coords, 2, dim=-1)
+        coords = torch.cat([__x % (2 * torch.pi), __p], dim=-1).clone().detach().requires_grad_(True)
 
-            __x, __p = torch.chunk(coords, 2, dim=-1)
-            coords = torch.cat([__x % (2 * torch.pi), __p], dim=-1).clone().detach().requires_grad_(True)
-
-            out = self.baseline(coords)
+        out = self.baseline(coords)
         return out
 
     def integrate(self, X0, t):

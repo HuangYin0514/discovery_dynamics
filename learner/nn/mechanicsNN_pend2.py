@@ -55,14 +55,14 @@ class MechanicsNN_pend2(LossNN):
     Mechanics neural networks.
     """
 
-    def __init__(self, obj, dim, num_layers=1, hidden_dim=200):
+    def __init__(self, obj, dim):
         super(MechanicsNN_pend2, self).__init__()
 
         q_dim = int(obj * dim)
         p_dim = int(obj * dim)
 
-        self.mass_net = MassNet(q_dim=q_dim, num_layers=num_layers, hidden_dim=hidden_dim)
-        self.dynamics_net = DynamicsNet(q_dim=q_dim, p_dim=p_dim, num_layers=num_layers, hidden_dim=hidden_dim)
+        self.mass_net = MassNet(q_dim=q_dim, num_layers=1, hidden_dim=50)
+        self.dynamics_net = DynamicsNet(q_dim=q_dim, p_dim=p_dim, num_layers=1, hidden_dim=256)
 
     def tril_Minv(self, q):
         """
@@ -98,25 +98,21 @@ class MechanicsNN_pend2(LossNN):
         return Minv
 
     def forward(self, t, coords):
-        with torch.enable_grad():
+        __x, __p = torch.chunk(coords, 2, dim=-1)
+        coords = torch.cat([__x % (2 * torch.pi), __p], dim=-1).clone().detach().requires_grad_(True)
 
-            __x, __p = torch.chunk(coords, 2, dim=-1)
-            coords = torch.cat([__x % (2 * torch.pi), __p], dim=-1).clone().detach().requires_grad_(True)
+        assert (coords.ndim == 2)
+        q, p = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
 
-            assert (coords.ndim == 2)
-            q, p = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
+        Minv = self.Minv(q)
+        # dq_dt = v = Minv @ p
+        dq_dt = Minv.matmul(p.unsqueeze(-1)).squeeze(-1)
+        # dp_dt = A(q, v)
+        dp_dt = self.dynamics_net(q, p)
 
-            Minv = self.Minv(q)
-            # dq_dt = v = Minv @ p
-            dq_dt = Minv.matmul(p.unsqueeze(-1)).squeeze(-1)
-            # dp_dt = A(q, v)
-            dp_dt = self.dynamics_net(q, p)
-
-            dz_dt = torch.cat([dq_dt, dp_dt], dim=-1)
-            return dz_dt
+        dz_dt = torch.cat([dq_dt, dp_dt], dim=-1)
+        return dz_dt
 
     def integrate(self, X0, t):
-
         coords = ODESolver(self, X0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
-
         return coords

@@ -25,15 +25,15 @@ class GlobalPositionTransform(nn.Module):
             nn.Linear(input_dim, input_dim * 6),
             nn.Tanh()
         )
-        self.hidden_layer = nn.ModuleList([hidden_bock for _ in range(5)])
+        self.hidden_layer = nn.ModuleList([hidden_bock for _ in range(6)])
 
-        self.mlp = MLP(input_dim=input_dim * 6 * 5 + 2 * input_dim, hidden_dim=hidden_dim, output_dim=output_dim,
+        self.mlp = MLP(input_dim=input_dim * 6 * 6 + 2 * input_dim, hidden_dim=hidden_dim, output_dim=output_dim,
                        num_layers=num_layers,
                        act=act)
 
     def forward(self, x, x_0):
         input_list = []
-        scale_list = [x, 2 * x, 3 * x, 4 * x, 5 * x]
+        scale_list = [1 / 8 * x, 1 / 4 * x, 1 / 2 * x, x, 2 * x, 4 * x, 8 * x]
         for idx in range(len(self.hidden_layer)):
             input = scale_list[idx]
             output = self.hidden_layer[idx](input)
@@ -52,17 +52,17 @@ class MassNet(nn.Module):
             nn.Linear(input_dim, input_dim * 6),
             nn.Tanh()
         )
-        self.hidden_layer = nn.ModuleList([hidden_bock for _ in range(5)])
+        self.hidden_layer = nn.ModuleList([hidden_bock for _ in range(6)])
 
         self.net = nn.Sequential(
-            MLP(input_dim=input_dim * 6 * 5 + 2 * input_dim, hidden_dim=hidden_dim, output_dim=input_dim * input_dim,
+            MLP(input_dim=input_dim * 6 * 6 + 2 * input_dim, hidden_dim=hidden_dim, output_dim=input_dim * input_dim,
                 num_layers=num_layers, act=act),
             ReshapeNet(-1, input_dim, input_dim)
         )
 
     def forward(self, x):
         input_list = []
-        scale_list = [x, 2 * x, 3 * x, 4 * x, 5 * x]
+        scale_list = [1 / 8 * x, 1 / 4 * x, 1 / 2 * x, x, 2 * x, 4 * x, 8 * x]
         for idx in range(len(self.hidden_layer)):
             input = scale_list[idx]
             output = self.hidden_layer[idx](input)
@@ -82,19 +82,21 @@ class PotentialEnergyCell(nn.Module):
             nn.Linear(input_dim, input_dim * 6),
             nn.Tanh()
         )
-        self.hidden_layer = nn.ModuleList([hidden_bock for _ in range(5)])
+        self.hidden_layer = nn.ModuleList([hidden_bock for _ in range(6)])
 
-        self.mlp = MLP(input_dim=input_dim * 6 * 5, hidden_dim=hidden_dim, output_dim=output_dim,
+        self.mlp = MLP(input_dim=input_dim * 6 * 6 + 2 * input_dim, hidden_dim=hidden_dim, output_dim=output_dim,
                        num_layers=num_layers,
                        act=act)
 
     def forward(self, x):
         input_list = []
-        scale_list = [x, 2 * x, 3 * x, 4 * x, 5 * x]
+        scale_list = [1 / 8 * x, 1 / 4 * x, 1 / 2 * x, x, 2 * x, 4 * x, 8 * x]
         for idx in range(len(self.hidden_layer)):
             input = scale_list[idx]
             output = self.hidden_layer[idx](input)
             input_list.append(output)
+        input_list.append(torch.sin(x))
+        input_list.append(torch.cos(x))
         x = torch.cat(input_list, dim=1)
         y = self.mlp(x)
         return y
@@ -172,65 +174,63 @@ class HnnModScale_pend2(LossNN):
         return Minv
 
     def forward(self, t, coords):
-        with torch.enable_grad():
+        __x, __p = torch.chunk(coords, 2, dim=-1)
+        coords = torch.cat([__x % (2 * torch.pi), __p], dim=-1).clone().detach().requires_grad_(True)
 
-            __x, __p = torch.chunk(coords, 2, dim=-1)
-            coords = torch.cat([__x % (2 * torch.pi), __p], dim=-1).clone().detach().requires_grad_(True)
+        bs = coords.size(0)
+        x, p = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
 
-            bs = coords.size(0)
-            x, p = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
+        # position transformations ----------------------------------------------------------------
+        x_global = torch.zeros((bs, self.global_dof), dtype=self.Dtype, device=self.Device)
+        x_origin = torch.zeros((bs, self.global_dof), dtype=self.Dtype, device=self.Device)
+        for i in range(self.obj):
+            for j in range(i):
+                x_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim] += x_global[:, (j) * self.global_dim:
+                                                                                             (j + 1) * self.global_dim]
+            x_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = self.global4x(
+                x[:, (i) * self.dim: (i + 1) * self.dim],
+                x_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim])
 
-            # position transformations ----------------------------------------------------------------
-            x_global = torch.zeros((bs, self.global_dof), dtype=self.Dtype, device=self.Device)
-            x_origin = torch.zeros((bs, self.global_dof), dtype=self.Dtype, device=self.Device)
-            for i in range(self.obj):
-                for j in range(i):
-                    x_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim] += x_global[:,
-                                                                                     (j) * self.global_dim:
-                                                                                     (j + 1) * self.global_dim]
-                x_global[:, (i) * self.global_dim: (i + 1) * self.global_dim] = self.global4x(
-                    x[:, (i) * self.dim: (i + 1) * self.dim],
-                    x_origin[:, (i) * self.global_dim: (i + 1) * self.global_dim])
+        # Calculate the potential energy for i-th element ------------------------------------------------------------
+        U = 0.
+        for i in range(self.obj):
+            U += self.co1 * self.mass(
+                self.Potential1(x_global[:, i * self.global_dim: (i + 1) * self.global_dim]))
 
-            # Calculate the potential energy for i-th element ------------------------------------------------------------
-            U = 0.
-            for i in range(self.obj):
-                U += self.co1 * self.mass(
-                    self.Potential1(x_global[:, i * self.global_dim: (i + 1) * self.global_dim]))
+        for i in range(self.obj):
+            for j in range(i):
+                x_ij = torch.cat(
+                    [x_global[:, i * self.global_dim: (i + 1) * self.global_dim],
+                     x_global[:, j * self.global_dim: (j + 1) * self.global_dim]],
+                    dim=1)
+                x_ji = torch.cat(
+                    [x_global[:, j * self.global_dim: (j + 1) * self.global_dim],
+                     x_global[:, i * self.global_dim: (i + 1) * self.global_dim]],
+                    dim=1)
+                U += self.co2 * (
+                        0.5 * self.mass(self.Potential2(x_ij)) + 0.5 * self.mass(self.Potential2(x_ji)))
 
-            for i in range(self.obj):
-                for j in range(i):
-                    x_ij = torch.cat(
-                        [x_global[:, i * self.global_dim: (i + 1) * self.global_dim],
-                         x_global[:, j * self.global_dim: (j + 1) * self.global_dim]],
-                        dim=1)
-                    x_ji = torch.cat(
-                        [x_global[:, j * self.global_dim: (j + 1) * self.global_dim],
-                         x_global[:, i * self.global_dim: (i + 1) * self.global_dim]],
-                        dim=1)
-                    U += self.co2 * (
-                            0.5 * self.mass(self.Potential2(x_ij)) + 0.5 * self.mass(self.Potential2(x_ji)))
+        # Calculate the kinetic --------------------------------------------------------------
+        T = 0.
+        T = (0.5 * p.unsqueeze(1) @ self.Minv(x) @ p.unsqueeze(-1)).squeeze(-1)
 
-            # Calculate the kinetic --------------------------------------------------------------
-            T = 0.
-            T = (0.5 * p.unsqueeze(1) @ self.Minv(x) @ p.unsqueeze(-1)).squeeze(-1)
+        # Calculate the Hamilton Derivative --------------------------------------------------------------
+        H = U + T
+        dqH = dfx(H.sum(), x)
+        dpH = dfx(H.sum(), p)
 
-            # Calculate the Hamilton Derivative --------------------------------------------------------------
-            H = U + T
-            dqH = dfx(H.sum(), x)
-            dpH = dfx(H.sum(), p)
+        v_global = self.Minv(x).matmul(p.unsqueeze(-1)).squeeze(-1)
 
-            v_global = self.Minv(x).matmul(p.unsqueeze(-1)).squeeze(-1)
+        # Calculate the Derivative ----------------------------------------------------------------
+        dq_dt = torch.zeros((bs, self.dof), dtype=self.Dtype, device=self.Device)
+        dp_dt = torch.zeros((bs, self.dof), dtype=self.Dtype, device=self.Device)
+        for i in range(self.obj):
+            # dq_dt[:, i * self.dim:(i + 1) * self.dim] = v_global[:, i * self.dim: (i + 1) * self.dim]
+            dq_dt[:, i * self.dim:(i + 1) * self.dim] = v_global[:, i * self.dim: (i + 1) * self.dim]
+            dp_dt[:, i * self.dim:(i + 1) * self.dim] = -dqH[:, i * self.dim:(i + 1) * self.dim]
+        dz_dt = torch.cat([dq_dt, dp_dt], dim=-1)
 
-            # Calculate the Derivative ----------------------------------------------------------------
-            dq_dt = torch.zeros((bs, self.dof), dtype=self.Dtype, device=self.Device)
-            dp_dt = torch.zeros((bs, self.dof), dtype=self.Dtype, device=self.Device)
-            for i in range(self.obj):
-                dq_dt[:, i * self.dim:(i + 1) * self.dim] = v_global[:, i * self.dim: (i + 1) * self.dim]
-                dp_dt[:, i * self.dim:(i + 1) * self.dim] = -dqH[:, i * self.dim:(i + 1) * self.dim]
-            dz_dt = torch.cat([dq_dt, dp_dt], dim=-1)
-
-            return dz_dt
+        return dz_dt
 
     def integrate(self, X0, t):
         out = ODESolver(self, X0, t, method='rk4').permute(1, 0, 2)  # (T, D)
