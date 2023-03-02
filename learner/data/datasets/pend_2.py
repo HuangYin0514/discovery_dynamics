@@ -75,18 +75,19 @@ class Pendulum2(BaseDynamicsDataset):
 
     def _process_dir(self, dir_path, ):
         data_paths = glob.glob(osp.join(dir_path, '*.npy'))
-        pattern = r'dataset_(\d+)_(\d+\.\d+)_(\d+\.\d+)_(\d+)_(\d+)\.npy'
+        pattern = r'dataset_(\d+)_(\d+)_(\d+\.\d+)_(\d+\.\d+)_(\d+)_(\d+)\.npy'
 
         dataset = []
         for data_path in data_paths:
             parts = data_path.split('/')
             parts = parts[-1].split('.npy')[:-1]
             dataset_info = parts[-1].split('_')
-            states = int(dataset_info[1])
-            min_t = float(dataset_info[2])
-            max_t = float(dataset_info[3])
-            len_t = int(dataset_info[4])
+            num_train_traj = int(dataset_info[1])
+            states = int(dataset_info[2])
+            min_t = float(dataset_info[3])
+            max_t = float(dataset_info[4])
+            len_t = int(dataset_info[5])
 
-            dataset.append((data_path, states, min_t, max_t, len_t))
+            dataset.append((data_path, num_train_traj,states, min_t, max_t, len_t))
 
         return dataset

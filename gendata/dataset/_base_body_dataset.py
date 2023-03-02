@@ -11,7 +11,6 @@ import os.path as osp
 import numpy as np
 import torch
 from matplotlib import pyplot as plt
-from tqdm import tqdm
 
 from learner.data.datasets._bases import BaseDynamicsDataset
 from learner.integrator import ODESolver
@@ -47,7 +46,7 @@ class BaseBodyDataset(BaseDynamicsDataset):
         max_t = max(t)
         len_t = len(t)
 
-        filename = osp.join(path, 'dataset_{}_{}_{}_{}.npy'.format(num_states, min_t, max_t, len_t))
+        filename = osp.join(path, 'dataset_{}_{}_{}_{}_{}.npy'.format(num, num_states, min_t, max_t, len_t))
         np.save(filename, dataset)
 
         return dataset
