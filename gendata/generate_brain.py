@@ -50,7 +50,7 @@ def gen_dataset(data_name, taskname, obj, dim, train_num, val_num, test_num,
     os.makedirs(val_path) if not os.path.exists(val_path) else None
     os.makedirs(test_path) if not os.path.exists(test_path) else None
 
-    num_states = int(obj * dim*2)
+    num_states = int(obj * dim * 2)
     min_t = min(dataset.t)
     max_t = max(dataset.t)
     len_t = len(dataset.t)
