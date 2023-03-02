@@ -32,7 +32,6 @@ parser.add_argument('--dim', default=1, type=int, help='coordinate dimension')
 parser.add_argument('--data_name', default='Pendulum2', type=str, help='choose dataset')
 parser.add_argument('--train_num', default=0, type=int, help='the number of train sampling trajectories')
 parser.add_argument('--test_num', default=0, type=int, help='the number of test sampling trajectories')
-parser.add_argument('--download_data', default='False', type=str, help='Download dataset from Internet')
 parser.add_argument('--num_workers', default=0, type=int, help='how many subprocesses to use for data loading. ')
 
 # net
@@ -72,7 +71,6 @@ def main():
         'taskname': args.taskname,
         'data_name': args.data_name,
         'dataset_path': './outputs/data/dataset_' + args.data_name,
-        'download_data': args.download_data,
         'num_workers': args.num_workers,
         'dtype': args.dtype,
         'device': device
