@@ -14,7 +14,7 @@ from learner.integrator import ODESolver
 from learner.utils import dfx
 
 
-class Pendulum2_L_constrant( BaseBodyDataset,nn.Module):
+class Pendulum2_L_constrant(BaseBodyDataset, nn.Module):
     """
     Pendulum with 2 bodies
     Reference:
@@ -40,21 +40,21 @@ class Pendulum2_L_constrant( BaseBodyDataset,nn.Module):
         self.dim = dim
         self.dof = self.obj * self.dim  # degree of freedom
 
-        self.dt = 0.01
+        self.dt = 0.0001
 
         t0 = 0.
-        t_end = 3.
+        t_end = 10.
         _time_step = int((t_end - t0) / self.dt)
         self.t = torch.linspace(t0, t_end, _time_step)
 
-        t_end = 3.
+        t_end = 10.
         dt = 0.01
         _time_step = int((t_end - t0) / dt)
         self.test_t = torch.linspace(t0, t_end, _time_step)
 
     def forward(self, t, coords):
-        __x, __p = torch.chunk(coords, 2, dim=-1)
-        coords = torch.cat([__x % (2 * torch.pi), __p], dim=-1).clone().detach().requires_grad_(True)
+        # __x, __p = torch.chunk(coords, 2, dim=-1)
+        # coords = torch.cat([__x % (2 * torch.pi), __p], dim=-1).clone().detach().requires_grad_(True)
 
         coords = coords.clone().detach().requires_grad_(True)
         bs = coords.size(0)
@@ -102,9 +102,9 @@ class Pendulum2_L_constrant( BaseBodyDataset,nn.Module):
 
         T = 0.
         vx, vy = 0., 0.
-        for i in range(self.dof):
-            vx = vx + self.l[i] * v[:, i] * torch.cos(x[:, i])
-            vy = vy + self.l[i] * v[:, i] * torch.sin(x[:, i])
+        for i in range(self.obj):
+            vx = coords[:, self.dof + i * self.dim]
+            vy = coords[:, self.dof + i * self.dim + 1]
             T = T + 0.5 * self.m[i] * (torch.pow(vx, 2) + torch.pow(vy, 2))
         return T
 
@@ -114,7 +114,7 @@ class Pendulum2_L_constrant( BaseBodyDataset,nn.Module):
         U = 0.
         y = 0.
         for i in range(self.obj):
-            y = y - self.l[i] * torch.cos(coords[:, i])
+            y = coords[:, i * self.dim + 1]
             U = U + self.m[i] * self.g * y
         return U
 
@@ -123,20 +123,38 @@ class Pendulum2_L_constrant( BaseBodyDataset,nn.Module):
         eng = self.kinetic(coords) + self.potential(coords)
         return eng
 
+    def body2globalCoords(self, coords):
+        vx, vy = 0., 0.
+        x, y = 0., 0.
+        y0 = np.zeros(self.dof * 2)
+
+        angle_coords_len = int(len(coords) / 2)
+        for i in range(self.obj):
+            x = x + self.l[i] * np.sin(coords[i])
+            y = y - self.l[i] * np.cos(coords[i])
+            vx = vx + self.l[i] * coords[angle_coords_len + i] * np.cos(coords[i])
+            vy = vy + self.l[i] * coords[angle_coords_len + i] * np.sin(coords[i])
+
+            y0[i * self.dim] = x
+            y0[i * self.dim + 1] = y
+            y0[self.dof + i * self.dim] = vx
+            y0[self.dof + i * self.dim + 1] = vy
+        return y0
+
     def random_config(self, num):
         x0_list = []
         for i in range(num):
-            max_momentum = 10.
+            max_momentum = 10
             y0 = np.zeros(self.obj * 2)
             for i in range(self.obj):
                 theta = (2 * np.random.rand()) * np.pi
                 momentum = (2 * np.random.rand() - 1) * max_momentum
                 y0[i] = theta
                 y0[i + self.obj] = momentum
+            y0 = self.body2globalCoords(y0)
             x0_list.append(y0)
         x0 = np.stack(x0_list)
         return torch.tensor(x0, dtype=self.Dtype, device=self.Device)
-
 
     def ode_solve_traj(self, x0, t):
         x0 = x0.to(self.Device)

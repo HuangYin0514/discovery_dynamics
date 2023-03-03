@@ -6,7 +6,6 @@
 @desc:
 """
 import abc
-import os.path as osp
 
 import numpy as np
 import torch
@@ -31,6 +30,20 @@ class BaseBodyDataset(BaseDynamicsDataset):
 
         for i in range(num):
             plt.plot(E[i].cpu().detach().numpy())
+
+            X = X[i].cpu().detach().numpy()
+            x1 = X[:, 0]
+            y1 = X[:, 1]
+            x2 = X[:, 2]
+            y2 = X[:, 3]
+
+            fig, ax = plt.subplots(figsize=(5, 5))
+            ax.plot(x1, y1, 'b', label='m1')
+            ax.plot(x2, y2, 'r', label='m2')
+            ax.set_xlabel('x')
+            ax.set_ylabel('y')
+            ax.legend()
+
         plt.show()
 
         dataset = {
@@ -40,7 +53,6 @@ class BaseBodyDataset(BaseDynamicsDataset):
             'dX': dX.cpu().numpy(),
             'E': E.cpu().numpy()
         }
-
 
         np.save(filename, dataset)
 
