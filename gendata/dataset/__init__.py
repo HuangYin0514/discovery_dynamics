@@ -7,3 +7,17 @@
 """
 from .pend_2 import Pendulum2
 from .pend_2_L import Pendulum2_L
+from .pend_2_L_constrant import Pendulum2_L_constrant
+
+__dataset_factory = {
+    'Pendulum2': Pendulum2,
+    'Pendulum2_L': Pendulum2_L,
+    'Pendulum2_L_constrant':Pendulum2_L_constrant
+}
+
+
+def choose_dataset(dataset_name, obj, dim, **kwargs):
+    if dataset_name not in __dataset_factory.keys():
+        raise ValueError('Dataset \'{}\' is not implemented'.format(dataset_name))
+    dataset = __dataset_factory[dataset_name](obj, dim)
+    return dataset
