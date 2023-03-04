@@ -15,11 +15,19 @@ from learner.utils import dfx
 
 
 class Pendulum2_L_constrant(BaseBodyDataset, nn.Module):
+    """
+    Pendulum with 2 bodies
+    Reference:
+    # ref: Simplifying Hamiltonian and Lagrangian Neural Networks via Explicit Constraints
+    # URL: https://proceedings.neurips.cc/paper/2020/file/9f655cc8884fda7ad6d8a6fb15cc001e-Paper.pdf
+    Dataset statistics:
+    # type: hamilton
+    # obj: 2
+    # dim: 1
+    """
 
     def __init__(self, obj, dim, m=None, l=None, **kwargs):
         super(Pendulum2_L_constrant, self).__init__()
-
-        self.dataset_url = ''
 
         self.__init_dynamic_variable(obj, dim)
 
@@ -32,20 +40,22 @@ class Pendulum2_L_constrant(BaseBodyDataset, nn.Module):
         self.dim = dim
         self.dof = self.obj * self.dim  # degree of freedom
 
-        self.dt = 0.05
+        self.dt = 0.0001
 
         t0 = 0.
-        t_end = 3.
+        t_end = 10.
         _time_step = int((t_end - t0) / self.dt)
         self.t = torch.linspace(t0, t_end, _time_step)
 
-        t_end = 15.
-        _time_step = int((t_end - t0) / self.dt)
+        t_end = 10.
+        dt = 0.01
+        _time_step = int((t_end - t0) / dt)
         self.test_t = torch.linspace(t0, t_end, _time_step)
 
-        self.k = 1  # body equation parameter
-
     def forward(self, t, coords):
+        # __x, __p = torch.chunk(coords, 2, dim=-1)
+        # coords = torch.cat([__x % (2 * torch.pi), __p], dim=-1).clone().detach().requires_grad_(True)
+
         coords = coords.clone().detach().requires_grad_(True)
         bs = coords.size(0)
         x, v = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
@@ -66,11 +76,17 @@ class Pendulum2_L_constrant(BaseBodyDataset, nn.Module):
 
         for i in range(self.dof):
             dvidvL = dfx(dvL[:, i].sum(), v)
-            dvdvL[:, i, :] += dvidvL
+            if dvidvL is None:
+                break
+            else:
+                dvdvL[:, i, :] += dvidvL
 
         for i in range(self.dof):
             dxidvL = dfx(dvL[:, i].sum(), x)
-            dxdvL[:, i, :] += dxidvL
+            if dxidvL is None:
+                break
+            else:
+                dxdvL[:, i, :] += dxidvL
 
         dvdvL_inv = torch.linalg.inv(dvdvL)
 
@@ -80,13 +96,16 @@ class Pendulum2_L_constrant(BaseBodyDataset, nn.Module):
 
     def kinetic(self, coords):
         """Kinetic energy"""
-        s, num_states = coords.shape
+        bs, num_states = coords.shape
         assert num_states == self.dof * 2
         x, v = torch.chunk(coords, 2, dim=1)
 
         T = 0.
+        vx, vy = 0., 0.
         for i in range(self.obj):
-            T = T + 0.5 * self.m[i] * torch.sum(v[:, 2 * i: 2 * i + 2] ** 2, dim=1)
+            vx = coords[:, self.dof + i * self.dim]
+            vy = coords[:, self.dof + i * self.dim + 1]
+            T = T + 0.5 * self.m[i] * (torch.pow(vx, 2) + torch.pow(vy, 2))
         return T
 
     def potential(self, coords):
@@ -132,9 +151,7 @@ class Pendulum2_L_constrant(BaseBodyDataset, nn.Module):
                 momentum = (2 * np.random.rand() - 1) * max_momentum
                 y0[i] = theta
                 y0[i + self.obj] = momentum
-            # y0 = self.body2globalCoords(y0)
-
-            y0 = [1, 0, 2, 0, 0, 0, 0, 0]
+            y0 = self.body2globalCoords(y0)
             x0_list.append(y0)
         x0 = np.stack(x0_list)
         return torch.tensor(x0, dtype=self.Dtype, device=self.Device)
