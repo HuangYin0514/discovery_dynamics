@@ -40,7 +40,7 @@ def get_dataloader(data_name, dataset_path, num_workers=0, **kwargs):
     )
 
     test_loader = torch.utils.data.DataLoader(
-        val_set, batch_size=2, shuffle=False,
+        val_set, batch_size=10, shuffle=False,
         num_workers=num_workers, collate_fn=test_collate_fn
     )
 
