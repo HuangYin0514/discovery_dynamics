@@ -1,8 +1,10 @@
 """
 双摆任务表现为微分代数方程形式
 
-利用解析的形式去求解双摆任务
+利用autograd的形式去求解双摆任务
 faiq、faiqq 利用自动求导给出
+
+坐标形式(x1,y1,x2,y2)
 """
 import autograd.numpy as np
 from autograd import jacobian
@@ -67,7 +69,7 @@ def equations(t, coords):
 coords = np.array([0, 0, 0, 0, l1, 0, l1 + l2, 0, 1, 1])
 t_eval = np.linspace(0, 10, num=1000)
 
-sol = solve_ivp(equations, t_span=[0, 10], t_eval=t_eval, y0=coords,method='RK23')
+sol = solve_ivp(equations, t_span=[0, 10], t_eval=t_eval, y0=coords, method='RK23')
 
 x1 = sol.y[4]
 y1 = sol.y[5]

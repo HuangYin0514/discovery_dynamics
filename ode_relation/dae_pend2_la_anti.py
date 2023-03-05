@@ -3,6 +3,8 @@
 
 利用解析的形式去求解双摆任务
 faiq、faiqq给出了具体的表达式
+
+坐标形式(x1,y1,x2,y2)
 """
 import numpy as np
 from matplotlib import pyplot as plt
