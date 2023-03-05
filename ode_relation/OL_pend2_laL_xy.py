@@ -33,7 +33,6 @@ def equations(t, coords):
         for i in range(2):
             y = x[i + 1]
             U = U + m[i] * g * y
-
         L = T - U
         return L
 
