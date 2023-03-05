@@ -8,7 +8,7 @@ ref：
 坐标形式(x1,y1,x2,y2)
 """
 import autograd.numpy as np
-from autograd import grad, jacobian
+from autograd import jacobian
 from matplotlib import pyplot as plt
 from scipy.integrate import solve_ivp
 
@@ -25,9 +25,9 @@ g = 10
 
 
 def equations(t, coords):
-    dx1, dx2, dy1, dy2, x1, x2, y1, y2, lam1, lam2 = coords
+    dx1, dx2, dy1, dy2, x1, x2, y1, y2 = coords
 
-    dx = np.array([dx1, dx2, dy1, dy2])
+    # dx = np.array([dx1, dx2, dy1, dy2])
 
     M = np.array([[m1, 0, 0, 0],
                   [0, m1, 0, 0],
@@ -50,25 +50,26 @@ def equations(t, coords):
     def phi_plus_q(coords):
         return jacobian(phi)(coords)[:, 4: 8] @ coords[0:4]
 
-    faiq = jacobian(phi)(coords)[:, 4: 8]
+    faiq = jacobian(phi)(coords)[:, 4: 8]  # (2, 4)
     faiqq = jacobian(phi_plus_q)(coords)[:, 4: 8]
 
-    L = np.block([[M, np.zeros((4, 4)), faiq.T],
-                  [np.zeros((4, 4)), np.diag(np.ones(4)), np.zeros((4, 2))],
-                  [faiq, np.zeros((2, 4)), np.zeros((2, 2))]])
+    Minv = np.linalg.inv(M)  # (4, 4)
 
-    R = np.concatenate([F, dx.reshape(-1, 1), (-faiqq @ dx.reshape(-1, 1)).reshape(-1, 1)], axis=0)
+    L = faiq @ Minv @ faiq.T  # (2, 2)
+    R = faiq @ Minv @ F + faiqq @ coords[0: 4].reshape(-1, 1)  # (2, 1)
+    lam = np.linalg.inv(L) @ R
 
-    L_inv = np.linalg.pinv(L)
+    vdot_L = M
+    vdot_R = F - faiq.T @ lam
+    vdot = np.linalg.inv(vdot_L) @ vdot_R
 
-    return (L_inv @ R).reshape(-1)
+    return np.concatenate([vdot, coords[0: 4].reshape(-1, 1)], axis=0).reshape(-1)
 
 
-
-coords = np.array([0, 0, 0, 0, l1, 0, l1 + l2, 0, 1, 1])
+coords = np.array([0, 0, 0, 0, l1, 0, l1 + l2, 0])
 t_eval = np.linspace(0, 10, num=10000)
 
-sol = solve_ivp(equations, t_span=[0, 10], t_eval=t_eval, y0=coords, method='DOP853')
+sol = solve_ivp(equations, t_span=[0, 10], t_eval=t_eval, y0=coords, method='RK23')
 
 x1 = sol.y[4]
 y1 = sol.y[5]
