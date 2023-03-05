@@ -4,6 +4,9 @@
 利用autograd，欧拉拉格朗日方程的形式去求解双摆任务
 
 坐标形式(x1, y1, x2, y2, dx1, dy1, dx2, dy2)
+
+！！！ 笛卡尔坐标系下，常微分方程组求解失败。
+！！！ 推测原因是在笛卡尔坐标系下，约束需要显式的去表述。
 """
 import autograd
 import autograd.numpy as np

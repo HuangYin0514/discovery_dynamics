@@ -18,30 +18,19 @@ g = 9.8
 
 def equations(t, coords):
     def La(coords):
-        # T = 0.
-        # vx, vy = 0., 0.
-        # for i in range(2):
-        #     vx = vx + l[i] * coords[2 + i] * np.cos(coords[i])
-        #     vy = vy + l[i] * coords[2 + i] * np.sin(coords[i])
-        #     T = T + 0.5 * m[i] * (np.power(vx, 2) + np.power(vy, 2))
-        #
-        # U = 0.
-        # y = 0.
-        # for i in range(2):
-        #     y = y - l[i] * np.cos(coords[i])
-        #     U = U + m[i] * g * y
-        #
-        # L = T - U
-        # return L
-        U, T = 0., 0.
+        T = 0.
         vx, vy = 0., 0.
-        y = 0.
         for i in range(2):
             vx = vx + l[i] * coords[2 + i] * np.cos(coords[i])
             vy = vy + l[i] * coords[2 + i] * np.sin(coords[i])
             T = T + 0.5 * m[i] * (np.power(vx, 2) + np.power(vy, 2))
+
+        U = 0.
+        y = 0.
+        for i in range(2):
             y = y - l[i] * np.cos(coords[i])
             U = U + m[i] * g * y
+
         L = T - U
         return L
 
