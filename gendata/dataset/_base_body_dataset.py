@@ -42,6 +42,8 @@ class BaseBodyDataset(BaseDynamicsDataset):
             ax.plot(x2, y2, 'r', label='m2')
             ax.set_xlabel('x')
             ax.set_ylabel('y')
+            ax.set_xlim(-22, 22)
+            ax.set_ylim(-22, 22)
             ax.legend()
 
         plt.show()

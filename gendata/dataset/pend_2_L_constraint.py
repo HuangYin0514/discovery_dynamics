@@ -12,7 +12,6 @@ from torch import nn
 from gendata.dataset._base_body_dataset import BaseBodyDataset
 from learner.integrator import ODESolver
 from learner.utils import dfx
-from learner.utils.common_utils import jacobian_fx
 
 
 class Pendulum2_L_constraint(BaseBodyDataset, nn.Module):
@@ -20,16 +19,16 @@ class Pendulum2_L_constraint(BaseBodyDataset, nn.Module):
     def __init__(self, obj, dim, m=None, l=None, **kwargs):
         super(Pendulum2_L_constraint, self).__init__()
 
-        self.train_url = 'https://drive.google.com/file/d/1kTP5WtPT78rX7HBcMo2BBU9ug6RGpZ8E/view?usp=share_link'
-        self.val_url = 'https://drive.google.com/file/d/1RXTP-fxTECHY6ZCP_rqkaL90k8EQd_f7/view?usp=share_link'
-        self.test_url = 'https://drive.google.com/file/d/1kTP5WtPT78rX7HBcMo2BBU9ug6RGpZ8E/view?usp=share_link'
+        self.train_url = ''
+        self.val_url = ''
+        self.test_url = ''
 
         self.__init_dynamic_variable(obj, dim)
 
     def __init_dynamic_variable(self, obj, dim):
         self.m = [10 for i in range(obj)]
         self.l = [10 for i in range(obj)]
-        self.g = 9.8
+        self.g = 10
 
         self.obj = obj
         self.dim = dim
@@ -52,25 +51,26 @@ class Pendulum2_L_constraint(BaseBodyDataset, nn.Module):
         x, v = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
 
         Minv = self.Minv(x)
-
-        phi_q = jacobian_fx(self.phi_fun, x)  # (bs, 2, 4)
-        phi_q = torch.einsum("bibj->bij", phi_q)  # (bs, 2, 4)
-
-        phi_qq = jacobian_fx(self.D_phi_fun, (x, v))[0]  # (bs, 4)
-        phi_qq = torch.einsum("bibj->bij", phi_qq)  # (bs, 2, 4)
-
         V = self.potential(x)
 
+        phi = self.phi_fun(x)
+        phi_q = torch.zeros(phi.shape[0], phi.shape[1], x.shape[1])  # (bs, 2, 4)
+        for i in range(phi.shape[1]):
+            phi_q[:, i] = dfx(phi[:, i], x)
+        phi_qq = torch.zeros(phi.shape[0], phi.shape[1], x.shape[1])  # (bs, 2, 4)
+        for i in range(phi.shape[1]):
+            phi_qq[:, i] = dfx(phi_q[:, i] @ v.unsqueeze(-1), x)
         F = -dfx(V, x)
 
         # 求解 lam ----------------------------------------------------------------
         L = phi_q @ Minv @ phi_q.permute(0, 2, 1)
-        R = (phi_q @ Minv @ F.unsqueeze(-1) + phi_qq@ v.unsqueeze(-1))  # (2, 1)
+        R = (phi_q @ Minv @ F.unsqueeze(-1) + phi_qq @ v.unsqueeze(-1))  # (2, 1)
         lam = torch.linalg.pinv(L) @ R  # (2, 1)
 
         # 求解 vdot ----------------------------------------------------------------
-        a_R = F.unsqueeze(-1) - phi_q.permute(0, 2, 1) @ lam   # (4, 1)
+        a_R = F.unsqueeze(-1) - phi_q.permute(0, 2, 1) @ lam  # (4, 1)
         a = (Minv @ a_R).squeeze(-1)  # (4, 1)
+
         return torch.cat([v, a], dim=-1)
 
     def Minv(self, q):
@@ -89,11 +89,6 @@ class Pendulum2_L_constraint(BaseBodyDataset, nn.Module):
         constraint_2 = (x[:, 0] - x[:, 2]) ** 2 + (x[:, 1] - x[:, 3]) ** 2 - 1 ** 2
         phi = torch.stack((constraint_1, constraint_2), dim=-1)
         return phi  # (bs ,2)
-
-    def D_phi_fun(self, x, v):
-        phi_q = jacobian_fx(self.phi_fun, x)  # (bs, 2, 4)
-        phi_q = torch.einsum("bibj->bij", phi_q)
-        return (phi_q @ v.unsqueeze(-1)).squeeze(-1)  # (bs ,2)
 
     def kinetic(self, v):
         T = 0.
@@ -138,7 +133,7 @@ class Pendulum2_L_constraint(BaseBodyDataset, nn.Module):
         # the double pendulum task. Therefore, use dopri5 to generate training data.
         if len(t) == len(self.test_t):
             # test stages
-            x = ODESolver(self, x0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
+            x = ODESolver(self, x0, t, method='dopri5').permute(1, 0, 2)  # (T, D) dopri5 rk4
         else:
             # train stages
             x = ODESolver(self, x0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
