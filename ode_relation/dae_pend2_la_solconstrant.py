@@ -3,9 +3,11 @@
 
 利用autograd的形式去求解双摆任务
 方法利用等式关系，求解拉格朗日乘子lambda
-ref：
 
 坐标形式(x1,y1,x2,y2)
+
+M给出了具体的形式
+F利用势能关系求解
 """
 import autograd
 import autograd.numpy as np
