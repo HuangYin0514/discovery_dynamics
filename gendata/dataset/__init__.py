@@ -7,12 +7,12 @@
 """
 from .pend_2 import Pendulum2
 from .pend_2_L import Pendulum2_L
-from .pend_2_L_constrant import Pendulum2_L_constrant
+from .pend_2_L_constraint import Pendulum2_L_constraint
 
 __dataset_factory = {
     'Pendulum2': Pendulum2,
     'Pendulum2_L': Pendulum2_L,
-    'Pendulum2_L_constrant':Pendulum2_L_constrant
+    'Pendulum2_L_constraint':Pendulum2_L_constraint
 }
 
 
