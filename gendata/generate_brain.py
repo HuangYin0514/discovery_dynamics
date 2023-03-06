@@ -58,6 +58,6 @@ def gen_dataset(data_name, taskname, obj, dim, train_num, val_num, test_num,
     else:
         print('Start generating dataset.')
         dataset.gen_data(train_num, dataset.t, train_filename)
-        # return
+        return
         dataset.gen_data(val_num, dataset.t, val_filename)
         dataset.gen_data(test_num, dataset.test_t, test_filename)

@@ -29,20 +29,20 @@ class BaseBodyDataset(BaseDynamicsDataset):
         E = torch.stack([self.energy_fn(y) for y in X]).clone().detach()
 
         for i in range(num):
-            plt.plot(E[i].cpu().detach().numpy())
-            #
-            # X = X[i].cpu().detach().numpy()
-            # x1 = X[:, 0]
-            # y1 = X[:, 1]
-            # x2 = X[:, 2]
-            # y2 = X[:, 3]
-            #
-            # fig, ax = plt.subplots(figsize=(5, 5))
-            # ax.plot(x1, y1, 'b', label='m1')
-            # ax.plot(x2, y2, 'r', label='m2')
-            # ax.set_xlabel('x')
-            # ax.set_ylabel('y')
-            # ax.legend()
+            # plt.plot(E[i].cpu().detach().numpy())
+
+            X_plot = X[i]
+            x1 = X_plot[:, 0]
+            y1 = X_plot[:, 1]
+            x2 = X_plot[:, 2]
+            y2 = X_plot[:, 3]
+
+            fig, ax = plt.subplots(figsize=(5, 5))
+            ax.plot(x1, y1, 'b', label='m1')
+            ax.plot(x2, y2, 'r', label='m2')
+            ax.set_xlabel('x')
+            ax.set_ylabel('y')
+            ax.legend()
 
         plt.show()
 

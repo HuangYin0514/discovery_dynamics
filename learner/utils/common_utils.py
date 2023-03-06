@@ -28,6 +28,9 @@ def init_random_state(random_seed=3407):
 def dfx(f, x):
     return torch.autograd.grad(f, x, grad_outputs=torch.ones_like(f), retain_graph=True, create_graph=True)[0]
 
+def jacobian_fx(f, x):
+    return torch.autograd.functional.jacobian(f, x)
+
 
 def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
