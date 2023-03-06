@@ -7,66 +7,65 @@ ref：
 
 坐标形式(x1,y1,x2,y2)
 """
+import autograd
 import autograd.numpy as np
-from autograd import jacobian
 from matplotlib import pyplot as plt
 from scipy.integrate import solve_ivp
 
 # constants
-l1 = 10.0
-l2 = 10.0
-m1 = 1.0
-m2 = 1.0
-g = 10
-
 l = [10.0, 10.0]
 m = [10.0, 10.0]
 g = 10
 
 
 def equations(t, coords):
-    dx1, dx2, dy1, dy2, x1, x2, y1, y2 = coords
+    # dx1, dy1, dx1, dy2, x1, y1, x2, y2
+    dx, x = np.split(coords, 2)
 
-    # dx = np.array([dx1, dx2, dy1, dy2])
-
-    M = np.array([[m1, 0, 0, 0],
-                  [0, m1, 0, 0],
-                  [0, 0, m2, 0],
-                  [0, 0, 0, m2]
+    M = np.array([[m[0], 0, 0, 0],
+                  [0, m[0], 0, 0],
+                  [0, 0, m[1], 0],
+                  [0, 0, 0, m[1]]
                   ])
 
-    F = np.array([[0],
-                  [-m1 * g],
-                  [0],
-                  [-m2 * g]
-                  ])
+    def la_V(x):
+        U = 0.
+        y = 0.
+        for i in range(2):
+            y = x[i * 2 + 1]
+            U = U + m[i] * g * y
+        return U
 
-    def phi(coords):
+    def phi(x):
         return np.array([
-            coords[4] ** 2 + coords[5] ** 2 - l1 ** 2,
-            (coords[4] - coords[6]) ** 2 + (coords[5] - coords[7]) ** 2 - l1 ** 2,
+            x[0] ** 2 + x[1] ** 2 - l[0] ** 2,
+            (x[0] - x[2]) ** 2 + (x[1] - x[3]) ** 2 - l[1] ** 2,
         ]).reshape(-1)
 
-    def phi_plus_q(coords):
-        return jacobian(phi)(coords)[:, 4: 8] @ coords[0:4]
+    def phi_plus_q(x, dx, D_phi_q_fun):
+        return D_phi_q_fun(x) @ dx
 
-    faiq = jacobian(phi)(coords)[:, 4: 8]  # (2, 4)
-    faiqq = jacobian(phi_plus_q)(coords)[:, 4: 8]
+    D_phi_q_fun = autograd.jacobian(phi)
+    D_phi_qq_fun = autograd.jacobian(phi_plus_q, argnum=0)
+    phi_q = D_phi_q_fun(x)  # (2, 4)
+    phi_qq = D_phi_qq_fun(x, dx, D_phi_q_fun)
 
     Minv = np.linalg.inv(M)  # (4, 4)
+    F = -autograd.jacobian(la_V)(x).reshape(-1, 1)  # (4, 1)
 
-    L = faiq @ Minv @ faiq.T  # (2, 2)
-    R = faiq @ Minv @ F + faiqq @ coords[0: 4].reshape(-1, 1)  # (2, 1)
-    lam = np.linalg.inv(L) @ R
+    # 求解 lam ----------------------------------------------------------------
+    L = phi_q @ Minv @ phi_q.T  # (2, 2)
+    R = phi_q @ Minv @ F + phi_qq @ dx.reshape(-1, 1)  # (2, 1)
+    lam = np.linalg.inv(L) @ R  # (2, 1)
 
-    vdot_L = M
-    vdot_R = F - faiq.T @ lam
-    vdot = np.linalg.inv(vdot_L) @ vdot_R
+    # 求解 vdot ----------------------------------------------------------------
+    vdot_R = F - phi_q.T @ lam  # (4, 1)
+    vdot = Minv @ vdot_R  # (4, 1)
 
-    return np.concatenate([vdot, coords[0: 4].reshape(-1, 1)], axis=0).reshape(-1)
+    return np.concatenate([vdot, dx.reshape(-1, 1)], axis=0).reshape(-1)
 
 
-coords = np.array([0, 0, 0, 0, l1, 0, l1 + l2, 0])
+coords = np.array([0, 0, 0, 0, l[0], 0, l[0] + l[1], 0])
 t_eval = np.linspace(0, 10, num=10000)
 
 sol = solve_ivp(equations, t_span=[0, 10], t_eval=t_eval, y0=coords, method='RK23')
