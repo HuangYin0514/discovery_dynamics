@@ -6,12 +6,12 @@
 @desc:
 """
 from .pend_2 import Pendulum2
+from .pend_2_L_dea import Pendulum2_L_dea
 
 __dataset_factory = {
     'Pendulum2': Pendulum2,
     'Pendulum2_L': Pendulum2,
-    # 'Body3': Body3,
-    # 'Body3_L': Body3_L,
+    'Pendulum2_L_dea': Pendulum2_L_dea,
 }
 
 
