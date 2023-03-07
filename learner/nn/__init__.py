@@ -1,11 +1,11 @@
-from ._base_module import LossNN
-
 import os
 import os.path as osp
 
 from learner.utils import timing, count_parameters, download_file_from_google_drive, load_network
+from ._base_module import LossNN
 from .baseline_body3 import Baseline_body3
 from .baseline_pend2 import Baseline_pend2
+from .baseline_pend2_dae import Baseline_pend2_dae
 from .body3_analytical import Body3_analytical
 from .hnn_body3 import HNN_body3
 from .hnn_pend2 import HNN_pend2
@@ -26,6 +26,7 @@ __model_factory = {
     'LNN_body3': LNN_body3,
     'Baseline_pend2': Baseline_pend2,
     'Baseline_body3': Baseline_body3,
+    'Baseline_pend2_dae': Baseline_pend2_dae,
     'MechanicsNN_pend2': MechanicsNN_pend2,
     'MechanicsNN_body3': MechanicsNN_body3,
     'ModLaNet_pend2': ModLaNet_pend2,
@@ -34,6 +35,7 @@ __model_factory = {
     'HnnModScale_body3': HnnModScale_body3,
     'Pend2_analytical': Pend2_analytical,
     'Body3_analytical': Body3_analytical,
+
 }
 
 
