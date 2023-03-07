@@ -26,7 +26,7 @@ class Pendulum2_L_constraint(BaseBodyDataset, nn.Module):
         self.__init_dynamic_variable(obj, dim)
 
     def __init_dynamic_variable(self, obj, dim):
-        self.m = [1, 500]
+        self.m = [10, 10]
         self.l = [10, 10]
         self.g = 10
 
@@ -110,6 +110,36 @@ class Pendulum2_L_constraint(BaseBodyDataset, nn.Module):
         H = self.kinetic(v) + self.potential(x)
         return H
 
+    def angle2cartesian(self, angles):
+        pos = np.zeros([angles.shape[0], angles.shape[1] * 2])
+        num_angles_dim = int(angles.shape[1]/2)
+        for i in range(self.obj):
+            if i == 0:
+                pos[:, self.dim * i:self.dim * (i + 1)] += np.concatenate(
+                    [self.l[i]*np.sin(angles[:, i:i + 1]), -self.l[i]*np.cos(angles[:, i:i + 1])],
+                    1)
+                pos[:, self.dof + self.dim * i:self.dof + self.dim * (i + 1)] += np.concatenate(
+                    [self.l[i] *
+                     np.cos(angles[:, i:i + 1]) *
+                     angles[:, num_angles_dim + i:num_angles_dim + i + 1],
+                     self.l[i] *
+                     np.sin(angles[:, i:i + 1]) *
+                     angles[:, num_angles_dim + i:num_angles_dim + i + 1]],
+                    1)
+            else:
+                pos[:, self.dim * i:self.dim * (i + 1)] += pos[:, self.dim * (i - 1):self.dim * i] + np.concatenate(
+                    [self.l[i]*np.sin(angles[:, i:i + 1]), -self.l[i]*np.cos(angles[:, i:i + 1])],
+                    1)
+                pos[:, self.dof + self.dim * i:self.dof + self.dim * (i + 1)] += np.concatenate(
+                    [self.l[i] *
+                     np.cos(angles[:, i:i + 1]) *
+                     angles[:, num_angles_dim + i:num_angles_dim + i + 1],
+                     self.l[i] *
+                     np.sin(angles[:, i:i + 1]) *
+                     angles[:, num_angles_dim + i:num_angles_dim + i + 1]],
+                    1)
+        return pos
+
     def random_config(self, num):
         x0_list = []
         for i in range(num):
@@ -121,10 +151,12 @@ class Pendulum2_L_constraint(BaseBodyDataset, nn.Module):
                 y0[i] = theta
                 y0[i + self.obj] = momentum
                 # ----------------------------------------------------------------
-                y0 = np.array([self.l[0], 0, self.l[0] + self.l[1], 0, 0, 0, 0, 0])
+                y0 = np.array([np.pi/2, np.pi/2, 0., 0.])
+                # y0 = np.array([self.l[0], 0, self.l[0] + self.l[1], 0, 0, 0, 0, 0])
                 # ----------------------------------------------------------------
             x0_list.append(y0)
         x0 = np.stack(x0_list)
+        x0 = self.angle2cartesian(x0)
         return torch.tensor(x0, dtype=self.Dtype, device=self.Device)
 
     def ode_solve_traj(self, x0, t):
@@ -137,5 +169,5 @@ class Pendulum2_L_constraint(BaseBodyDataset, nn.Module):
             x = ODESolver(self, x0, t, method='dopri5').permute(1, 0, 2)  # (T, D) dopri5 rk4
         else:
             # train stages
-            x = ODESolver(self, x0, t, method='dopri5').permute(1, 0, 2)  # (T, D) dopri5 rk4
+            x = ODESolver(self, x0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
         return x
