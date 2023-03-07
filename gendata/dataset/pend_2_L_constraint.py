@@ -4,6 +4,10 @@
 @contact: hy1071324110@gmail.com
 @time: 2023/1/3 3:50 PM
 @desc:
+
+利用 微分代数方程DAE来生成数据
+
+初始化角度坐标-》转换成笛卡尔坐标-》构造DAE形式-》利用ode求解器进行求解
 """
 import numpy as np
 import torch
