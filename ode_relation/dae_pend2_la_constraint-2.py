@@ -17,12 +17,10 @@ from scipy.integrate import solve_ivp
 l1 = 10.0
 l2 = 10.0
 m1 = 1.0
-m2 = 1.0
+m2 = 500.0
 g = 10
 
-l = [10.0, 10.0]
-m = [10.0, 10.0]
-g = 10
+
 
 
 def equations(t, coords):

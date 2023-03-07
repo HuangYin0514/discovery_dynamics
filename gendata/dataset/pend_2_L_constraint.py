@@ -26,8 +26,8 @@ class Pendulum2_L_constraint(BaseBodyDataset, nn.Module):
         self.__init_dynamic_variable(obj, dim)
 
     def __init_dynamic_variable(self, obj, dim):
-        self.m = [10 for i in range(obj)]
-        self.l = [10 for i in range(obj)]
+        self.m = [1, 500]
+        self.l = [10, 10]
         self.g = 10
 
         self.obj = obj
@@ -106,7 +106,8 @@ class Pendulum2_L_constraint(BaseBodyDataset, nn.Module):
 
     def energy_fn(self, coords):
         """energy function """
-        H = self.kinetic(coords) + self.potential(coords)
+        x, v = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
+        H = self.kinetic(v) + self.potential(x)
         return H
 
     def random_config(self, num):
@@ -136,5 +137,5 @@ class Pendulum2_L_constraint(BaseBodyDataset, nn.Module):
             x = ODESolver(self, x0, t, method='dopri5').permute(1, 0, 2)  # (T, D) dopri5 rk4
         else:
             # train stages
-            x = ODESolver(self, x0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
+            x = ODESolver(self, x0, t, method='dopri5').permute(1, 0, 2)  # (T, D) dopri5 rk4
         return x

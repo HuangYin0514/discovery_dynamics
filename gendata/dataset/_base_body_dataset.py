@@ -29,7 +29,7 @@ class BaseBodyDataset(BaseDynamicsDataset):
         E = torch.stack([self.energy_fn(y) for y in X]).clone().detach()
 
         for i in range(num):
-            # plt.plot(E[i].cpu().detach().numpy())
+            plt.plot(E[i].cpu().detach().numpy())
 
             X_plot = X[i]
             x1 = X_plot[:, 0]
