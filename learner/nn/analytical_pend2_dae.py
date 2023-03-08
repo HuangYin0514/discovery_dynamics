@@ -58,7 +58,7 @@ class Analytical_pend2_dae(LossNN):
         a = (Minv @ a_R).squeeze(-1)  # (4, 1)
 
         bs = v.shape[0]
-        torch.cat([x.reshape(bs, -1), R.reshape(bs, -1), R.reshape(bs, -1)], dim=-1)
+        return torch.cat([torch.ones_like(x).reshape(bs, -1), R.reshape(bs, -1), R.reshape(bs, -1)], dim=-1)
         return torch.cat([v, a], dim=-1)
 
     def Minv(self, q):
