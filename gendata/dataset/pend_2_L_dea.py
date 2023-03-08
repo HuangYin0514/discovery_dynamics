@@ -65,7 +65,7 @@ class Pendulum2_L_dea(BaseBodyDataset, nn.Module):
             phi_q[:, i] = dfx(phi[:, i], x)
         phi_qq = torch.zeros(phi.shape[0], phi.shape[1], x.shape[1])  # (bs, 2, 4)
         for i in range(phi.shape[1]):
-            phi_qq[:, i] = dfx(phi_q[:, i] @ v.unsqueeze(-1), x)
+            phi_qq[:, i] = dfx(phi_q[:, i].unsqueeze(-2) @ v.unsqueeze(-1), x)
         F = -dfx(V, x)
 
         # 求解 lam ----------------------------------------------------------------
@@ -118,11 +118,11 @@ class Pendulum2_L_dea(BaseBodyDataset, nn.Module):
 
     def angle2cartesian(self, angles):
         pos = np.zeros([angles.shape[0], angles.shape[1] * 2])
-        num_angles_dim = int(angles.shape[1]/2)
+        num_angles_dim = int(angles.shape[1] / 2)
         for i in range(self.obj):
             if i == 0:
                 pos[:, self.dim * i:self.dim * (i + 1)] += np.concatenate(
-                    [self.l[i]*np.sin(angles[:, i:i + 1]), -self.l[i]*np.cos(angles[:, i:i + 1])],
+                    [self.l[i] * np.sin(angles[:, i:i + 1]), -self.l[i] * np.cos(angles[:, i:i + 1])],
                     1)
                 pos[:, self.dof + self.dim * i:self.dof + self.dim * (i + 1)] += np.concatenate(
                     [self.l[i] *
@@ -134,7 +134,7 @@ class Pendulum2_L_dea(BaseBodyDataset, nn.Module):
                     1)
             else:
                 pos[:, self.dim * i:self.dim * (i + 1)] += pos[:, self.dim * (i - 1):self.dim * i] + np.concatenate(
-                    [self.l[i]*np.sin(angles[:, i:i + 1]), -self.l[i]*np.cos(angles[:, i:i + 1])],
+                    [self.l[i] * np.sin(angles[:, i:i + 1]), -self.l[i] * np.cos(angles[:, i:i + 1])],
                     1)
                 pos[:, self.dof + self.dim * i:self.dof + self.dim * (i + 1)] += np.concatenate(
                     [self.l[i] *
@@ -158,7 +158,7 @@ class Pendulum2_L_dea(BaseBodyDataset, nn.Module):
                 y0[i] = theta
                 y0[i + self.obj] = momentum
             # ----------------------------------------------------------------
-            # y0 = np.array([np.pi/2, np.pi/2, 0., 0.])
+            # y0 = np.array([np.pi/pi2, np.pi/2, 0., 0.])
             # y0 = np.array([self.l[0], 0, self.l[0] + self.l[1], 0, 0, 0, 0, 0])
             # ----------------------------------------------------------------
             x0_list.append(y0)
