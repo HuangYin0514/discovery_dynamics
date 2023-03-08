@@ -55,6 +55,16 @@ def timing(func):
     return wrapper
 
 
+def enable_grad(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        with torch.enable_grad():
+            result = func(*args, **kwargs)
+        return result
+
+    return wrapper
+
+
 def deprecated(func):
     @wraps(func)
     def wrapper(*args, **kwargs):

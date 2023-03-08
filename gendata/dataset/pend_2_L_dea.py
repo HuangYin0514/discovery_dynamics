@@ -16,6 +16,7 @@ from torch import nn
 from gendata.dataset._base_body_dataset import BaseBodyDataset
 from learner.integrator import ODESolver
 from learner.utils import dfx
+from learner.utils.common_utils import enable_grad
 
 
 class Pendulum2_L_dea(BaseBodyDataset, nn.Module):
@@ -50,33 +51,33 @@ class Pendulum2_L_dea(BaseBodyDataset, nn.Module):
         _time_step = int((t_end - t0) / dt)
         self.test_t = torch.linspace(t0, t_end, _time_step)
 
+    @enable_grad
     def forward(self, t, coords):
-        with torch.enable_grad():
-            coords = coords.clone().detach().requires_grad_(True)
-            x, v = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
+        coords = coords.clone().detach().requires_grad_(True)
+        x, v = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
 
-            Minv = self.Minv(x)
-            V = self.potential(x)
+        Minv = self.Minv(x)
+        V = self.potential(x)
 
-            phi = self.phi_fun(x)
-            phi_q = torch.zeros(phi.shape[0], phi.shape[1], x.shape[1])  # (bs, 2, 4)
-            for i in range(phi.shape[1]):
-                phi_q[:, i] = dfx(phi[:, i], x)
-            phi_qq = torch.zeros(phi.shape[0], phi.shape[1], x.shape[1])  # (bs, 2, 4)
-            for i in range(phi.shape[1]):
-                phi_qq[:, i] = dfx(phi_q[:, i] @ v.unsqueeze(-1), x)
-            F = -dfx(V, x)
+        phi = self.phi_fun(x)
+        phi_q = torch.zeros(phi.shape[0], phi.shape[1], x.shape[1])  # (bs, 2, 4)
+        for i in range(phi.shape[1]):
+            phi_q[:, i] = dfx(phi[:, i], x)
+        phi_qq = torch.zeros(phi.shape[0], phi.shape[1], x.shape[1])  # (bs, 2, 4)
+        for i in range(phi.shape[1]):
+            phi_qq[:, i] = dfx(phi_q[:, i] @ v.unsqueeze(-1), x)
+        F = -dfx(V, x)
 
-            # 求解 lam ----------------------------------------------------------------
-            L = phi_q @ Minv @ phi_q.permute(0, 2, 1)
-            R = (phi_q @ Minv @ F.unsqueeze(-1) + phi_qq @ v.unsqueeze(-1))  # (2, 1)
-            lam = torch.linalg.pinv(L) @ R  # (2, 1)
+        # 求解 lam ----------------------------------------------------------------
+        L = phi_q @ Minv @ phi_q.permute(0, 2, 1)
+        R = (phi_q @ Minv @ F.unsqueeze(-1) + phi_qq @ v.unsqueeze(-1))  # (2, 1)
+        lam = torch.linalg.pinv(L) @ R  # (2, 1)
 
-            # 求解 vdot ----------------------------------------------------------------
-            a_R = F.unsqueeze(-1) - phi_q.permute(0, 2, 1) @ lam  # (4, 1)
-            a = (Minv @ a_R).squeeze(-1)  # (4, 1)
+        # 求解 vdot ----------------------------------------------------------------
+        a_R = F.unsqueeze(-1) - phi_q.permute(0, 2, 1) @ lam  # (4, 1)
+        a = (Minv @ a_R).squeeze(-1)  # (4, 1)
 
-            return torch.cat([v, a], dim=-1)
+        return torch.cat([v, a], dim=-1)
 
     def Minv(self, q):
         bs, states = q.shape
