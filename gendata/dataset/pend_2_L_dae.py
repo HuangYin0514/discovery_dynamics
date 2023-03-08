@@ -16,7 +16,7 @@ from torch import nn
 from gendata.dataset._base_body_dataset import BaseBodyDataset
 from learner.integrator import ODESolver
 from learner.utils import dfx
-from learner.utils.common_utils import enable_grad
+from learner.utils.common_utils import enable_grad, matrix_inv
 
 
 class Pendulum2_L_dae(BaseBodyDataset, nn.Module):
@@ -71,7 +71,7 @@ class Pendulum2_L_dae(BaseBodyDataset, nn.Module):
         # 求解 lam ----------------------------------------------------------------
         L = phi_q @ Minv @ phi_q.permute(0, 2, 1)
         R = (phi_q @ Minv @ F.unsqueeze(-1) + phi_qq @ v.unsqueeze(-1))  # (2, 1)
-        lam = torch.linalg.pinv(L) @ R  # (2, 1)
+        lam = matrix_inv(L) @ R  # (2, 1)
 
         # 求解 vdot ----------------------------------------------------------------
         a_R = F.unsqueeze(-1) - phi_q.permute(0, 2, 1) @ lam  # (4, 1)
@@ -86,7 +86,7 @@ class Pendulum2_L_dae(BaseBodyDataset, nn.Module):
         M = np.tile(M, (bs, 1, 1))
         M = torch.tensor(M, dtype=self.Dtype, device=self.Device)
 
-        Minv = torch.linalg.pinv(M)
+        Minv =matrix_inv(M)
         return Minv
 
     def phi_fun(self, x):

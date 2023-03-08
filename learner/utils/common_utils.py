@@ -29,6 +29,12 @@ def dfx(f, x):
     return torch.autograd.grad(f, x, grad_outputs=torch.ones_like(f), retain_graph=True, create_graph=True)[0]
 
 
+def matrix_inv(b_mat):
+    eye = torch.eye(b_mat.shape[1]).expand_as(b_mat)
+    b_inv = torch.linalg.solve(b_mat, eye)
+    return b_inv
+
+
 def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
