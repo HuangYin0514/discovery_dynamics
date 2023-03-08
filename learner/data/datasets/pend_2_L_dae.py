@@ -11,7 +11,7 @@ import os.path as osp
 from learner.data.datasets._bases import BaseDynamicsDataset
 
 
-class Pendulum2_L_dea(BaseDynamicsDataset):
+class Pendulum2_L_dae(BaseDynamicsDataset):
     dataset_dir = ''
 
     train_url = ''
@@ -19,7 +19,7 @@ class Pendulum2_L_dea(BaseDynamicsDataset):
     test_url = ''
 
     def __init__(self, root='', download_data=False, **kwargs):
-        super(Pendulum2_L_dea, self).__init__()
+        super(Pendulum2_L_dae, self).__init__()
         self.dataset_dir = osp.join(root, self.dataset_dir)
         self.train_dir = osp.join(self.dataset_dir, 'train')
         self.val_dir = osp.join(self.dataset_dir, 'val')
