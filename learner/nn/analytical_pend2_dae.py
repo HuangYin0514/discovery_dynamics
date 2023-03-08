@@ -86,7 +86,7 @@ class Analytical_pend2_dae(LossNN):
         U = 0.
         y = 0.
         for i in range(self.obj):
-            y = x[:, i * 2 + 1]
+            y = x[:, i * 2 + 1:i * 2 + 2]
             U = U + m[i] * g * y
         return U
 

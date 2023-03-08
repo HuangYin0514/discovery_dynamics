@@ -109,7 +109,7 @@ class Pendulum2_L_dae(BaseBodyDataset, nn.Module):
         U = 0.
         y = 0.
         for i in range(self.obj):
-            y = x[:, i * 2 + 1]
+            y = x[:, i * 2 + 1:i * 2 + 2]
             U = U + self.m[i] * self.g * y
         return U
 
