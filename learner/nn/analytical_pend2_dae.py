@@ -80,8 +80,8 @@ class Analytical_pend2_dae(LossNN):
         return phi  # (bs ,2)
 
     def potential(self, x):
-        m = [10, 10]
-        g = 10
+        m = [10., 10.]
+        g = 10.
 
         U = 0.
         y = 0.
