@@ -27,27 +27,27 @@
 
 ## Baseline_pend2
 ```
-# %run  ./task/train.py \
-#     --taskname pend_2_task_Baseline \
-#     --net_name Baseline_pend2 \
-#     --data_name Pendulum2 \
-#     --obj 2 \
-#     --dim 1 \
-#     --lr 1e-3 \
-#     --criterion L2_loss \
-#     --optimizer adam \
-#     --scheduler MultiStepLR \
-#     --iterations 3000 \
-#     --print_every 1000 \
+%run  ./task/train.py \
+    --taskname pend_2_task_Baseline \
+    --net_name Baseline_pend2 \
+    --data_name Pendulum2 \
+    --obj 2 \
+    --dim 1 \
+    --lr 1e-3 \
+    --criterion L2_loss \
+    --optimizer adam \
+    --scheduler MultiStepLR \
+    --iterations 3000 \
+    --print_every 1000 \
 
-# %run  ./task/analyze.py \
-#     --taskname pend_2_task_Baseline \
-#     --net_name Baseline_pend2 \
-#     --data_name Pendulum2 \
-#     --obj 2 \
-#     --dim 1 
+%run  ./task/analyze.py \
+    --taskname pend_2_task_Baseline \
+    --net_name Baseline_pend2 \
+    --data_name Pendulum2 \
+    --obj 2 \
+    --dim 1 
 
-# %rm -rf ./training_file
+%rm -rf ./training_file
 
 ```
 
