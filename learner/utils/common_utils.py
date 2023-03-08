@@ -30,7 +30,7 @@ def dfx(f, x):
 
 
 def matrix_inv(b_mat):
-    eye = torch.eye(b_mat.shape[1]).expand_as(b_mat)
+    eye = torch.eye(b_mat.shape[1],dtype=b_mat.dtype,device=b_mat.device).expand_as(b_mat)
     b_inv = torch.linalg.solve(b_mat, eye)
     return b_inv
 
