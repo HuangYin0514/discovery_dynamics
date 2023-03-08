@@ -28,24 +28,25 @@ class BaseBodyDataset(BaseDynamicsDataset):
         dX = torch.stack(list(map(lambda x: self(None, x), X))).clone().detach()  # (T, D)
         E = torch.stack([self.energy_fn(y) for y in X]).clone().detach()
 
+        fig, ax1 = plt.subplots(figsize=(5, 5))
+
         for i in range(num):
-            plt.plot(E[i].cpu().detach().numpy())
+            ax1.plot(E[i].cpu().detach().numpy())
 
-            X_plot = X[i]
-            x1 = X_plot[:, 0].cpu().detach().numpy()
-            y1 = X_plot[:, 1].cpu().detach().numpy()
-            x2 = X_plot[:, 2].cpu().detach().numpy()
-            y2 = X_plot[:, 3].cpu().detach().numpy()
+            X_plot = X[i].cpu().detach().numpy()
+            x1 = X_plot[:, 0]
+            y1 = X_plot[:, 1]
+            x2 = X_plot[:, 2]
+            y2 = X_plot[:, 3]
 
-            fig, ax = plt.subplots(figsize=(5, 5))
-            ax.plot(x1, y1, 'b', label='m1')
-            ax.plot(x2, y2, 'r', label='m2')
-            ax.set_xlabel('x')
-            ax.set_ylabel('y')
-            ax.set_xlim(-22, 22)
-            ax.set_ylim(-22, 22)
-            ax.legend()
-
+            fig, ax2 = plt.subplots(figsize=(5, 5))
+            ax2.plot(x1, y1, 'b', label='m1')
+            ax2.plot(x2, y2, 'r', label='m2')
+            ax2.set_xlabel('x')
+            ax2.set_ylabel('y')
+            ax2.set_xlim(-22, 22)
+            ax2.set_ylim(-22, 22)
+            ax2.legend()
         plt.show()
 
         dataset = {
