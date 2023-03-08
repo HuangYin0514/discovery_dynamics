@@ -79,7 +79,7 @@ class Pendulum2_L_dae(BaseBodyDataset, nn.Module):
 
         bs = v.shape[0]
         # return phi_qq.reshape(bs,-1)
-        return torch.cat([torch.ones_like(x).reshape(bs, -1), matrix_inv(L).reshape(bs, -1)], dim=-1)
+        # return torch.cat([torch.ones_like(x).reshape(bs, -1), matrix_inv(L).reshape(bs, -1)], dim=-1)
         return torch.cat([v, a], dim=-1)
 
     def Minv(self, q):
