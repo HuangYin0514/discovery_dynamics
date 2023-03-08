@@ -75,7 +75,7 @@ class Pendulum2_L_dae(BaseBodyDataset, nn.Module):
 
         # 求解 vdot ----------------------------------------------------------------
         a_R = F - (lam.squeeze(-1).unsqueeze(-2) @ phi_q).squeeze(-2)  # (bs, 4, 1)
-        return torch.cat([a_R, a_R], dim=-1)
+        return torch.cat([lam.squeeze(-1),lam.squeeze(-1),lam.squeeze(-1), lam.squeeze(-1)], dim=-1)
 
         a = (Minv @ a_R).squeeze(-1)  # (4, 1)
 
