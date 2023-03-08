@@ -54,8 +54,8 @@ class Analytical_pend2_dae(LossNN):
         lam = matrix_inv(L) @ R  # (2, 1)
 
         # 求解 vdot ----------------------------------------------------------------
-        a_R = F.unsqueeze(-1) - phi_q.permute(0, 2, 1) @ lam  # (4, 1)
-        return torch.cat([phi_q.reshape(-1, 8)], dim=-1)
+        a_R = F - (lam.squeeze(-1).unsqueeze(-2) @ phi_q).squeeze(-2)  # (bs, 4, 1)
+        return torch.cat([a_R, a_R], dim=-1)
 
         a = (Minv @ a_R).squeeze(-1)  # (4, 1)
 
