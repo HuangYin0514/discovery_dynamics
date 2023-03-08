@@ -5,6 +5,7 @@ from learner.utils import timing, count_parameters, download_file_from_google_dr
 from ._base_module import LossNN
 from .analytical_body3 import Analytical_body3
 from .analytical_pend2 import Analytical_pend2
+from .analytical_pend2_dae import Analytical_pend2_dae
 from .baseline_body3 import Baseline_body3
 from .baseline_pend2 import Baseline_pend2
 from .baseline_pend2_dae import Baseline_pend2_dae
@@ -35,6 +36,7 @@ __model_factory = {
     'HnnModScale_body3': HnnModScale_body3,
     'Analytical_pend2': Analytical_pend2,
     'Analytical_body3': Analytical_body3,
+    'Analytical_pend2_dae': Analytical_pend2_dae,
 
 }
 

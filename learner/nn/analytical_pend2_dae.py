@@ -5,6 +5,7 @@
 @time: 2023/3/8 4:53 PM
 @desc:
 """
+import numpy as np
 import torch
 
 from ._base_module import LossNN
@@ -29,67 +30,62 @@ class Analytical_pend2_dae(LossNN):
         self.dof = int(obj * dim)
 
         self.mass = torch.nn.Linear(1, 1, bias=False)
-        torch.nn.init.ones_(self.mass.weight)
-
-    def M(self, x):
-        N = self.obj
-        M = torch.zeros((x.shape[0], N, N), dtype=self.Dtype, device=self.Device)
-        for i in range(N):
-            for k in range(N):
-                m_sum = 0
-                j = i if i >= k else k
-                for tmp in range(j, N):
-                    m_sum += 1.0
-                M[:, i, k] = torch.cos(x[:, i] - x[:, k]) * m_sum
-        return M
-
-    def Minv(self, x):
-        return torch.linalg.inv(self.M(x))
 
     @enable_grad
     def forward(self, t, coords):
-        __x, __p = torch.chunk(coords, 2, dim=-1)
-        coords = torch.cat([__x % (2 * torch.pi), __p], dim=-1).clone().detach().requires_grad_(True)
+        coords = coords.clone().detach().requires_grad_(True)
+        x, v = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
 
-        bs = coords.size(0)
-        q, p = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
+        Minv = self.Minv(x)
+        V = self.potential(x)
 
-        # Calculate the potential energy for i-th element ------------------------------------------------------------
+        phi = self.phi_fun(x)
+        phi_q = torch.zeros(phi.shape[0], phi.shape[1], x.shape[1], dtype=self.Dtype, device=self.Device)  # (bs, 2, 4)
+        for i in range(phi.shape[1]):
+            phi_q[:, i] = dfx(phi[:, i], x)
+        phi_qq = torch.zeros(phi.shape[0], phi.shape[1], x.shape[1], dtype=self.Dtype, device=self.Device)  # (bs, 2, 4)
+        for i in range(phi.shape[1]):
+            phi_qq[:, i] = dfx(phi_q[:, i].unsqueeze(-2) @ v.unsqueeze(-1), x)
+        F = -dfx(V, x)
+
+        # 求解 lam ----------------------------------------------------------------
+        L = phi_q @ Minv @ phi_q.permute(0, 2, 1)
+        R = (phi_q @ Minv @ F.unsqueeze(-1) + phi_qq @ v.unsqueeze(-1))  # (2, 1)
+        lam = torch.linalg.pinv(L) @ R  # (2, 1)
+
+        # 求解 vdot ----------------------------------------------------------------
+        a_R = F.unsqueeze(-1) - phi_q.permute(0, 2, 1) @ lam  # (4, 1)
+        a = (Minv @ a_R).squeeze(-1)  # (4, 1)
+
+        return torch.cat([v, a], dim=-1)
+
+    def Minv(self, q):
+        bs, states = q.shape
+        m = [10, 10]
+        M = np.diag(np.array([m[0], m[0], m[1], m[1]]))
+        M = np.tile(M, (bs, 1, 1))
+        M = torch.tensor(M, dtype=self.Dtype, device=self.Device)
+
+        Minv = torch.linalg.pinv(M)
+        return Minv
+
+    def phi_fun(self, x):
+        bs, states_num = x.shape
+        constraint_1 = x[:, 0] ** 2 + x[:, 1] ** 2 - 1 ** 2
+        constraint_2 = (x[:, 0] - x[:, 2]) ** 2 + (x[:, 1] - x[:, 3]) ** 2 - 1 ** 2
+        phi = torch.stack((constraint_1, constraint_2), dim=-1)
+        return phi  # (bs ,2)
+
+    def potential(self, x):
+        m = [10, 10]
+        g = 10
+
         U = 0.
         y = 0.
         for i in range(self.obj):
-            y = y - torch.cos(q[:, i])
-            U = U + 9.8 * y
-
-        # Calculate the kinetic --------------------------------------------------------------
-        # T = self.dataset.kinetic(torch.cat([x, p], dim=-1).reshape(-1))
-
-        T = 0.
-        v = torch.matmul(self.Minv(q), p.unsqueeze(-1))
-        T = 0.5 * torch.matmul(p.unsqueeze(1), v).squeeze(-1).squeeze(-1)
-
-        # Calculate the Hamilton Derivative --------------------------------------------------------------
-        H = U + T
-        dqH = dfx(H.sum(), q)
-        dpH = dfx(H.sum(), p)
-
-        v_global = self.Minv(q).matmul(p.unsqueeze(-1)).squeeze(-1)
-
-        # Calculate the Derivative ----------------------------------------------------------------
-        # dq_dt = torch.zeros((bs, self.dof), dtype=self.Dtype, device=self.Device)
-        # dp_dt = torch.zeros((bs, self.dof), dtype=self.Dtype, device=self.Device)
-        # for i in range(self.obj):
-        #     dq_dt[:, i * self.dim:(i + 1) * self.dim] = dpH[:, i * self.dim: (i + 1) * self.dim]
-        #     dp_dt[:, i * self.dim:(i + 1) * self.dim] = -dqH[:, i * self.dim:(i + 1) * self.dim]
-        # dz_dt = torch.cat([dq_dt, dp_dt], dim=-1)
-        dq_dt = torch.zeros((bs, self.dof), dtype=self.Dtype)
-        dp_dt = torch.zeros((bs, self.dof), dtype=self.Dtype)
-
-        dq_dt = dpH
-        dp_dt = -dqH
-
-        dz_dt = torch.cat([dq_dt, dp_dt], dim=-1)
-        return dz_dt
+            y = x[:, i * 2 + 1]
+            U = U + m[i] * g * y
+        return U
 
     def integrate(self, X0, t):
         out = ODESolver(self, X0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
