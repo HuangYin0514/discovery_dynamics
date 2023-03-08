@@ -20,13 +20,13 @@ from ..integrator import ODESolver
 from ..utils import dfx
 
 
-class Body3_analytical(LossNN):
+class Analytical_body3(LossNN):
     """
     Mechanics neural networks.
     """
 
     def __init__(self, obj, dim, num_layers=None, hidden_dim=None):
-        super(Body3_analytical, self).__init__()
+        super(Analytical_body3, self).__init__()
 
         q_dim = int(obj * dim)
         p_dim = int(obj * dim)

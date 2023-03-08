@@ -39,7 +39,7 @@ parser.add_argument('--net_name', default='Baseline_pend2_dae', type=str,
                          'ModLaNet_pend2 ModLaNet_body3'
                          'HnnMod_pend2 HnnMod_body3'
                          'HnnModScale_pend2 HnnModScale_body3'
-                         'Pend2_analytical body3_analytical'
+                         'Analytical_pend2 Analytical_body3'
                          ']'
                     )
 parser.add_argument('--net_url', default='', type=str, help='Download net from Internet')

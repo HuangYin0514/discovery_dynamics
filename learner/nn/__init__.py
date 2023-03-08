@@ -3,10 +3,11 @@ import os.path as osp
 
 from learner.utils import timing, count_parameters, download_file_from_google_drive, load_network
 from ._base_module import LossNN
+from .analytical_body3 import Analytical_body3
+from .analytical_pend2 import Analytical_pend2
 from .baseline_body3 import Baseline_body3
 from .baseline_pend2 import Baseline_pend2
 from .baseline_pend2_dae import Baseline_pend2_dae
-from .body3_analytical import Body3_analytical
 from .hnn_body3 import HNN_body3
 from .hnn_pend2 import HNN_pend2
 from .hnnmodscale_body3 import HnnModScale_body3
@@ -17,7 +18,6 @@ from .mechanicsNN_body3 import MechanicsNN_body3
 from .mechanicsNN_pend2 import MechanicsNN_pend2
 from .modlanet_body3 import ModLaNet_body3
 from .modlanet_pend2 import ModLaNet_pend2
-from .pend2_analytical import Pend2_analytical
 
 __model_factory = {
     'HNN_pend2': HNN_pend2,
@@ -33,8 +33,8 @@ __model_factory = {
     'ModLaNet_body3': ModLaNet_body3,
     'HnnModScale_pend2': HnnModScale_pend2,
     'HnnModScale_body3': HnnModScale_body3,
-    'Pend2_analytical': Pend2_analytical,
-    'Body3_analytical': Body3_analytical,
+    'Analytical_pend2': Analytical_pend2,
+    'Analytical_body3': Analytical_body3,
 
 }
 
