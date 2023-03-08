@@ -121,7 +121,7 @@ class Pendulum2_L_dae(BaseBodyDataset, nn.Module):
         return H
 
     def angle2cartesian(self, angles):
-        pos = np.zeros([angles.shape[0], angles.shape[1] * 2], dtype=self.Dtype, device=self.Device)
+        pos = np.zeros([angles.shape[0], angles.shape[1] * 2])
         num_angles_dim = int(angles.shape[1] / 2)
         for i in range(self.obj):
             if i == 0:
