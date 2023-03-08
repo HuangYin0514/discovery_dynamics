@@ -32,10 +32,10 @@ class BaseBodyDataset(BaseDynamicsDataset):
             plt.plot(E[i].cpu().detach().numpy())
 
             X_plot = X[i]
-            x1 = X_plot[:, 0]
-            y1 = X_plot[:, 1]
-            x2 = X_plot[:, 2]
-            y2 = X_plot[:, 3]
+            x1 = X_plot[:, 0].cpu().detach().numpy()
+            y1 = X_plot[:, 1].cpu().detach().numpy()
+            x2 = X_plot[:, 2].cpu().detach().numpy()
+            y2 = X_plot[:, 3].cpu().detach().numpy()
 
             fig, ax = plt.subplots(figsize=(5, 5))
             ax.plot(x1, y1, 'b', label='m1')
