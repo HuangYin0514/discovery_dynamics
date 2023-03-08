@@ -19,10 +19,10 @@ from learner.utils import dfx
 from learner.utils.common_utils import enable_grad
 
 
-class Pendulum2_L_dea(BaseBodyDataset, nn.Module):
+class Pendulum2_L_dae(BaseBodyDataset, nn.Module):
 
     def __init__(self, obj, dim, m=None, l=None, **kwargs):
-        super(Pendulum2_L_dea, self).__init__()
+        super(Pendulum2_L_dae, self).__init__()
 
         self.train_url = ''
         self.val_url = ''
