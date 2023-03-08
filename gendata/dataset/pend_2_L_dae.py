@@ -31,9 +31,9 @@ class Pendulum2_L_dae(BaseBodyDataset, nn.Module):
         self.__init_dynamic_variable(obj, dim)
 
     def __init_dynamic_variable(self, obj, dim):
-        self.m = [10, 10]
-        self.l = [10, 10]
-        self.g = 10
+        self.m = [10., 10.]
+        self.l = [10., 10.]
+        self.g = 10.
 
         self.obj = obj
         self.dim = dim
