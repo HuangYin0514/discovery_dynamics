@@ -41,12 +41,12 @@ class Pendulum2_L_dae(BaseBodyDataset, nn.Module):
 
         t0 = 0.
 
-        t_end = 1.
+        t_end = 3.
         dt = 0.01
         _time_step = int((t_end - t0) / dt)
         self.t = torch.linspace(t0, t_end, _time_step)
 
-        t_end = 1.
+        t_end = 3.
         dt = 0.01
         _time_step = int((t_end - t0) / dt)
         self.test_t = torch.linspace(t0, t_end, _time_step)
@@ -71,14 +71,14 @@ class Pendulum2_L_dae(BaseBodyDataset, nn.Module):
         # 求解 lam ----------------------------------------------------------------
         L = phi_q @ Minv @ phi_q.permute(0, 2, 1)
         R = (phi_q @ Minv @ F.unsqueeze(-1) + phi_qq @ v.unsqueeze(-1))  # (2, 1)
-        lam = matrix_inv(L) @ R  # (bs, 2, 1)
+        lam = matrix_inv(L) @ R  # (2, 1)
 
         # 求解 vdot ----------------------------------------------------------------
-        a_R = F - (lam.squeeze(-1).unsqueeze(-2) @ phi_q).squeeze(-2)  # (bs, 4, 1)
-        return torch.cat([lam.squeeze(-1),lam.squeeze(-1),lam.squeeze(-1), lam.squeeze(-1)], dim=-1)
-
+        a_R = F.unsqueeze(-1) - phi_q.permute(0, 2, 1) @ lam  # (4, 1)
         a = (Minv @ a_R).squeeze(-1)  # (4, 1)
 
+        bs = v.shape[0]
+        return torch.cat([L.reshape(bs, -1), L.reshape(bs, -1)], dim=-1)
         return torch.cat([v, a], dim=-1)
 
     def Minv(self, q):
