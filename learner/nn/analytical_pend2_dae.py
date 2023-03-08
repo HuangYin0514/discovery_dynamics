@@ -2,7 +2,7 @@
 """
 @author: Yin Huang
 @contact: hy1071324110@gmail.com
-@time: 2023/1/18 4:41 PM
+@time: 2023/3/8 4:53 PM
 @desc:
 """
 import torch
@@ -10,15 +10,16 @@ import torch
 from ._base_module import LossNN
 from ..integrator import ODESolver
 from ..utils import dfx
+from ..utils.common_utils import enable_grad
 
 
-class Analytical_pend2(LossNN):
+class Analytical_pend2_dae(LossNN):
     """
     Mechanics neural networks.
     """
 
     def __init__(self, obj, dim, num_layers=None, hidden_dim=None):
-        super(Analytical_pend2, self).__init__()
+        super(Analytical_pend2_dae, self).__init__()
 
         q_dim = int(obj * dim)
         p_dim = int(obj * dim)
@@ -45,6 +46,7 @@ class Analytical_pend2(LossNN):
     def Minv(self, x):
         return torch.linalg.inv(self.M(x))
 
+    @enable_grad
     def forward(self, t, coords):
         __x, __p = torch.chunk(coords, 2, dim=-1)
         coords = torch.cat([__x % (2 * torch.pi), __p], dim=-1).clone().detach().requires_grad_(True)
