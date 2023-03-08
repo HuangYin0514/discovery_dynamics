@@ -57,6 +57,8 @@ class Analytical_pend2_dae(LossNN):
 
         # 求解 vdot ----------------------------------------------------------------
         a_R = F.unsqueeze(-1) - phi_q.permute(0, 2, 1) @ lam  # (4, 1)
+        return torch.cat([v, a_R.squeeze(-1)], dim=-1)
+
         a = (Minv @ a_R).squeeze(-1)  # (4, 1)
 
         return torch.cat([v, a], dim=-1)
