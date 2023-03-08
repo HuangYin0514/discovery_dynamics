@@ -24,9 +24,9 @@ class AnalyzeBrain:
     def Run(cls):
         cls.analyze_brain.run()
 
-    def __init__(self, taskname,obj,dim, data, net, dtype, device):
+    def __init__(self, taskname, obj, dim, data, net, dtype, device):
         self.taskname = taskname
-        self.obj=obj
+        self.obj = obj
         self.dim = dim
         self.data = data
         self.net = net
@@ -146,7 +146,7 @@ class AnalyzeBrain:
         self.test_loader = test_loader
 
         # energy function
-        dataclass = getattr(gendata.dataset, self.data_name)(self.obj,self.dim)
+        dataclass = getattr(gendata.dataset, self.data_name)(self.obj, self.dim)
         dataclass.device = self.device
         dataclass.dtype = self.dtype
         self.energy_fn = dataclass.energy_fn
