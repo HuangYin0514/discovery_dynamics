@@ -86,7 +86,7 @@ class Pendulum2_L_dae(BaseBodyDataset, nn.Module):
         M = np.tile(M, (bs, 1, 1))
         M = torch.tensor(M, dtype=self.Dtype, device=self.Device)
 
-        Minv =matrix_inv(M)
+        Minv = matrix_inv(M)
         return Minv
 
     def phi_fun(self, x):
