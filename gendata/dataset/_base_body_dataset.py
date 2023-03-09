@@ -39,14 +39,14 @@ class BaseBodyDataset(BaseDynamicsDataset):
             x2 = X_plot[:, 2]
             y2 = X_plot[:, 3]
 
-            fig, ax2 = plt.subplots(figsize=(5, 5))
-            ax2.plot(x1, y1, 'b', label='m1')
-            ax2.plot(x2, y2, 'r', label='m2')
-            ax2.set_xlabel('x')
-            ax2.set_ylabel('y')
-            ax2.set_xlim(-22, 22)
-            ax2.set_ylim(-22, 22)
-            ax2.legend()
+            # fig, ax2 = plt.subplots(figsize=(5, 5))
+            # ax2.plot(x1, y1, 'b', label='m1')
+            # ax2.plot(x2, y2, 'r', label='m2')
+            # ax2.set_xlabel('x')
+            # ax2.set_ylabel('y')
+            # ax2.set_xlim(-22, 22)
+            # ax2.set_ylim(-22, 22)
+            # ax2.legend()
         plt.show()
 
         dataset = {
