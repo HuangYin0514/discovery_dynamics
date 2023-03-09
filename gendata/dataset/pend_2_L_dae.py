@@ -90,15 +90,14 @@ class Pendulum2_L_dae(BaseBodyDataset, nn.Module):
         L = L.reshape(bs, 2, 2)
         R = R.reshape(bs, 2, 1)
 
-        # lam = torch.linalg.solve(L, R)  # (2, 1)
-        lam = torch.matmul(matrix_inv(L), R)
+        lam = torch.linalg.solve(L, R)
         lam = lam.reshape(bs, 2, 1)
 
         # 求解 a ----------------------------------------------------------------
         a_R = torch.matmul(F.unsqueeze(-1) - phi_q.permute(0, 2, 1), lam)  # (4, 1)
         a_R = a_R.reshape(bs, 4, 1)
 
-        a = torch.matmul(Minv , a_R).squeeze(-1)  # (4, 1)
+        a = torch.matmul(Minv, a_R).squeeze(-1)  # (4, 1)
 
         a = a.reshape(bs, 4)
 
