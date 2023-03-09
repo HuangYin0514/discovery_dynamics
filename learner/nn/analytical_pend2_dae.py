@@ -88,14 +88,14 @@ class Analytical_pend2_dae(LossNN):
         return phi  # (bs ,2)
 
     def potential(self, x):
-        m = [10., 10.]
-        g = 10.
+        self.m = [10., 10.]
+        self.g = 10.
 
         U = 0.
         y = 0.
         for i in range(self.obj):
-            y = x[:, i * 2 + 1:i * 2 + 2]
-            U = U + m[i] * g * y
+            y = x[:, i * 2 + 1]
+            U = U + self.m[i] * self.g * y
         return U
 
     def integrate(self, X0, t):
