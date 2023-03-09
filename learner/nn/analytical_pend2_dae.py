@@ -110,8 +110,8 @@ class Analytical_pend2_dae(LossNN):
         x, v = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
         T = 0.
         for i in range(self.obj):
-            vx = v[:, 2 * i: 2 * i + 1] ** 2
-            vy = v[:, 2 * i + 1: 2 * i + 2] ** 2
+            vx = v[:, i * 2]
+            vy = v[:, i * 2 + 1]
             T = T + 0.5 * self.m[i] * (vx ** 2 + vy ** 2)
         return T
 
