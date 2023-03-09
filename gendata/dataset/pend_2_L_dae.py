@@ -83,7 +83,7 @@ class Pendulum2_L_dae(BaseBodyDataset, nn.Module):
         F = -dfx(V, x)
 
         # 求解 lam ----------------------------------------------------------------
-        phiq_Minv = phi_q @ Minv
+        phiq_Minv = phi_q @ Minv #(bs,2,4)
         L = phiq_Minv @ phi_q.permute(0, 2, 1)
         R = phiq_Minv @ F.unsqueeze(-1) + phi_qq @ v.unsqueeze(-1)  # (2, 1)
 
