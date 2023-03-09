@@ -36,7 +36,7 @@ class Analytical_pend2_dae(LossNN):
     @enable_grad
     def forward(self, t, coords):
         coords = coords.clone().detach().requires_grad_(True)
-        x, v = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
+        x, v = coords.chunk(2, dim=-1)
 
         Minv = self.Minv(x)
         V = self.potential(x)
