@@ -59,22 +59,33 @@ class Pendulum2_L_dae(BaseBodyDataset, nn.Module):
         Minv = self.Minv(x)
         V = self.potential(x)
 
+        # 约束 -------------------------------------------------------------------------------
+        phi = self.phi_fun(x)
+        phi_q = torch.zeros(phi.shape[0], phi.shape[1], x.shape[1], dtype=self.Dtype, device=self.Device)  # (bs, 2, 4)
+        for i in range(phi.shape[1]):
+            phi_q[:, i] = dfx(phi[:, i:i + 1], x)
+        phi_qq = torch.zeros(phi.shape[0], phi.shape[1], x.shape[1], dtype=self.Dtype, device=self.Device)  # (bs, 2, 4)
+        for i in range(phi.shape[1]):
+            phi_qq[:, i] = dfx(phi_q[:, i:i + 1] @ v.unsqueeze(-1), x)
+
+        # 右端项 -------------------------------------------------------------------------------
+        F = -dfx(V, x)
         # ----------------------------------------------------------------
         bs = v.shape[0]
 
-        phi_q = torch.tensor([[1, 2, 3, 4], [5, 6, 7, 8]], dtype=self.Dtype, device=self.Device).reshape(1, 2,
-                                                                                                         4).repeat(bs,
-                                                                                                                   1, 1)
-        phi_qq = torch.tensor([[9, 10, 11, 12], [13, 14, 15, 16]], dtype=self.Dtype, device=self.Device).reshape(1, 2,
-                                                                                                                 4).repeat(
-            bs, 1, 1)
+        phi_q = torch.tensor([[1, 2, 3, 4], [5, 6, 7, 8]], dtype=self.Dtype, device=self.Device).reshape(1, 2, 4).repeat(bs, 1, 1)
+        phi_qq = torch.tensor([[9, 10, 11, 12], [13, 14, 15, 16]], dtype=self.Dtype, device=self.Device).reshape(1, 2, 4).repeat(bs, 1, 1)
         F = torch.tensor([[0],
                           [-self.m[0] * self.g],
                           [0],
                           [-self.m[1] * self.g]
                           ], dtype=self.Dtype, device=self.Device).reshape(1, -1).repeat(bs, 1)
-        lam = torch.tensor([[5], [6]], dtype=self.Dtype, device=self.Device).reshape(1, 2, 1).repeat(bs, 1, 1)
         # ----------------------------------------------------------------
+
+        # 求解 lam ----------------------------------------------------------------
+        L = phi_q @ Minv @ phi_q.permute(0, 2, 1)
+        R = (phi_q @ Minv @ F.unsqueeze(-1) + phi_qq @ v.unsqueeze(-1))  # (2, 1)
+        lam = torch.linalg.solve(L, R)  # (2, 1)
 
         # 求解 a ----------------------------------------------------------------
         a_R = F.unsqueeze(-1) - phi_q.permute(0, 2, 1) @ lam  # (4, 1)
