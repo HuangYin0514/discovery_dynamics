@@ -59,7 +59,7 @@ class Pendulum2_L_dae(BaseBodyDataset, nn.Module):
         bs = coords.shape[0]
 
         Minv = self.Minv(x)
-        V = self.potential(x)
+        V = self.potential(torch.cat([x,v],dim=-1))
 
         Minv = Minv.reshape(bs, 4, 4)
         V = V.reshape(bs, 1)

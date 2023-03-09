@@ -42,7 +42,7 @@ class Analytical_pend2_dae(LossNN):
         bs = coords.shape[0]
 
         Minv = self.Minv(x)
-        V = self.potential(x)
+        V = self.potential(torch.cat([x,v],dim=-1))
 
         Minv = Minv.reshape(bs, 4, 4)
         V = V.reshape(bs, 1)
