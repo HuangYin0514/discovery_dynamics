@@ -112,7 +112,6 @@ class Analytical_pend2_dae(LossNN):
 
     def potential(self, coords):
         x, v = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
-
         U = 0.
         y = 0.
         for i in range(self.obj):
@@ -122,8 +121,7 @@ class Analytical_pend2_dae(LossNN):
 
     def energy_fn(self, coords):
         """energy function """
-        x, v = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
-        H = self.kinetic(v) + self.potential(x)
+        H = self.kinetic(coords) + self.potential(coords)
         return H
 
     def integrate(self, X0, t):
