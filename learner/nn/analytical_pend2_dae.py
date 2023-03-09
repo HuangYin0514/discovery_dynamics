@@ -58,8 +58,10 @@ class Analytical_pend2_dae(LossNN):
         R = phi_q @ Minv @ F.unsqueeze(-1) + phi_qq @ v.unsqueeze(-1)  # (2, 1)
         lam = torch.linalg.solve(L, R)  # (2, 1)
 
-        bs = x.shape[0]
-        a = torch.cat([lam,lam], dim=-1).reshape(-1, 4) + 1
+        # 求解 a ----------------------------------------------------------------
+        a_R = F.unsqueeze(-1) - phi_q.permute(0, 2, 1) @ lam  # (4, 1)
+        a = (Minv @ a_R).squeeze(-1)  # (4, 1)
+
         return torch.cat([v, a], dim=-1)
 
     def Minv(self, q):
