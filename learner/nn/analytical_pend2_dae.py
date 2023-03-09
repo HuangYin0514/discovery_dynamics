@@ -66,23 +66,22 @@ class Analytical_pend2_dae(LossNN):
         F = -dfx(V, x)
 
         # 求解 lam ----------------------------------------------------------------
-        phiq_Minv = phi_q @ Minv
-        L = phiq_Minv @ phi_q.permute(0, 2, 1)
-        R = phiq_Minv @ F.unsqueeze(-1) + phi_qq @ v.unsqueeze(-1)  # (2, 1)
+        phiq_Minv = torch.matmul(phi_q, Minv)  # (bs,2,4)
+        L = torch.matmul(phiq_Minv, phi_q.permute(0, 2, 1))
+        R = torch.matmul(phiq_Minv, F.unsqueeze(-1)) + torch.matmul(phi_qq, v.unsqueeze(-1))  # (2, 1)
 
         L = L.reshape(bs, 2, 2)
         R = R.reshape(bs, 2, 1)
-        # R = phiq_Minv @ F.unsqueeze(-1)+ torch.ones((bs, 4, 1), dtype=self.Dtype, device=self.Device) * 4
-        R = torch.matmul(phiq_Minv, F.unsqueeze(-1))
 
-        lam = matrix_inv(L) @ R
+        # lam = torch.linalg.solve(L, R)  # (2, 1)
+        lam = torch.matmul(matrix_inv(L), R)
         lam = lam.reshape(bs, 2, 1)
 
         # 求解 a ----------------------------------------------------------------
-        a_R = F.unsqueeze(-1) - phi_q.permute(0, 2, 1) @ lam  # (4, 1)
+        a_R = torch.matmul(F.unsqueeze(-1) - phi_q.permute(0, 2, 1), lam)  # (4, 1)
         a_R = a_R.reshape(bs, 4, 1)
 
-        a = (Minv @ a_R).squeeze(-1)  # (4, 1)
+        a = torch.matmul(Minv, a_R).squeeze(-1)  # (4, 1)
 
         a = a.reshape(bs, 4)
 
