@@ -85,7 +85,7 @@ class Pendulum2_L_dae(BaseBodyDataset, nn.Module):
         phiq_Minv = torch.bmm(phi_q, Minv)  # (bs,2,4)
         L = torch.bmm(phiq_Minv, phi_q.permute(0, 2, 1))
         # R = torch.matmul(phiq_Minv, F.unsqueeze(-1)) + torch.matmul(phi_qq, v.unsqueeze(-1))  # (2, 1)
-        R = torch.bmm(phiq_Minv, F.unsqueeze(-1))  # (2, 1)
+        R = torch.bmm(phiq_Minv, F.unsqueeze(-1))  + torch.bmm(phi_qq, v.unsqueeze(-1))  # (2, 1)
 
         L = L.reshape(bs, 2, 2)
         R = R.reshape(bs, 2, 1)
