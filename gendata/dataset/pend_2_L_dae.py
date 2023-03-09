@@ -76,7 +76,7 @@ class Pendulum2_L_dae(BaseBodyDataset, nn.Module):
         R = (phi_q @ Minv @ F.unsqueeze(-1) + phi_qq @ v.unsqueeze(-1))  # (2, 1)
         lam = torch.linalg.solve(L, R)  # (2, 1)
 
-        return torch.cat([v, lam.squeeze(-1),lam.squeeze(-1)], dim=-1)
+        return torch.cat([v, F.squeeze(-1)], dim=-1)
 
     def Minv(self, q):
         bs, states = q.shape
