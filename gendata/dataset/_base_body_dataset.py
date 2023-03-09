@@ -33,11 +33,11 @@ class BaseBodyDataset(BaseDynamicsDataset):
         for i in range(num):
             ax1.plot(E[i].cpu().detach().numpy())
 
-            X_plot = X[i].cpu().detach().numpy()
-            x1 = X_plot[:, 0]
-            y1 = X_plot[:, 1]
-            x2 = X_plot[:, 2]
-            y2 = X_plot[:, 3]
+            # X_plot = X[i].cpu().detach().numpy()
+            # x1 = X_plot[:, 0]
+            # y1 = X_plot[:, 1]
+            # x2 = X_plot[:, 2]
+            # y2 = X_plot[:, 3]
 
             # fig, ax2 = plt.subplots(figsize=(5, 5))
             # ax2.plot(x1, y1, 'b', label='m1')

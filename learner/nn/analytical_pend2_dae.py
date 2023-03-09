@@ -75,7 +75,7 @@ class Analytical_pend2_dae(LossNN):
         R = R.reshape(bs, 2, 1)
 
         # lam = torch.linalg.solve(L, R)  # (2, 1)
-        lam = torch.linalg.solve(L, R)
+        lam = torch.matmul(matrix_inv(L), R)
         lam = lam.reshape(bs, 2, 1)
 
         # 求解 a ----------------------------------------------------------------
