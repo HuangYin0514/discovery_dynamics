@@ -42,12 +42,12 @@ class Pendulum2_L_dae(BaseBodyDataset, nn.Module):
         t0 = 0.
 
         t_end = 1.1
-        dt = 0.001
+        dt = 0.1
         _time_step = int((t_end - t0) / dt)
         self.t = torch.linspace(t0, t_end, _time_step)
 
         t_end =1.1
-        dt = 0.001
+        dt = 0.1
         _time_step = int((t_end - t0) / dt)
         self.test_t = torch.linspace(t0, t_end, _time_step)
 
