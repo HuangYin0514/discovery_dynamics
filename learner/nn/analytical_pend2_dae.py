@@ -10,8 +10,7 @@ import torch
 
 from ._base_module import LossNN
 from ..integrator import ODESolver
-from ..utils import dfx
-from ..utils.common_utils import enable_grad, matrix_inv
+from ..utils.common_utils import enable_grad, matrix_inv, dfx
 
 
 class Analytical_pend2_dae(LossNN):
@@ -31,45 +30,35 @@ class Analytical_pend2_dae(LossNN):
 
         self.mass = torch.nn.Linear(1, 1, bias=False)
 
+        self.m = [10, 10]
+        self.g = 10
+
     @enable_grad
     def forward(self, t, coords):
         coords = coords.clone().detach().requires_grad_(True)
         x, v = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
 
-        self.m = [10., 10.]
-        self.g = 10.
-
         Minv = self.Minv(x)
+        V = self.potential(x)
 
+        # 约束 -------------------------------------------------------------------------------
         phi = self.phi_fun(x)
         phi_q = torch.zeros(phi.shape[0], phi.shape[1], x.shape[1], dtype=self.Dtype, device=self.Device)  # (bs, 2, 4)
         for i in range(phi.shape[1]):
             phi_q[:, i] = dfx(phi[:, i:i + 1], x)
+        phi_qq = torch.zeros(phi.shape[0], phi.shape[1], x.shape[1], dtype=self.Dtype, device=self.Device)  # (bs, 2, 4)
+        for i in range(phi.shape[1]):
+            phi_qq[:, i] = dfx(phi_q[:, i:i + 1] @ v.unsqueeze(-1), x)
 
-        # ----------------------------------------------------------------
-        bs = v.shape[0]
-        phi_qq = torch.tensor([[9, 10, 11, 12], [13, 14, 15, 16]], dtype=self.Dtype, device=self.Device).reshape(1, 2,
-                                                                                                                 4).repeat(
-            bs, 1, 1)
-        F = torch.tensor([[0],
-                          [-self.m[0] * self.g],
-                          [0],
-                          [-self.m[1] * self.g]
-                          ], dtype=self.Dtype, device=self.Device).reshape(1, -1).repeat(bs, 1)
-        v = torch.tensor([[9, 10, 11, 12]], dtype=self.Dtype, device=self.Device).reshape(1,           4).repeat(
-            bs, 1)
+        # 右端项 -------------------------------------------------------------------------------
+        F = -dfx(V, x)
+
         # 求解 lam ----------------------------------------------------------------
         L = phi_q @ Minv @ phi_q.permute(0, 2, 1)
-        # R = phi_q @ Minv @ F.unsqueeze(-1) + phi_qq @ v.unsqueeze(-1)  # (2, 1)
-        R = torch.tensor([[5], [6]], dtype=self.Dtype, device=self.Device).reshape(1, 2, 1).repeat(bs, 1, 1)
+        R = (phi_q @ Minv @ F.unsqueeze(-1) + phi_qq @ v.unsqueeze(-1))  # (2, 1)
         lam = torch.linalg.solve(L, R)  # (2, 1)
-        # ----------------------------------------------------------------
 
-        # 求解 a ----------------------------------------------------------------
-        a_R = F.unsqueeze(-1) - phi_q.permute(0, 2, 1) @ lam  # (4, 1)
-        a = (Minv @ a_R).squeeze(-1)  # (4, 1)
-
-        return torch.cat([v, a], dim=-1)
+        return torch.cat([v, lam.squeeze(-1), lam.squeeze(-1)], dim=-1)
 
     def Minv(self, q):
         bs, states = q.shape
@@ -89,7 +78,6 @@ class Analytical_pend2_dae(LossNN):
         return phi  # (bs ,2)
 
     def potential(self, x):
-
         U = 0.
         y = 0.
         for i in range(self.obj):
