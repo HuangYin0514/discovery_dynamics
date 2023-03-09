@@ -41,8 +41,8 @@ class Pendulum2_L_dae(BaseBodyDataset, nn.Module):
 
         t0 = 0.
 
-        t_end = 1.0
-        dt = 0.1
+        t_end = 3.0
+        dt = 0.01
         _time_step = int((t_end - t0) / dt)
         self.t = torch.linspace(t0, t_end, _time_step)
 
@@ -62,7 +62,6 @@ class Pendulum2_L_dae(BaseBodyDataset, nn.Module):
         V = self.potential(torch.cat([x, v], dim=-1))
 
         Minv = Minv.reshape(bs, 4, 4)
-        V = V.reshape(bs, 1)
 
         # 约束 -------------------------------------------------------------------------------
         phi = self.phi_fun(x)
@@ -94,7 +93,7 @@ class Pendulum2_L_dae(BaseBodyDataset, nn.Module):
         lam = lam.reshape(bs, 2, 1)
 
         # 求解 a ----------------------------------------------------------------
-        a_R = torch.matmul(F.unsqueeze(-1) - phi_q.permute(0, 2, 1), lam)  # (4, 1)
+        a_R = F.unsqueeze(-1) - torch.matmul(phi_q.permute(0, 2, 1), lam)  # (4, 1)
         a_R = a_R.reshape(bs, 4, 1)
 
         a = torch.matmul(Minv, a_R).squeeze(-1)  # (4, 1)

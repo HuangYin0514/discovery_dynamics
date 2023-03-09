@@ -78,7 +78,7 @@ class Analytical_pend2_dae(LossNN):
         lam = lam.reshape(bs, 2, 1)
 
         # 求解 a ----------------------------------------------------------------
-        a_R = torch.matmul(F.unsqueeze(-1) - phi_q.permute(0, 2, 1), lam)  # (4, 1)
+        a_R = F.unsqueeze(-1) - torch.matmul(phi_q.permute(0, 2, 1), lam)  # (4, 1)
         a_R = a_R.reshape(bs, 4, 1)
 
         a = torch.matmul(Minv, a_R).squeeze(-1)  # (4, 1)
