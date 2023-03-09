@@ -73,7 +73,12 @@ class Pendulum2_L_dae(BaseBodyDataset, nn.Module):
                           [0],
                           [-self.m[1] * self.g]
                           ], dtype=self.Dtype, device=self.Device).reshape(1, -1).repeat(bs, 1)
-        lam = torch.tensor([[5], [6]], dtype=self.Dtype, device=self.Device).reshape(1, 2, 1).repeat(bs, 1, 1)
+
+        # 求解 lam ----------------------------------------------------------------
+        L = phi_q @ Minv @ phi_q.permute(0, 2, 1)
+        # R = (phi_q @ Minv @ F.unsqueeze(-1) + phi_qq @ v.unsqueeze(-1))  # (2, 1)
+        R = torch.tensor([[5], [6]], dtype=self.Dtype, device=self.Device).reshape(1, 2, 1).repeat(bs, 1, 1)
+        lam = torch.linalg.solve(L, R)  # (2, 1)
         # ----------------------------------------------------------------
 
         # 求解 a ----------------------------------------------------------------
