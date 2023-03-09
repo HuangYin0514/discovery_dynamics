@@ -45,7 +45,7 @@ class Analytical_pend2_dae(LossNN):
         V = self.potential(x)
 
         Minv = Minv.reshape(bs, 4, 4)
-        V = V.reshape(bs, )
+        V = V.reshape(bs, 1)
 
         # 约束 -------------------------------------------------------------------------------
         phi = self.phi_fun(x)
@@ -124,6 +124,6 @@ class Analytical_pend2_dae(LossNN):
         return H
 
 
-def integrate(self, X0, t):
-        out = ODESolver(self, X0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
-        return out
+    def integrate(self, X0, t):
+            out = ODESolver(self, X0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
+            return out

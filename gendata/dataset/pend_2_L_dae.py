@@ -62,7 +62,7 @@ class Pendulum2_L_dae(BaseBodyDataset, nn.Module):
         V = self.potential(x)
 
         Minv = Minv.reshape(bs, 4, 4)
-        V = V.reshape(bs, )
+        V = V.reshape(bs, 1)
 
         # 约束 -------------------------------------------------------------------------------
         phi = self.phi_fun(x)
