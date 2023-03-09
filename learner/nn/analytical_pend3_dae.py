@@ -30,14 +30,13 @@ class Analytical_pend2_dae(LossNN):
 
         self.mass = torch.nn.Linear(1, 1, bias=False)
 
-        self.m = [10., 10.]
-        self.l = [10., 10.]
-        self.g = 10.
+        self.m = [10, 10]
+        self.g = 10
 
     @enable_grad
     def forward(self, t, coords):
         coords = coords.clone().detach().requires_grad_(True)
-        x, v = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
+        x, v = coords.chunk(2, dim=-1)
 
         bs = coords.shape[0]
 
@@ -54,7 +53,6 @@ class Analytical_pend2_dae(LossNN):
         phi_q = torch.zeros(phi.shape[0], phi.shape[1], x.shape[1], dtype=self.Dtype, device=self.Device)  # (bs, 2, 4)
         for i in range(phi.shape[1]):
             phi_q[:, i] = dfx(phi[:, i:i + 1], x)
-
         phi_q = phi_q.reshape(bs, 2, 4)
 
         phi_qq = torch.zeros(phi.shape[0], phi.shape[1], x.shape[1], dtype=self.Dtype, device=self.Device)  # (bs, 2, 4)
@@ -72,7 +70,6 @@ class Analytical_pend2_dae(LossNN):
 
         L = L.reshape(bs, 2, 2)
         R = R.reshape(bs, 2, 1)
-
         lam = torch.linalg.solve(L, R)  # (2, 1)
         lam = lam.reshape(bs, 2, 1)
 
@@ -81,15 +78,14 @@ class Analytical_pend2_dae(LossNN):
         a_R = a_R.reshape(bs, 4, 1)
 
         a = (Minv @ a_R).squeeze(-1)  # (4, 1)
-
         a = a.reshape(bs, 4)
 
         return torch.cat([v, a], dim=-1)
 
     def Minv(self, q):
         bs, states = q.shape
-
-        M = np.diag(np.array([self.m[0], self.m[0], self.m[1], self.m[1]]))
+        m = [10, 10]
+        M = np.diag(np.array([m[0], m[0], m[1], m[1]]))
         M = np.tile(M, (bs, 1, 1))
         M = torch.tensor(M, dtype=self.Dtype, device=self.Device)
 
@@ -103,12 +99,6 @@ class Analytical_pend2_dae(LossNN):
         phi = torch.stack((constraint_1, constraint_2), dim=-1)
         return phi  # (bs ,2)
 
-    def kinetic(self, v):
-        T = 0.
-        for i in range(self.obj):
-            T = T + 0.5 * self.m[i] * torch.sum(v[:, 2 * i: 2 * i + 2] ** 2, dim=1)
-        return T
-
     def potential(self, x):
         U = 0.
         y = 0.
@@ -117,13 +107,6 @@ class Analytical_pend2_dae(LossNN):
             U = U + self.m[i] * self.g * y
         return U
 
-    def energy_fn(self, coords):
-        """energy function """
-        x, v = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
-        H = self.kinetic(v) + self.potential(x)
-        return H
-
-
-def integrate(self, X0, t):
+    def integrate(self, X0, t):
         out = ODESolver(self, X0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
         return out
