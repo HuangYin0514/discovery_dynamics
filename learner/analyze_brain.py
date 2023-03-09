@@ -66,7 +66,6 @@ class AnalyzeBrain:
         preds = torch.cat(pred_list, dim=0)
         labels = torch.cat(labels_list, dim=0)
 
-
         err = accuracy_fn(preds, labels, self.energy_fn)
         pos_err, eng_err = err
         result = ('net: {}'.format(self.net.__class__.__name__)
