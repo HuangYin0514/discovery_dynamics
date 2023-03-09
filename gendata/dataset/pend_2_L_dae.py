@@ -87,12 +87,11 @@ class Pendulum2_L_dae(BaseBodyDataset, nn.Module):
         L = phiq_Minv @ phi_q.permute(0, 2, 1)
         R = phiq_Minv @ F.unsqueeze(-1) + phi_qq @ v.unsqueeze(-1)  # (2, 1)
 
-        R = phiq_Minv @ F.unsqueeze(-1) + torch.ones(bs, 2, 1, dtype=self.Dtype, device=self.Device)  # (2, 1)
-
         L = L.reshape(bs, 2, 2)
         R = R.reshape(bs, 2, 1)
 
-        lam = torch.linalg.solve(L, R)  # (2, 1)
+        # lam = torch.linalg.solve(L, R)  # (2, 1)
+        lam = matrix_inv(L) @ R
         lam = lam.reshape(bs, 2, 1)
 
         # 求解 a ----------------------------------------------------------------
