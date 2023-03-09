@@ -29,11 +29,6 @@ def get_dataloader(data_name, dataset_path, num_workers=0, **kwargs):
         train_set, batch_size=len_train_set, shuffle=True,
         num_workers=num_workers, collate_fn=train_collate_fn)
 
-    # train_loader = torch.utils.data.DataLoader(
-    #     val_set, batch_size=len_val_set, shuffle=False,
-    #     num_workers=num_workers, collate_fn=val_collate_fn
-    # )
-
     val_loader = torch.utils.data.DataLoader(
         val_set, batch_size=len_val_set, shuffle=False,
         num_workers=num_workers, collate_fn=val_collate_fn
