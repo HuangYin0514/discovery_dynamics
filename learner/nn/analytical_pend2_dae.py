@@ -56,8 +56,12 @@ class Analytical_pend2_dae(LossNN):
         # ----------------------------------------------------------------
         bs = v.shape[0]
 
-        phi_q = torch.ones(bs, 2, 4, dtype=self.Dtype, device=self.Device)
-        phi_qq = torch.ones(bs, 2, 4, dtype=self.Dtype, device=self.Device)
+        phi_q = torch.tensor([[1, 2, 3, 4], [5, 6, 7, 8]], dtype=self.Dtype, device=self.Device).reshape(1, 2,
+                                                                                                         4).repeat(bs,
+                                                                                                                   1, 1)
+        phi_qq = torch.tensor([[9, 10, 11, 12], [13, 14, 15, 16]], dtype=self.Dtype, device=self.Device).reshape(1, 2,
+                                                                                                                 4).repeat(
+            bs, 1, 1)
         F = torch.tensor([[0],
                           [-self.m[0] * self.g],
                           [0],
