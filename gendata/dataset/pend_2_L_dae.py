@@ -77,7 +77,7 @@ class Pendulum2_L_dae(BaseBodyDataset, nn.Module):
         lam = torch.linalg.solve(L, R)  # (2, 1)
 
         bs = x.shape[0]
-        a = L.reshape[bs, -1]
+        a = L.reshape(bs, -1)
         return torch.cat([v, a], dim=-1)
 
     def Minv(self, q):
