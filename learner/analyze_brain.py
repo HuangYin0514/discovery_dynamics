@@ -89,6 +89,10 @@ class AnalyzeBrain:
         pred_kinetic_eng = self.kinetic_fn(net_pred)
         pred_potential_eng = self.potential_fn(net_pred)
 
+        print(sum(true_eng- pred_eng))
+        print(sum(true_kinetic_eng- pred_kinetic_eng))
+        print(sum(true_potential_eng- pred_potential_eng))
+
         t = t.detach().cpu().numpy()
 
         ground_true = ground_true.detach().cpu().numpy()
