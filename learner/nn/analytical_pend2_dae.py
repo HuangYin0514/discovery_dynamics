@@ -64,6 +64,7 @@ class Analytical_pend2_dae(LossNN):
         lam = torch.linalg.solve(L, R)  # (2, 1)
         # ----------------------------------------------------------------
 
+
         # 求解 a ----------------------------------------------------------------
         a_R = F.unsqueeze(-1) - phi_q.permute(0, 2, 1) @ lam  # (4, 1)
         a = (Minv @ a_R).squeeze(-1)  # (4, 1)
