@@ -155,7 +155,7 @@ class AnalyzeBrain:
         dataclass.device = self.device
         dataclass.dtype = self.dtype
 
-        dataclass = Pendulum2_L_dae(self.obj, self.dim)
+        # dataclass = Pendulum2_L_dae(self.obj, self.dim)
         self.energy_fn = dataclass.energy_fn
         self.kinetic_fn = dataclass.kinetic
         self.potential_fn = dataclass.potential
