@@ -73,7 +73,7 @@ class Pendulum2_L_dae(BaseBodyDataset, nn.Module):
                           [-self.m[0] * self.g],
                           [0],
                           [-self.m[1] * self.g]
-                          ]).reshape(1, -1).repeat(bs, 1)
+                          ], dtype=self.Dtype, device=self.Device).reshape(1, -1).repeat(bs, 1)
         # ----------------------------------------------------------------
 
         # 求解 lam ----------------------------------------------------------------
