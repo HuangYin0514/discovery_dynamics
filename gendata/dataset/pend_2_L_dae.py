@@ -57,14 +57,14 @@ class Pendulum2_L_dae(BaseBodyDataset, nn.Module):
         x, v = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
 
         Minv = self.Minv(x)
-        V = self.potential(x)
+
+        phi = self.phi_fun(x)
+        phi_q = torch.zeros(phi.shape[0], phi.shape[1], x.shape[1], dtype=self.Dtype, device=self.Device)  # (bs, 2, 4)
+        for i in range(phi.shape[1]):
+            phi_q[:, i] = dfx(phi[:, i:i + 1], x)
 
         # ----------------------------------------------------------------
         bs = v.shape[0]
-
-        phi_q = torch.tensor([[1, 2, 3, 4], [5, 6, 7, 8]], dtype=self.Dtype, device=self.Device).reshape(1, 2,
-                                                                                                         4).repeat(bs,
-                                                                                                                   1, 1)
         phi_qq = torch.tensor([[9, 10, 11, 12], [13, 14, 15, 16]], dtype=self.Dtype, device=self.Device).reshape(1, 2,
                                                                                                                  4).repeat(
             bs, 1, 1)
