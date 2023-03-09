@@ -70,13 +70,13 @@ class Pendulum2_L_dae(BaseBodyDataset, nn.Module):
 
         phi_q = torch.zeros(phi.shape[0], phi.shape[1], x.shape[1], dtype=self.Dtype, device=self.Device)  # (bs, 2, 4)
         for i in range(phi.shape[1]):
-            phi_q[:, i] = dfx(phi[:, i:i + 1], x)
+            phi_q[:, i] = dfx(phi[:, i], x)
 
         phi_q = phi_q.reshape(bs, 2, 4)
 
         phi_qq = torch.zeros(phi.shape[0], phi.shape[1], x.shape[1], dtype=self.Dtype, device=self.Device)  # (bs, 2, 4)
         for i in range(phi.shape[1]):
-            phi_qq[:, i] = dfx(phi_q[:, i:i + 1] @ v.unsqueeze(-1), x)
+            phi_qq[:, i] = dfx(phi_q[:, i] .unsqueeze(-2)@ v.unsqueeze(-1), x)
         phi_qq = phi_qq.reshape(bs, 2, 4)
 
         # 右端项 -------------------------------------------------------------------------------
