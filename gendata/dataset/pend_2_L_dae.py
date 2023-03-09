@@ -59,7 +59,7 @@ class Pendulum2_L_dae(BaseBodyDataset, nn.Module):
         bs = coords.shape[0]
 
         Minv = self.Minv(x)
-        V = self.potential(torch.cat([x,v],dim=-1))
+        V = self.potential(torch.cat([x, v], dim=-1))
 
         Minv = Minv.reshape(bs, 4, 4)
         V = V.reshape(bs, 1)
@@ -76,7 +76,7 @@ class Pendulum2_L_dae(BaseBodyDataset, nn.Module):
 
         phi_qq = torch.zeros(phi.shape[0], phi.shape[1], x.shape[1], dtype=self.Dtype, device=self.Device)  # (bs, 2, 4)
         for i in range(phi.shape[1]):
-            phi_qq[:, i] = dfx(phi_q[:, i] .unsqueeze(-2)@ v.unsqueeze(-1), x)
+            phi_qq[:, i] = dfx(phi_q[:, i].unsqueeze(-2) @ v.unsqueeze(-1), x)
         phi_qq = phi_qq.reshape(bs, 2, 4)
 
         # 右端项 -------------------------------------------------------------------------------
@@ -87,7 +87,7 @@ class Pendulum2_L_dae(BaseBodyDataset, nn.Module):
         L = phiq_Minv @ phi_q.permute(0, 2, 1)
         R = phiq_Minv @ F.unsqueeze(-1) + phi_qq @ v.unsqueeze(-1)  # (2, 1)
 
-        R = torch.ones(bs,2,1,dtype=self.Dtype, device=self.Device) # (2, 1)
+        R =  phi_qq @ torch.ones(bs, 4, 1, dtype=self.Dtype, device=self.Device)  # (2, 1)
 
         L = L.reshape(bs, 2, 2)
         R = R.reshape(bs, 2, 1)
