@@ -84,7 +84,7 @@ class Pendulum2_L_dae(BaseBodyDataset, nn.Module):
         # 求解 lam ----------------------------------------------------------------
         phiq_Minv = torch.matmul(phi_q, Minv)  # (bs,2,4)
         L = torch.matmul(phiq_Minv, phi_q.permute(0, 2, 1))
-        R = torch.matmul(phiq_Minv, F.unsqueeze(-1)) + torch.matmul(phi_qq, v.unsqueeze(-1))  # (2, 1)
+        # R = torch.matmul(phiq_Minv, F.unsqueeze(-1)) + torch.matmul(phi_qq, v.unsqueeze(-1))  # (2, 1)
         R = torch.matmul(phiq_Minv, F.unsqueeze(-1))  # (2, 1)
 
         L = L.reshape(bs, 2, 2)
@@ -92,6 +92,7 @@ class Pendulum2_L_dae(BaseBodyDataset, nn.Module):
 
         lam = torch.matmul(matrix_inv(L), R)
         lam = lam.reshape(bs, 2, 1)
+        lam = torch.ones_like(lam, dtype=self.Dtype, device=self.Device)
 
         # 求解 a ----------------------------------------------------------------
         a_R = F.unsqueeze(-1) - torch.matmul(phi_q.permute(0, 2, 1), lam)  # (4, 1)
