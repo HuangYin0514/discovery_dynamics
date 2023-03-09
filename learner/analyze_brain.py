@@ -51,16 +51,16 @@ class AnalyzeBrain:
 
         pbar = tqdm(self.test_loader, desc='Processing')
         for test_data in pbar:
-            inputs, labels = test_data
+            inputs, true_traj = test_data
             X, t = inputs
             X, t = X.to(self.device), t.to(self.device)
-            labels = labels.to(self.device)
+            true_traj = true_traj.to(self.device)
 
             # pred ----------------------------------------------------------------
-            preds = self.net.integrate(X, t).clone().detach()  # (bs, T, states)
+            net_pred = self.net.integrate(X, t).clone().detach()  # (bs, T, states)
 
-            pred_list.append(preds)
-            labels_list.append(labels)
+            pred_list.append(net_pred)
+            labels_list.append(true_traj)
 
         # error ----------------------------------------------------------------
         preds = torch.cat(pred_list, dim=0)
