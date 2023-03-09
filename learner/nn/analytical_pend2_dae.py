@@ -68,7 +68,6 @@ class Analytical_pend2_dae(LossNN):
         # 求解 lam ----------------------------------------------------------------
         phiq_Minv = torch.matmul(phi_q, Minv)  # (bs,2,4)
         L = torch.matmul(phiq_Minv, phi_q.permute(0, 2, 1))
-        # R = torch.matmul(phiq_Minv, F.unsqueeze(-1)) + torch.matmul(phi_qq, v.unsqueeze(-1))  # (2, 1)
         R = torch.matmul(phiq_Minv, F.unsqueeze(-1))  + torch.matmul(phi_qq, v.unsqueeze(-1))  # (2, 1)
 
         L = L.reshape(bs, 2, 2)
