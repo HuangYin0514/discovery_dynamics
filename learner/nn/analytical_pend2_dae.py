@@ -41,6 +41,7 @@ class Analytical_pend2_dae(LossNN):
 
         Minv = self.Minv(x)
 
+
         # ----------------------------------------------------------------
         bs = v.shape[0]
 
