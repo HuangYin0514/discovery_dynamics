@@ -62,11 +62,10 @@ class Pendulum2_L_dae(BaseBodyDataset, nn.Module):
         phi = self.phi_fun(x)
         phi_q = torch.zeros(phi.shape[0], phi.shape[1], x.shape[1], dtype=self.Dtype, device=self.Device)  # (bs, 2, 4)
         for i in range(phi.shape[1]):
-            phi_q[:, i] = dfx(phi[:, i:i + 1], x)
+            phi_q[:, i] = dfx(phi[:, i:i+1], x)
         phi_qq = torch.zeros(phi.shape[0], phi.shape[1], x.shape[1], dtype=self.Dtype, device=self.Device)  # (bs, 2, 4)
         for i in range(phi.shape[1]):
-            phi_qq[:, i] = dfx(phi_q[:, i:i + 1] @ v.unsqueeze(-1), x)
-
+            phi_qq[:, i] = dfx(phi_q[:, i:i+1] @ v.unsqueeze(-1), x)
         # ----------------------------------------------------------------
         bs = v.shape[0]
         F = torch.tensor([[0],
@@ -79,12 +78,13 @@ class Pendulum2_L_dae(BaseBodyDataset, nn.Module):
         # 求解 lam ----------------------------------------------------------------
         L = phi_q @ Minv @ phi_q.permute(0, 2, 1)
         R = (phi_q @ Minv @ F.unsqueeze(-1) + phi_qq @ v.unsqueeze(-1))  # (2, 1)
-        lam = torch.linalg.solve(L, R)  # (2, 1)
+        lam = torch.linalg.solve(L, R) # (2, 1)
 
         # 求解 vdot ----------------------------------------------------------------
         a_R = F.unsqueeze(-1) - phi_q.permute(0, 2, 1) @ lam  # (4, 1)
         a = (Minv @ a_R).squeeze(-1)  # (4, 1)
 
+        bs = v.shape[0]
         # return phi_qq.reshape(bs,-1)
         # return torch.cat([torch.ones_like(x).reshape(bs, -1), matrix_inv(L).reshape(bs, -1)], dim=-1)
         return torch.cat([v, a], dim=-1)
