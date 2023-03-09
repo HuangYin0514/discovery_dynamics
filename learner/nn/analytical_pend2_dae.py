@@ -72,7 +72,8 @@ class Analytical_pend2_dae(LossNN):
 
         L = L.reshape(bs, 2, 2)
         R = R.reshape(bs, 2, 1)
-        R = phiq_Minv @ F.unsqueeze(-1)+ torch.ones((bs, 4, 1), dtype=self.Dtype, device=self.Device) * 4
+        # R = phiq_Minv @ F.unsqueeze(-1)+ torch.ones((bs, 4, 1), dtype=self.Dtype, device=self.Device) * 4
+        R = torch.matmul(phiq_Minv, F.unsqueeze(-1))
 
         lam = matrix_inv(L) @ R
         lam = lam.reshape(bs, 2, 1)
