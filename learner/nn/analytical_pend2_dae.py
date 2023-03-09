@@ -56,12 +56,14 @@ class Analytical_pend2_dae(LossNN):
                           [0],
                           [-self.m[1] * self.g]
                           ], dtype=self.Dtype, device=self.Device).reshape(1, -1).repeat(bs, 1)
-
+        v = torch.tensor([[9, 10, 11, 12]], dtype=self.Dtype, device=self.Device).reshape(1,           4).repeat(
+            bs, 1)
         # 求解 lam ----------------------------------------------------------------
         L = phi_q @ Minv @ phi_q.permute(0, 2, 1)
         # R = phi_q @ Minv @ F.unsqueeze(-1) + phi_qq @ v.unsqueeze(-1)  # (2, 1)
-        R = torch.bmm(phi_qq ,v.unsqueeze(-1)) + torch.tensor([[5], [6]], dtype=self.Dtype, device=self.Device).reshape(1, 2,
-                                                                                                              1).repeat(
+        R = torch.bmm(phi_qq, v.unsqueeze(-1)) + torch.tensor([[5], [6]], dtype=self.Dtype, device=self.Device).reshape(
+            1, 2,
+            1).repeat(
             bs, 1, 1)
         lam = torch.linalg.solve(L, R)  # (2, 1)
         # ----------------------------------------------------------------
