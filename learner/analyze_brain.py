@@ -6,6 +6,7 @@ from matplotlib import pyplot as plt
 from tqdm import tqdm
 
 import gendata
+from gendata.dataset import Pendulum2_L_dae
 from .analyze import plot_energy, plot_compare_energy, plot_compare_state, plot_field, plot_trajectory
 from .metrics import accuracy_fn
 from .utils import timing
@@ -153,6 +154,8 @@ class AnalyzeBrain:
         dataclass = getattr(gendata.dataset, self.data_name)(self.obj, self.dim)
         dataclass.device = self.device
         dataclass.dtype = self.dtype
+
+        dataclass = Pendulum2_L_dae(self.obj, self.dim)
         self.energy_fn = dataclass.energy_fn
         self.kinetic_fn = dataclass.kinetic
         self.potential_fn = dataclass.potential

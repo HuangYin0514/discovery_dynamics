@@ -125,7 +125,9 @@ class Pendulum2_L_dae(BaseBodyDataset, nn.Module):
         x, v = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
         T = 0.
         for i in range(self.obj):
-            T = T + 0.5 * self.m[i] * torch.sum(v[:, 2 * i: 2 * i + 2] ** 2, dim=1)
+            vx = v[:, i * 2]
+            vy = v[:, i * 2 + 1]
+            T = T + 0.5 * self.m[i] * (vx ** 2 + vy ** 2)
         return T
 
     def potential(self, coords):
