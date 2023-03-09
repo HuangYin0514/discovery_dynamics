@@ -70,7 +70,7 @@ class Analytical_pend2_dae(LossNN):
         L = phiq_Minv @ phi_q.permute(0, 2, 1)
         R = phiq_Minv @ F.unsqueeze(-1) + phi_qq @ v.unsqueeze(-1)  # (2, 1)
 
-        L = x.reshape(bs, 2, 2)*2+1
+        L = x.reshape(bs, 2, 2)/12+1
         R = phi_qq @ v.reshape(bs, 4, 1) + torch.ones(bs, 2, 1, dtype=self.Dtype, device=self.Device)  # (2, 1)
 
         L = L.reshape(bs, 2, 2)
