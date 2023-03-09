@@ -46,7 +46,7 @@ class Pendulum2_L_dae(BaseBodyDataset, nn.Module):
         _time_step = int((t_end - t0) / dt)
         self.t = torch.linspace(t0, t_end, _time_step)
 
-        t_end =5.1
+        t_end = 5.1
         dt = 0.1
         _time_step = int((t_end - t0) / dt)
         self.test_t = torch.linspace(t0, t_end, _time_step)
@@ -56,17 +56,28 @@ class Pendulum2_L_dae(BaseBodyDataset, nn.Module):
         coords = coords.clone().detach().requires_grad_(True)
         x, v = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
 
+        bs = coords.shape[0]
+
         Minv = self.Minv(x)
         V = self.potential(x)
 
+        Minv = Minv.reshape(bs, 4, 4)
+        V = V.reshape(bs, )
+
         # 约束 -------------------------------------------------------------------------------
         phi = self.phi_fun(x)
+        phi = phi.reshape(bs, 2)
+
         phi_q = torch.zeros(phi.shape[0], phi.shape[1], x.shape[1], dtype=self.Dtype, device=self.Device)  # (bs, 2, 4)
         for i in range(phi.shape[1]):
             phi_q[:, i] = dfx(phi[:, i:i + 1], x)
+
+        phi_q = phi_q.reshape(bs, 2, 4)
+
         phi_qq = torch.zeros(phi.shape[0], phi.shape[1], x.shape[1], dtype=self.Dtype, device=self.Device)  # (bs, 2, 4)
         for i in range(phi.shape[1]):
             phi_qq[:, i] = dfx(phi_q[:, i:i + 1] @ v.unsqueeze(-1), x)
+        phi_qq = phi_qq.reshape(bs, 2, 4)
 
         # 右端项 -------------------------------------------------------------------------------
         F = -dfx(V, x)
@@ -75,14 +86,22 @@ class Pendulum2_L_dae(BaseBodyDataset, nn.Module):
         phiq_Minv = phi_q @ Minv
         L = phiq_Minv @ phi_q.permute(0, 2, 1)
         R = phiq_Minv @ F.unsqueeze(-1) + phi_qq @ v.unsqueeze(-1)  # (2, 1)
+
+        L = L.reshape(bs, 2, 2)
+        R = R.reshape(bs, 2, 1)
+
         lam = torch.linalg.solve(L, R)  # (2, 1)
+        lam = lam.reshape(bs, 2, 1)
 
         # 求解 a ----------------------------------------------------------------
         a_R = F.unsqueeze(-1) - phi_q.permute(0, 2, 1) @ lam  # (4, 1)
+        a_R = a_R.reshape(bs, 4, 1)
+
         a = (Minv @ a_R).squeeze(-1)  # (4, 1)
 
-        return torch.cat([v, a], dim=-1)
+        a = a.reshape(bs, 4)
 
+        return torch.cat([v, a], dim=-1)
 
     def Minv(self, q):
         bs, states = q.shape
@@ -163,7 +182,7 @@ class Pendulum2_L_dae(BaseBodyDataset, nn.Module):
                 y0[i] = theta
                 y0[i + self.obj] = momentum
             # ----------------------------------------------------------------
-            y0 = np.array([np.pi/2, np.pi/2, 0., 0.])
+            y0 = np.array([np.pi / 2, np.pi / 2, 0., 0.])
             # y0 = np.array([self.l[0], 0, self.l[0] + self.l[1], 0, 0, 0, 0, 0])
             # ----------------------------------------------------------------
             x0_list.append(y0)

@@ -38,17 +38,27 @@ class Analytical_pend2_dae(LossNN):
         coords = coords.clone().detach().requires_grad_(True)
         x, v = coords.chunk(2, dim=-1)
 
+        bs = coords.shape[0]
+
         Minv = self.Minv(x)
         V = self.potential(x)
 
+        Minv = Minv.reshape(bs, 4, 4)
+        V = V.reshape(bs, )
+
         # 约束 -------------------------------------------------------------------------------
         phi = self.phi_fun(x)
+        phi = phi.reshape(bs, 2)
+
         phi_q = torch.zeros(phi.shape[0], phi.shape[1], x.shape[1], dtype=self.Dtype, device=self.Device)  # (bs, 2, 4)
         for i in range(phi.shape[1]):
             phi_q[:, i] = dfx(phi[:, i:i + 1], x)
+        phi_q = phi_q.reshape(bs, 2, 4)
+
         phi_qq = torch.zeros(phi.shape[0], phi.shape[1], x.shape[1], dtype=self.Dtype, device=self.Device)  # (bs, 2, 4)
         for i in range(phi.shape[1]):
             phi_qq[:, i] = dfx(phi_q[:, i:i + 1] @ v.unsqueeze(-1), x)
+        phi_qq = phi_qq.reshape(bs, 2, 4)
 
         # 右端项 -------------------------------------------------------------------------------
         F = -dfx(V, x)
@@ -57,11 +67,18 @@ class Analytical_pend2_dae(LossNN):
         phiq_Minv = phi_q @ Minv
         L = phiq_Minv @ phi_q.permute(0, 2, 1)
         R = phiq_Minv @ F.unsqueeze(-1) + phi_qq @ v.unsqueeze(-1)  # (2, 1)
+
+        L = L.reshape(bs, 2, 2)
+        R = R.reshape(bs, 2, 1)
         lam = torch.linalg.solve(L, R)  # (2, 1)
+        lam = lam.reshape(bs, 2, 1)
 
         # 求解 a ----------------------------------------------------------------
         a_R = F.unsqueeze(-1) - phi_q.permute(0, 2, 1) @ lam  # (4, 1)
+        a_R = a_R.reshape(bs, 4, 1)
+
         a = (Minv @ a_R).squeeze(-1)  # (4, 1)
+        a = a.reshape(bs, 4)
 
         return torch.cat([v, a], dim=-1)
 
