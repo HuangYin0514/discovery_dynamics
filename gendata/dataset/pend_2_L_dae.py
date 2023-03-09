@@ -163,7 +163,7 @@ class Pendulum2_L_dae(BaseBodyDataset, nn.Module):
                 y0[i] = theta
                 y0[i + self.obj] = momentum
             # ----------------------------------------------------------------
-            # y0 = np.array([np.pi/pi2, np.pi/2, 0., 0.])
+            y0 = np.array([np.pi/2, np.pi/2, 0., 0.])
             # y0 = np.array([self.l[0], 0, self.l[0] + self.l[1], 0, 0, 0, 0, 0])
             # ----------------------------------------------------------------
             x0_list.append(y0)
