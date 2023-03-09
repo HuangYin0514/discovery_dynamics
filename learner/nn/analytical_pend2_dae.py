@@ -37,30 +37,22 @@ class Analytical_pend2_dae(LossNN):
     @enable_grad
     def forward(self, t, coords):
         coords = coords.clone().detach().requires_grad_(True)
+        bs = coords.shape[0]
         x, v = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
 
-        bs = coords.shape[0]
-
+        # 拟合 ------------------------------------------------------------------------------
         Minv = self.Minv(x)
         V = self.potential(torch.cat([x, v], dim=-1))
 
-        Minv = Minv.reshape(bs, 4, 4)
-        V = V.reshape(bs, 1)
-
         # 约束 -------------------------------------------------------------------------------
         phi = self.phi_fun(x)
-        phi = phi.reshape(bs, 2)
 
         phi_q = torch.zeros(phi.shape[0], phi.shape[1], x.shape[1], dtype=self.Dtype, device=self.Device)  # (bs, 2, 4)
         for i in range(phi.shape[1]):
             phi_q[:, i] = dfx(phi[:, i], x)
-
-        phi_q = phi_q.reshape(bs, 2, 4)
-
         phi_qq = torch.zeros(phi.shape[0], phi.shape[1], x.shape[1], dtype=self.Dtype, device=self.Device)  # (bs, 2, 4)
         for i in range(phi.shape[1]):
             phi_qq[:, i] = dfx(phi_q[:, i].unsqueeze(-2) @ v.unsqueeze(-1), x)
-        phi_qq = phi_qq.reshape(bs, 2, 4)
 
         # 右端项 -------------------------------------------------------------------------------
         F = -dfx(V, x)
@@ -68,23 +60,12 @@ class Analytical_pend2_dae(LossNN):
         # 求解 lam ----------------------------------------------------------------
         phiq_Minv = torch.matmul(phi_q, Minv)  # (bs,2,4)
         L = torch.matmul(phiq_Minv, phi_q.permute(0, 2, 1))
-        R = torch.matmul(phiq_Minv, F.unsqueeze(-1))  + torch.matmul(phi_qq, v.unsqueeze(-1))  # (2, 1)
-
-        L = L.reshape(bs, 2, 2)
-        R = R.reshape(bs, 2, 1)
-
+        R = torch.matmul(phiq_Minv, F.unsqueeze(-1)) + torch.matmul(phi_qq, v.unsqueeze(-1))  # (2, 1)
         lam = torch.matmul(matrix_inv(L), R)
-        lam = lam.reshape(bs, 2, 1)
-        # lam = torch.ones_like(lam, dtype=self.Dtype, device=self.Device)
 
         # 求解 a ----------------------------------------------------------------
         a_R = F.unsqueeze(-1) - torch.matmul(phi_q.permute(0, 2, 1), lam)  # (4, 1)
-        a_R = a_R.reshape(bs, 4, 1)
-
         a = torch.matmul(Minv, a_R).squeeze(-1)  # (4, 1)
-
-        a = a.reshape(bs, 4)
-
         return torch.cat([v, a], dim=-1)
 
     def Minv(self, q):
