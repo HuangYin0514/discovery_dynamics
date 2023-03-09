@@ -120,13 +120,15 @@ class Pendulum2_L_dae(BaseBodyDataset, nn.Module):
         phi = torch.stack((constraint_1, constraint_2), dim=-1)
         return phi  # (bs ,2)
 
-    def kinetic(self, v):
+    def kinetic(self, coords):
+        x, v = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
         T = 0.
         for i in range(self.obj):
             T = T + 0.5 * self.m[i] * torch.sum(v[:, 2 * i: 2 * i + 2] ** 2, dim=1)
         return T
 
-    def potential(self, x):
+    def potential(self, coords):
+        x, v = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
         U = 0.
         y = 0.
         for i in range(self.obj):
@@ -136,8 +138,7 @@ class Pendulum2_L_dae(BaseBodyDataset, nn.Module):
 
     def energy_fn(self, coords):
         """energy function """
-        x, v = coords.chunk(2, dim=-1)  # (bs, q_dim) / (bs, p_dim)
-        H = self.kinetic(v) + self.potential(x)
+        H = self.kinetic(coords) + self.potential(coords)
         return H
 
     def angle2cartesian(self, angles):
