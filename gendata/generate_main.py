@@ -32,7 +32,7 @@ parser.add_argument('--data_name', default='Pendulum2_L_dae', type=str,
                     )
 parser.add_argument('--train_num', default=1, type=int, help='the number of train sampling trajectories')
 parser.add_argument('--val_num', default=1, type=int, help='the number of val sampling trajectories')
-parser.add_argument('--test_num', default=4, type=int, help='the number of test sampling trajectories')
+parser.add_argument('--test_num', default=2, type=int, help='the number of test sampling trajectories')
 parser.add_argument('--download_data', default='False', type=str, help='Download dataset from Internet')
 parser.add_argument('--num_workers', default=0, type=int, help='how many subprocesses to use for data loading. ')
 

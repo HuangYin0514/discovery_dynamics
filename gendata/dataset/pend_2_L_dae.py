@@ -33,8 +33,8 @@ class Pendulum2_L_dae(BaseBodyDataset, nn.Module):
         self.__init_dynamic_variable(obj, dim)
 
     def __init_dynamic_variable(self, obj, dim):
-        self.m = [10., 10.]
-        self.l = [10., 10.]
+        self.m = [1., 10.]
+        self.l = [1., 1.]
         self.g = 10.
 
         self.obj = obj
@@ -44,12 +44,12 @@ class Pendulum2_L_dae(BaseBodyDataset, nn.Module):
         t0 = 0.
 
         t_end = 3.0
-        dt = 0.01
+        dt = 0.001
         _time_step = int((t_end - t0) / dt)
         self.t = torch.linspace(t0, t_end, _time_step)
 
         t_end = 5.0
-        dt = 0.01
+        dt = 0.001
         _time_step = int((t_end - t0) / dt)
         self.test_t = torch.linspace(t0, t_end, _time_step)
 
@@ -160,12 +160,12 @@ class Pendulum2_L_dae(BaseBodyDataset, nn.Module):
     def random_config(self, num):
         x0_list = []
         for i in range(num):
-            max_momentum = 0.1
+            max_momentum = 0.0
             y0 = np.zeros(self.obj * 2)
             for i in range(self.obj):
                 theta = (2 * np.random.rand()) * np.pi
-                # momentum = (2 * np.random.rand() - 1) * max_momentum
-                momentum = np.zeros(1)
+                momentum = (2 * np.random.rand() - 1) * max_momentum
+                # momentum = np.zeros(1)
                 y0[i] = theta
                 y0[i + self.obj] = momentum
             # ----------------------------------------------------------------
