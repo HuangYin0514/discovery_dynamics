@@ -30,7 +30,7 @@ parser.add_argument('--data_name', default='Pendulum2_L_dae', type=str,
 parser.add_argument('--num_workers', default=0, type=int, help='how many subprocesses to use for data loading. ')
 
 # net
-parser.add_argument('--net_name', default='Analytical_pend2_dae', type=str,
+parser.add_argument('--net_name', default='CLNN_pend2', type=str,
                     help='Select model to train '
                          '[Baseline_pend2 Baseline_body3 Baseline_pend2_dae'
                          'HNN_pend2 HNN_body3'

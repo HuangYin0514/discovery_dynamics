@@ -9,6 +9,7 @@ from .analytical_pend2_dae import Analytical_pend2_dae
 from .baseline_body3 import Baseline_body3
 from .baseline_pend2 import Baseline_pend2
 from .baseline_pend2_dae import Baseline_pend2_dae
+from .clnn_pend2 import CLNN_pend2
 from .hnn_body3 import HNN_body3
 from .hnn_pend2 import HNN_pend2
 from .hnnmodscale_body3 import HnnModScale_body3
@@ -37,6 +38,7 @@ __model_factory = {
     'Analytical_pend2': Analytical_pend2,
     'Analytical_body3': Analytical_body3,
     'Analytical_pend2_dae': Analytical_pend2_dae,
+    'CLNN_pend2':CLNN_pend2,
 
 }
 
