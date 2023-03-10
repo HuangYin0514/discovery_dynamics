@@ -33,7 +33,7 @@ class Pendulum2_L_dae(BaseBodyDataset, nn.Module):
         self.__init_dynamic_variable(obj, dim)
 
     def __init_dynamic_variable(self, obj, dim):
-        self.m = [1., 50.]
+        self.m = [1., 5.]
         self.l = [1., 1.]
         self.g = 10.
 
@@ -44,12 +44,12 @@ class Pendulum2_L_dae(BaseBodyDataset, nn.Module):
         t0 = 0.
 
         t_end = 3.0
-        dt = 0.001
+        dt = 0.01
         _time_step = int((t_end - t0) / dt)
         self.t = torch.linspace(t0, t_end, _time_step)
 
         t_end = 5.0
-        dt = 0.001
+        dt = 0.01
         _time_step = int((t_end - t0) / dt)
         self.test_t = torch.linspace(t0, t_end, _time_step)
 
