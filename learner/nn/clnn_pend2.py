@@ -46,8 +46,8 @@ class CLNN_pend2(LossNN):
         self.dim = dim
         self.dof = int(obj * dim)
 
-        # self.potential_net = MLP(input_dim=obj * dim, hidden_dim=256, output_dim=1, num_layers=3,
-        #                          act=nn.Tanh)
+        self.potential_net = MLP(input_dim=obj * dim, hidden_dim=256, output_dim=1, num_layers=3,
+                                 act=nn.Tanh)
 
         self.mass_net = MassNet(q_dim=q_dim, num_layers=1, hidden_dim=50)
 
@@ -85,17 +85,17 @@ class CLNN_pend2(LossNN):
         a_R = F.unsqueeze(-1) - torch.matmul(phi_q.permute(0, 2, 1), lam)  # (4, 1)
         a = torch.matmul(Minv, a_R).squeeze(-1)  # (4, 1)
         return torch.cat([v, a], dim=-1)
-
-    def potential_net(self, x):
-        self.m = [1., 5.]
-        self.l = [1., 1.]
-        self.g = 10.
-        U = 0.
-        y = 0.
-        for i in range(self.obj):
-            y = x[:, i * 2 + 1]
-            U = U + self.m[i] * self.g * y
-        return U
+    #
+    # def potential_net(self, x):
+    #     self.m = [1., 5.]
+    #     self.l = [1., 1.]
+    #     self.g = 10.
+    #     U = 0.
+    #     y = 0.
+    #     for i in range(self.obj):
+    #         y = x[:, i * 2 + 1]
+    #         U = U + self.m[i] * self.g * y
+    #     return U
 
     def tril_Minv(self, q):
         """
