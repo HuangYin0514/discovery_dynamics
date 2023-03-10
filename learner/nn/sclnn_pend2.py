@@ -74,9 +74,11 @@ class SCLNN_pend2(LossNN):
 
         # 拟合 ------------------------------------------------------------------------------
         Minv = self.Minv(x)
+
+        M = matrix_inv(Minv)
         V = 0.
         for i in range(self.obj):
-            V += self.co1 * self.mass(self.Potential1(x[:, i * self.dim: (i + 1) * self.dim]))
+            V += self.co1 * M[:, i * self.dim, i * self.dim] * self.Potential1(x[:, i * self.dim: (i + 1) * self.dim])
 
         # for i in range(self.obj):
         #     for j in range(i):
