@@ -30,7 +30,7 @@ class Analytical_pend2_dae(LossNN):
 
         self.mass = torch.nn.Linear(1, 1, bias=False)
 
-        self.m = [1., 10.]
+        self.m = [1., 5.]
         self.l = [1., 1.]
         self.g = 10.
 
