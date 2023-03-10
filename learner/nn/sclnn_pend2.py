@@ -54,17 +54,15 @@ class SCLNN_pend2(LossNN):
                             act=nn.Tanh)
 
         self.Potential1 = PotentialEnergyCell(input_dim=self.dim,
-                                              hidden_dim=50,
+                                              hidden_dim=20,
                                               output_dim=1,
                                               num_layers=1, act=Identity)
         self.Potential2 = PotentialEnergyCell(input_dim=self.dim * 2,
-                                              hidden_dim=50,
+                                              hidden_dim=20,
                                               output_dim=1,
                                               num_layers=1, act=Identity)
         self.co1 = torch.nn.Parameter(torch.ones(1, dtype=self.Dtype, device=self.Device) * 0.5)
         self.co2 = torch.nn.Parameter(torch.ones(1, dtype=self.Dtype, device=self.Device) * 0.5)
-        self.mass = torch.nn.Linear(1, 1, bias=False)
-        torch.nn.init.ones_(self.mass.weight)
 
     @enable_grad
     def forward(self, t, coords):
@@ -78,7 +76,7 @@ class SCLNN_pend2(LossNN):
         M = matrix_inv(Minv)
         V = 0.
         for i in range(self.obj):
-            V += self.co1 * M[:, i * self.dim, i * self.dim] * self.Potential1(x[:, i * self.dim: (i + 1) * self.dim])
+            V += self.co1 * M[0, i * self.dim, i * self.dim] * self.Potential1(x[:, i * self.dim: (i + 1) * self.dim])
 
         # for i in range(self.obj):
         #     for j in range(i):
