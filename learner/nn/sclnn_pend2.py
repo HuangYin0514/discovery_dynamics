@@ -78,17 +78,17 @@ class SCLNN_pend2(LossNN):
         for i in range(self.obj):
             V += self.co1 * self.mass(self.Potential1(x[:, i * self.dim: (i + 1) * self.dim]))
 
-        for i in range(self.obj):
-            for j in range(i):
-                x_ij = torch.cat(
-                    [x[:, i * self.dim: (i + 1) * self.dim],
-                     x[:, j * self.dim: (j + 1) * self.dim]],
-                    dim=1)
-                x_ji = torch.cat(
-                    [x[:, j * self.dim: (j + 1) * self.dim],
-                     x[:, i * self.dim: (i + 1) * self.dim]],
-                    dim=1)
-                V += self.co2 * (0.5 * self.mass(self.Potential2(x_ij)) + 0.5 * self.mass(self.Potential2(x_ji)))
+        # for i in range(self.obj):
+        #     for j in range(i):
+        #         x_ij = torch.cat(
+        #             [x[:, i * self.dim: (i + 1) * self.dim],
+        #              x[:, j * self.dim: (j + 1) * self.dim]],
+        #             dim=1)
+        #         x_ji = torch.cat(
+        #             [x[:, j * self.dim: (j + 1) * self.dim],
+        #              x[:, i * self.dim: (i + 1) * self.dim]],
+        #             dim=1)
+        #         V += self.co2 * (0.5 * self.mass(self.Potential2(x_ij)) + 0.5 * self.mass(self.Potential2(x_ji)))
 
         # 约束 -------------------------------------------------------------------------------
         phi = self.phi_fun(x)
