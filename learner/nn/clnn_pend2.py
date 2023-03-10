@@ -122,6 +122,7 @@ class CLNN_pend2(LossNN):
     def Minv(self, q):
         self.m = [1., 5.]
 
+
         bs, states = q.shape
 
         M = np.diag(np.array([self.m[0], self.m[0], self.m[1], self.m[1]]))
