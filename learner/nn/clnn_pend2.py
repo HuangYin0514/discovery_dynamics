@@ -5,6 +5,7 @@
 @time: 2023/3/10 5:14 PM
 @desc:
 """
+import numpy as np
 import torch
 from torch import nn, Tensor
 
@@ -102,22 +103,33 @@ class CLNN_pend2(LossNN):
         res = res.transpose(-1, -2)  # Make lower triangular
         return res
 
-    def Minv(self, q: Tensor, eps=1e-4) -> Tensor:
-        """Compute the learned inverse mass matrix M^{-1}(q)
-            M = LU
-            M^{-1} = (LU)^{-1} = U^{-1} @ L^{-1}
-            M^{-1}(q) = [x, 0] @ [x, x]
-                        [x, x]   [0, x]
-        Args:
-            q: bs x D Tensor representing the position
-        """
-        assert q.ndim == 2
-        lower_triangular = self.tril_Minv(q)
-        assert lower_triangular.ndim == 3
-        diag_noise = eps * torch.eye(lower_triangular.size(-1), dtype=q.dtype, device=q.device)
-        Minv = lower_triangular.matmul(lower_triangular.transpose(-2, -1)) + diag_noise
-        return Minv
+    # def Minv(self, q: Tensor, eps=1e-4) -> Tensor:
+    #     """Compute the learned inverse mass matrix M^{-1}(q)
+    #         M = LU
+    #         M^{-1} = (LU)^{-1} = U^{-1} @ L^{-1}
+    #         M^{-1}(q) = [x, 0] @ [x, x]
+    #                     [x, x]   [0, x]
+    #     Args:
+    #         q: bs x D Tensor representing the position
+    #     """
+    #     assert q.ndim == 2
+    #     lower_triangular = self.tril_Minv(q)
+    #     assert lower_triangular.ndim == 3
+    #     diag_noise = eps * torch.eye(lower_triangular.size(-1), dtype=q.dtype, device=q.device)
+    #     Minv = lower_triangular.matmul(lower_triangular.transpose(-2, -1)) + diag_noise
+    #     return Minv
 
+    def Minv(self, q):
+        self.m = [1., 5.]
+
+        bs, states = q.shape
+
+        M = np.diag(np.array([self.m[0], self.m[0], self.m[1], self.m[1]]))
+        M = np.tile(M, (bs, 1, 1))
+        M = torch.tensor(M, dtype=self.Dtype, device=self.Device)
+
+        Minv = matrix_inv(M)
+        return Minv
     def phi_fun(self, x):
         bs, states_num = x.shape
         constraint_1 = x[:, 0] ** 2 + x[:, 1] ** 2 - 1 ** 2
