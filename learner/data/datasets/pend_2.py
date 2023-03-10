@@ -27,10 +27,6 @@ class Pendulum2(BaseDynamicsDataset):
 
     dataset_dir = ''
 
-    train_url = '1'
-    val_url = ''
-    test_url = ''
-
     def __init__(self, root='',download_data=False, **kwargs):
         super(Pendulum2, self).__init__()
         self.dataset_dir = osp.join(root, self.dataset_dir)

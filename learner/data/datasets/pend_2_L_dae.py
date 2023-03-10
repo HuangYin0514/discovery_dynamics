@@ -14,9 +14,6 @@ from learner.data.datasets._bases import BaseDynamicsDataset
 class Pendulum2_L_dae(BaseDynamicsDataset):
     dataset_dir = ''
 
-    train_url = 'https://drive.google.com/file/d/14qzrrWUjaagEt8591DASUazhchLTRo0e/view?usp=share_link'
-    val_url = 'https://drive.google.com/file/d/1q7Q7pZnLeouZNIKnfTRR_4VwKLOSRrd6/view?usp=share_link'
-    test_url = 'https://drive.google.com/file/d/1FcUSk61-QUuwWMTJF2kxaD2SfVz0b3EL/view?usp=share_link'
 
     def __init__(self, root='', download_data=False, **kwargs):
         super(Pendulum2_L_dae, self).__init__()

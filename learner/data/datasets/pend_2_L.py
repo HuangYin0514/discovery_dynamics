@@ -27,9 +27,6 @@ class Pendulum2_L(BaseDynamicsDataset):
 
     dataset_dir = ''
 
-    train_url = '1'
-    val_url = ''
-    test_url = ''
 
     def __init__(self, root='',download_data=True, **kwargs):
         super(Pendulum2_L, self).__init__()
