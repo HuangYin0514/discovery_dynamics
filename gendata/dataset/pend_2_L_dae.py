@@ -33,7 +33,7 @@ class Pendulum2_L_dae(BaseBodyDataset, nn.Module):
         self.__init_dynamic_variable(obj, dim)
 
     def __init_dynamic_variable(self, obj, dim):
-        self.m = [1., 5.]
+        self.m = [2., 5.]
         self.l = [1., 1.]
         self.g = 10.
 
