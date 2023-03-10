@@ -8,12 +8,25 @@
 # encoding: utf-8
 
 import torch
-from torch import nn, Tensor
+from torch import nn
 
 from learner.integrator import ODESolver
 from learner.nn import LossNN
 from learner.nn.mlp import MLP
+from learner.nn.utils_nn import Identity
 from learner.utils.common_utils import matrix_inv, enable_grad, dfx
+
+
+class PotentialEnergyCell(nn.Module):
+    def __init__(self, input_dim, hidden_dim, output_dim, num_layers=1, act=nn.Tanh):
+        super(PotentialEnergyCell, self).__init__()
+
+        self.mlp = MLP(input_dim=input_dim, hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers,
+                       act=act)
+
+    def forward(self, x):
+        y = self.mlp(x)
+        return y
 
 
 class SCLNN_pend2(LossNN):
@@ -40,6 +53,19 @@ class SCLNN_pend2(LossNN):
         self.mass_net = MLP(input_dim=2, hidden_dim=10, output_dim=2, num_layers=1,
                             act=nn.Tanh)
 
+        self.Potential1 = PotentialEnergyCell(input_dim=self.dim,
+                                              hidden_dim=50,
+                                              output_dim=1,
+                                              num_layers=1, act=Identity)
+        self.Potential2 = PotentialEnergyCell(input_dim=self.dim * 2,
+                                              hidden_dim=50,
+                                              output_dim=1,
+                                              num_layers=1, act=Identity)
+        self.co1 = torch.nn.Parameter(torch.ones(1, dtype=self.Dtype, device=self.Device) * 0.5)
+        self.co2 = torch.nn.Parameter(torch.ones(1, dtype=self.Dtype, device=self.Device) * 0.5)
+        self.mass = torch.nn.Linear(1, 1, bias=False)
+        torch.nn.init.ones_(self.mass.weight)
+
     @enable_grad
     def forward(self, t, coords):
         coords = coords.clone().detach().requires_grad_(True)
@@ -48,7 +74,21 @@ class SCLNN_pend2(LossNN):
 
         # 拟合 ------------------------------------------------------------------------------
         Minv = self.Minv(x)
-        V = self.potential_net(x)
+        V = 0.
+        for i in range(self.obj):
+            V += self.co1 * self.mass(self.Potential1(x[:, i * self.dim: (i + 1) * self.dim]))
+
+        for i in range(self.obj):
+            for j in range(i):
+                x_ij = torch.cat(
+                    [x[:, i * self.dim: (i + 1) * self.dim],
+                     x[:, j * self.dim: (j + 1) * self.dim]],
+                    dim=1)
+                x_ji = torch.cat(
+                    [x[:, j * self.dim: (j + 1) * self.dim],
+                     x[:, i * self.dim: (i + 1) * self.dim]],
+                    dim=1)
+                V += self.co2 * (0.5 * self.mass(self.Potential2(x_ij)) + 0.5 * self.mass(self.Potential2(x_ji)))
 
         # 约束 -------------------------------------------------------------------------------
         phi = self.phi_fun(x)
@@ -74,29 +114,13 @@ class SCLNN_pend2(LossNN):
         a = torch.matmul(Minv, a_R).squeeze(-1)  # (4, 1)
         return torch.cat([v, a], dim=-1)
 
-    def Minv(self, q: Tensor, eps=1e-4) -> Tensor:
-        """Compute the learned inverse mass matrix M^{-1}(q)
-            M = LU
-            M^{-1} = (LU)^{-1} = U^{-1} @ L^{-1}
-            M^{-1}(q) = [x, 0] @ [x, x]
-                        [x, x]   [0, x]
-        Args:
-            q: bs x D Tensor representing the position
-        """
-        assert q.ndim == 2
-        lower_triangular = self.tril_Minv(q)
-        assert lower_triangular.ndim == 3
-        diag_noise = eps * torch.eye(lower_triangular.size(-1), dtype=q.dtype, device=q.device)
-        Minv = lower_triangular.matmul(lower_triangular.transpose(-2, -1)) + diag_noise
-        return Minv
-
     def Minv(self, q):
         bs, states = q.shape
 
         I = torch.ones(bs, 2, dtype=self.Dtype, device=self.Device)
         Minv = self.mass_net(I)
         Minv = torch.exp(-Minv)
-        Minv = torch.cat([Minv[:, 0:1], Minv[:, 0:1],Minv[:, 1:2], Minv[:, 1:2]], dim=-1)
+        Minv = torch.cat([Minv[:, 0:1], Minv[:, 0:1], Minv[:, 1:2], Minv[:, 1:2]], dim=-1)
         Minv = torch.diag_embed(Minv)
         return Minv
 
