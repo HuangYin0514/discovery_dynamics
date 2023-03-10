@@ -7,8 +7,8 @@
 """
 import numpy as np
 import torch
+from torch import nn
 
-from learner import nn
 from learner.integrator import ODESolver
 from learner.nn import LossNN
 from learner.nn.mlp import MLP
