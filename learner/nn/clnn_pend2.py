@@ -87,6 +87,9 @@ class CLNN_pend2(LossNN):
         return torch.cat([v, a], dim=-1)
 
     def potential_net(self, x):
+        self.m = [1., 5.]
+        self.l = [1., 1.]
+        self.g = 10.
         U = 0.
         y = 0.
         for i in range(self.obj):
