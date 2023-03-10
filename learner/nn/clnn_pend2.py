@@ -91,6 +91,7 @@ class CLNN_pend2(LossNN):
         to get lower triangle of  M^{-1}(q)  = [x, 0]
                                                [x, x]
         """
+        q = torch.ones_like(q, dtype=self.Dtype, device=self.Device)
         mass_net_q = self.mass_net(q)
         res = torch.triu(mass_net_q, diagonal=1)
         res = torch.diag_embed(
