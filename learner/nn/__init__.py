@@ -20,6 +20,7 @@ from .mechanicsNN_body3 import MechanicsNN_body3
 from .mechanicsNN_pend2 import MechanicsNN_pend2
 from .modlanet_body3 import ModLaNet_body3
 from .modlanet_pend2 import ModLaNet_pend2
+from .sclnn_pend2 import SCLNN_pend2
 
 __model_factory = {
     'HNN_pend2': HNN_pend2,
@@ -39,6 +40,7 @@ __model_factory = {
     'Analytical_body3': Analytical_body3,
     'Analytical_pend2_dae': Analytical_pend2_dae,
     'CLNN_pend2':CLNN_pend2,
+    'SCLNN_pend2':SCLNN_pend2
 
 }
 
