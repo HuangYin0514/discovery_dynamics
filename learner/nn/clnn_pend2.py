@@ -46,7 +46,7 @@ class CLNN_pend2(LossNN):
         self.dim = dim
         self.dof = int(obj * dim)
 
-        self.potential_net = MLP(input_dim=obj * dim, hidden_dim=200, output_dim=1, num_layers=1,
+        self.potential_net = MLP(input_dim=obj * dim, hidden_dim=256, output_dim=1, num_layers=3,
                                  act=nn.Tanh)
 
         self.mass_net = MassNet(q_dim=q_dim, num_layers=1, hidden_dim=50)
