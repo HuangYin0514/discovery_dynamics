@@ -44,11 +44,8 @@ class SCLNN_pend2(LossNN):
         self.dim = dim
         self.dof = int(obj * dim)
 
-        self.potential_net = MLP(input_dim=obj * dim, hidden_dim=256, output_dim=1, num_layers=3,
-                                 act=nn.Tanh)
-
-        self.mass1 = torch.nn.Parameter(.1 * torch.randn(1, ))
-        self.mass2 = torch.nn.Parameter(.1 * torch.randn(1, ))
+        # self.potential_net = MLP(input_dim=obj * dim, hidden_dim=256, output_dim=1, num_layers=3,
+        #                          act=nn.Tanh)
 
         self.mass_net = MLP(input_dim=2, hidden_dim=10, output_dim=2, num_layers=1,
                             act=nn.Tanh)
