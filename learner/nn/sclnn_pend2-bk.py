@@ -17,30 +17,6 @@ from learner.nn.utils_nn import Identity
 from learner.utils.common_utils import matrix_inv, enable_grad, dfx
 
 
-class MassNet(nn.Module):
-    def __init__(self, input_dim, hidden_dim, output_dim, num_layers=1, act=nn.Tanh):
-        super(MassNet, self).__init__()
-        hidden_bock = nn.Sequential(
-            nn.Linear(input_dim, input_dim * 3),
-            nn.Tanh()
-        )
-        self.hidden_layer = nn.ModuleList([hidden_bock for _ in range(6)])
-
-        self.net = MLP(input_dim=input_dim * 6 * 3, hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers,
-                       act=nn.Tanh)
-
-    def forward(self, x):
-        input_list = []
-        scale_list = [x, 2 * x, 3 * x, 4 * x, 5 * x, 6 * x]
-        for idx in range(len(self.hidden_layer)):
-            input = scale_list[idx]
-            output = self.hidden_layer[idx](input)
-            input_list.append(output)
-        x = torch.cat(input_list, dim=-1)
-        out = self.net(x)
-        return out
-
-
 class PotentialEnergyCell(nn.Module):
     def __init__(self, input_dim, hidden_dim, output_dim, num_layers=1, act=nn.Tanh):
         super(PotentialEnergyCell, self).__init__()
@@ -71,10 +47,8 @@ class SCLNN_pend2(LossNN):
         # self.potential_net = MLP(input_dim=obj * dim, hidden_dim=256, output_dim=1, num_layers=3,
         #                          act=nn.Tanh)
 
-        self.mass_net = MassNet(input_dim=self.obj,
-                                hidden_dim=10,
-                                output_dim=self.obj,
-                                num_layers=1, act=nn.Tanh)
+        self.mass_net = MLP(input_dim=2, hidden_dim=10, output_dim=2, num_layers=1,
+                            act=nn.Tanh)
 
         self.Potential1 = PotentialEnergyCell(input_dim=self.dim,
                                               hidden_dim=20,
