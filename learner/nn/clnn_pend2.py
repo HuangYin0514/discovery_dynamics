@@ -48,9 +48,7 @@ class CLNN_pend2(LossNN):
         self.potential_net = MLP(input_dim=obj * dim, hidden_dim=200, output_dim=1, num_layers=1,
                                  act=nn.Tanh)
 
-
         self.mass_net = MassNet(q_dim=q_dim, num_layers=1, hidden_dim=50)
-
 
     @enable_grad
     def forward(self, t, coords):
@@ -95,7 +93,7 @@ class CLNN_pend2(LossNN):
         """
         mass_net_q = self.mass_net(q)
         res = torch.triu(mass_net_q, diagonal=1)
-        res = res + torch.diag_embed(
+        res = torch.diag_embed(
             torch.nn.functional.softplus(torch.diagonal(mass_net_q, dim1=-2, dim2=-1)),
             dim1=-2,
             dim2=-1,
