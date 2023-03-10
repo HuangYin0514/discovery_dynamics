@@ -8,8 +8,10 @@
 import numpy as np
 import torch
 
+from learner import nn
 from learner.integrator import ODESolver
 from learner.nn import LossNN
+from learner.nn.mlp import MLP
 from learner.utils.common_utils import matrix_inv, enable_grad, dfx
 
 
@@ -28,8 +30,8 @@ class CLNN_pend2(LossNN):
         self.dim = dim
         self.dof = int(obj * dim)
 
-        self.mass = torch.nn.Linear(1, 1, bias=False)
-
+        self.potential_net = MLP(input_dim=obj * dim, hidden_dim=100, output_dim=1, num_layers=1,
+                            act=nn.Tanh)
         self.m = [10., 10.]
         self.l = [10., 10.]
         self.g = 10.
@@ -42,7 +44,7 @@ class CLNN_pend2(LossNN):
 
         # 拟合 ------------------------------------------------------------------------------
         Minv = self.Minv(x)
-        V = self.potential(torch.cat([x, v], dim=-1))
+        V = self.potential_net(x)
 
         # 约束 -------------------------------------------------------------------------------
         phi = self.phi_fun(x)
