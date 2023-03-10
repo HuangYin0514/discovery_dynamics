@@ -9,7 +9,7 @@ import torch
 
 
 def train_collate_fn(batch):
-    x0, X, dX, t= zip(*batch)
+    x0, X, dX, t = zip(*batch)
 
     X = torch.stack(X, dim=0).float()
     t = torch.stack(t, dim=0).float()
