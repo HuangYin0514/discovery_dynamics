@@ -26,17 +26,17 @@ class MassNet(nn.Module):
         )
         self.hidden_layer = nn.ModuleList([hidden_bock for _ in range(6)])
 
-        self.net = MLP(input_dim=input_dim * 6 * 3, hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers,
+        self.net = MLP(input_dim=input_dim , hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers,
                        act=nn.Tanh)
 
     def forward(self, x):
         input_list = []
         scale_list = [x, 2 * x, 3 * x, 4 * x, 5 * x, 6 * x]
-        for idx in range(len(self.hidden_layer)):
-            input = scale_list[idx]
-            output = self.hidden_layer[idx](input)
-            input_list.append(output)
-        x = torch.cat(input_list, dim=-1)
+        # for idx in range(len(self.hidden_layer)):
+        #     input = scale_list[idx]
+        #     output = self.hidden_layer[idx](input)
+        #     input_list.append(output)
+        # x = torch.cat(input_list, dim=-1)
         out = self.net(x)
         return out
 
