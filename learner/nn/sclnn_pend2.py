@@ -53,6 +53,7 @@ class PotentialEnergyCell(nn.Module):
         # self.mlp = MLP(input_dim=input_dim, hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers,
         #                act=act)
 
+
     def forward(self, x):
         input_list = []
         scale_list = [x, 2 * x, 4 * x, 8 * x, 16 * x, 32 * x]
