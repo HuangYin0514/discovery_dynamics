@@ -20,11 +20,11 @@ from learner.utils.common_utils import matrix_inv, enable_grad, dfx
 class MassNet(nn.Module):
     def __init__(self, input_dim, hidden_dim, output_dim, num_layers=1, act=nn.Tanh):
         super(MassNet, self).__init__()
-        hidden_bock = nn.Sequential(
-            MLP(input_dim=input_dim, hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers,
-                act=nn.Tanh)
-        )
-        self.hidden_layer = nn.ModuleList([hidden_bock for _ in range(5)])
+        # hidden_bock = nn.Sequential(
+        #     MLP(input_dim=input_dim, hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers,
+        #         act=nn.Tanh)
+        # )
+        # self.hidden_layer = nn.ModuleList([hidden_bock for _ in range(5)])
 
         self.net = MLP(input_dim=input_dim, hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers,
                        act=nn.Tanh)
