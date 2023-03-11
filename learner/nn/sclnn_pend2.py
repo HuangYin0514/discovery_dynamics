@@ -41,30 +41,29 @@ class MassNet(nn.Module):
             # out = self.net(x)
         return sol
 
+
 class PotentialEnergyCell(nn.Module):
     def __init__(self, input_dim, hidden_dim, output_dim, num_layers=1, act=nn.Tanh):
         super(PotentialEnergyCell, self).__init__()
 
         hidden_bock = nn.Sequential(
-            MLP(input_dim=input_dim, hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers,
-                act=act)
+            MLP(input_dim=input_dim, hidden_dim=hidden_dim, output_dim=input_dim, num_layers=num_layers,
+                act=nn.Tanh)
         )
         self.hidden_layer = nn.ModuleList([hidden_bock for _ in range(5)])
-        # self.mlp = MLP(input_dim=input_dim, hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers,
-        #                act=act)
-
+        self.net = MLP(input_dim=input_dim * 5, hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers,
+                       act=act)
 
     def forward(self, x):
         input_list = []
         scale_list = [x, 2 * x, 4 * x, 8 * x, 16 * x, 32 * x]
-        sol = 0.
         for idx in range(len(self.hidden_layer)):
             input = scale_list[idx]
-            sol += self.hidden_layer[idx](input)
-            # input_list.append(output)
-            # x = torch.cat(input_list, dim=-1)
-            # out = self.net(x)
-        return sol
+            output = self.hidden_layer[idx](input)
+            input_list.append(output)
+        x = torch.cat(input_list, dim=-1)
+        out = self.net(x)
+        return out
 
 
 class SCLNN_pend2(LossNN):
