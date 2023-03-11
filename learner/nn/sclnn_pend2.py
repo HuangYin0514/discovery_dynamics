@@ -44,7 +44,9 @@ class PotentialEnergyCell(nn.Module):
         )
         self.hidden_layer = nn.ModuleList([hidden_bock for _ in range(5)])
         self.net = nn.Sequential(
-            nn.Linear(input_dim*6, output_dim),
+            nn.Linear(input_dim*6, input_dim*3),
+            nn.Tanh(),
+            nn.Linear(input_dim * 3, output_dim),
             act()
         )
 
