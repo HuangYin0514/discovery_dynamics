@@ -30,7 +30,7 @@ class MassNet(nn.Module):
 
     def forward(self, x):
         input_list = []
-        scale_list = [2 * x, 4 * x, 8 * x, 16 * x, 32 * x]
+        scale_list = [1 * x, 2 * x, 4 * x, 8 * x, 16 * x]
         for idx in range(len(self.hidden_layer)):
             input = scale_list[idx]
             output = self.hidden_layer[idx](input)+input
