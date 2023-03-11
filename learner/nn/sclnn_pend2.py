@@ -58,7 +58,7 @@ class PotentialEnergyCell(nn.Module):
 
     def forward(self, x):
         input_list = []
-        scale_list = [2 * x, 4 * x, 8 * x, 16 * x, 32 * x]
+        scale_list = [1 * x, 2 * x, 4 * x, 8 * x, 16 * x]
         for idx in range(len(self.hidden_layer)):
             input = scale_list[idx]
             output = self.hidden_layer[idx](input)+input
@@ -94,11 +94,11 @@ class SCLNN_pend2(LossNN):
                                 num_layers=1, act=nn.Tanh)
 
         self.Potential1 = PotentialEnergyCell(input_dim=self.dim,
-                                              hidden_dim=20,
+                                              hidden_dim=10,
                                               output_dim=1,
                                               num_layers=1, act=Identity)
         self.Potential2 = PotentialEnergyCell(input_dim=self.dim * 2,
-                                              hidden_dim=20,
+                                              hidden_dim=10,
                                               output_dim=1,
                                               num_layers=1, act=Identity)
         self.co1 = torch.nn.Parameter(torch.ones(1, dtype=self.Dtype, device=self.Device) * 0.5)
