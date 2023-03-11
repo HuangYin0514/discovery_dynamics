@@ -50,8 +50,8 @@ class PotentialEnergyCell(nn.Module):
             MLP(input_dim=input_dim, hidden_dim=hidden_dim, output_dim=input_dim, num_layers=num_layers,
                 act=nn.Tanh)
         )
-        self.hidden_layer = nn.ModuleList([hidden_bock for _ in range(5)])
-        self.net = MLP(input_dim=input_dim * 5, hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers,
+        self.hidden_layer = nn.ModuleList([hidden_bock for _ in range(6)])
+        self.net = MLP(input_dim=input_dim * 6, hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers,
                        act=act)
 
     def forward(self, x):
@@ -90,11 +90,11 @@ class SCLNN_pend2(LossNN):
                                 num_layers=1, act=nn.Tanh)
 
         self.Potential1 = PotentialEnergyCell(input_dim=self.dim,
-                                              hidden_dim=20,
+                                              hidden_dim=10,
                                               output_dim=1,
                                               num_layers=1, act=Identity)
         self.Potential2 = PotentialEnergyCell(input_dim=self.dim * 2,
-                                              hidden_dim=20,
+                                              hidden_dim=10,
                                               output_dim=1,
                                               num_layers=1, act=Identity)
         self.co1 = torch.nn.Parameter(torch.ones(1, dtype=self.Dtype, device=self.Device) * 0.5)
