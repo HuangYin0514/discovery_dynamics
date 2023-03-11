@@ -40,7 +40,7 @@ class PotentialEnergyCell(nn.Module):
 
         hidden_bock = nn.Sequential(
             nn.Linear(input_dim, input_dim),
-            nn.Tanh()
+            nn.ReLU()
         )
         self.hidden_layer = nn.ModuleList([hidden_bock for _ in range(5)])
         self.net = MLP(input_dim=input_dim * 6, hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers,
