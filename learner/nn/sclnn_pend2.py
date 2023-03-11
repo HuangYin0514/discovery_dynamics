@@ -40,13 +40,11 @@ class PotentialEnergyCell(nn.Module):
 
         hidden_bock = nn.Sequential(
             nn.Linear(input_dim, input_dim),
-            nn.ReLU()
         )
         self.hidden_layer = nn.ModuleList([hidden_bock for _ in range(5)])
         self.net = nn.Sequential(
             nn.Linear(input_dim*6, input_dim*3),
             nn.Linear(input_dim * 3, output_dim),
-            act()
         )
 
     def forward(self, x):
