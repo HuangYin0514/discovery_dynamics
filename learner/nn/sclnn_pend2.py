@@ -33,7 +33,7 @@ class MassNet(nn.Module):
         scale_list = [2 * x, 4 * x, 8 * x, 16 * x, 32 * x]
         for idx in range(len(self.hidden_layer)):
             input = scale_list[idx]
-            output = self.hidden_layer[idx](input)
+            output = self.hidden_layer[idx](input)+input
             # output = input
             input_list.append(output)
         input_list.append(x)
@@ -61,7 +61,7 @@ class PotentialEnergyCell(nn.Module):
         scale_list = [2 * x, 4 * x, 8 * x, 16 * x, 32 * x]
         for idx in range(len(self.hidden_layer)):
             input = scale_list[idx]
-            output = self.hidden_layer[idx](input)
+            output = self.hidden_layer[idx](input)+input
             # output = input
             input_list.append(output)
         input_list.append(x)
