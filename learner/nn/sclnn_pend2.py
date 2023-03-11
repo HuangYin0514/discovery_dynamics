@@ -13,7 +13,7 @@ from torch import nn
 from learner.integrator import ODESolver
 from learner.nn import LossNN
 from learner.nn.mlp import MLP
-from learner.nn.utils_nn import Identity
+from learner.nn.utils_nn import Identity, Compact_Support_Activation
 from learner.utils.common_utils import matrix_inv, enable_grad, dfx
 
 
@@ -30,16 +30,21 @@ class MassNet(nn.Module):
                        act=nn.Tanh)
 
     def forward(self, x):
-        input_list = []
-        scale_list = [x, 2 * x, 4 * x, 8 * x, 16 * x, 32 * x]
-        sol = 0.
-        for idx in range(len(self.hidden_layer)):
-            input = scale_list[idx]
-            sol += self.hidden_layer[idx](input)
-            # input_list.append(output)
-            # x = torch.cat(input_list, dim=-1)
-            # out = self.net(x)
-        return sol
+        # input_list = []
+        # scale_list = [x, 2 * x, 4 * x, 8 * x, 16 * x, 32 * x]
+        # sol = 0.
+        # for idx in range(len(self.hidden_layer)):
+        #     input = scale_list[idx]
+        #     sol += self.hidden_layer[idx](input)
+        #     # input_list.append(output)
+        #     # x = torch.cat(input_list, dim=-1)
+        #     # out = self.net(x)
+        # return sol
+
+        out = self.net(x)
+        return out
+
+
 
 
 class PotentialEnergyCell(nn.Module):
@@ -47,22 +52,24 @@ class PotentialEnergyCell(nn.Module):
         super(PotentialEnergyCell, self).__init__()
 
         hidden_bock = nn.Sequential(
-            nn.Linear(input_dim, input_dim * 3),
+            nn.Linear(input_dim, input_dim),
             nn.Tanh()
         )
-        self.hidden_layer = nn.ModuleList([hidden_bock for _ in range(6)])
-        self.net = MLP(input_dim=input_dim * 3 * 6, hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers,
+        self.hidden_layer = nn.ModuleList([hidden_bock for _ in range(5)])
+        self.net = MLP(input_dim=input_dim * 6, hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers,
                        act=act)
 
     def forward(self, x):
         input_list = []
-        scale_list = [x, 2 * x, 4 * x, 8 * x, 16 * x, 32 * x]
+        scale_list = [2 * x, 4 * x, 8 * x, 16 * x, 32 * x]
         for idx in range(len(self.hidden_layer)):
             input = scale_list[idx]
             output = self.hidden_layer[idx](input)
+            # output = input
             input_list.append(output)
-        x = torch.cat(input_list, dim=-1)
-        out = self.net(x)
+        input_list.append(x)
+        y = torch.cat(input_list, dim=-1)
+        out = self.net(y)
         return out
 
 
@@ -90,11 +97,11 @@ class SCLNN_pend2(LossNN):
                                 num_layers=1, act=nn.Tanh)
 
         self.Potential1 = PotentialEnergyCell(input_dim=self.dim,
-                                              hidden_dim=10,
+                                              hidden_dim=20,
                                               output_dim=1,
                                               num_layers=1, act=Identity)
         self.Potential2 = PotentialEnergyCell(input_dim=self.dim * 2,
-                                              hidden_dim=10,
+                                              hidden_dim=20,
                                               output_dim=1,
                                               num_layers=1, act=Identity)
         self.co1 = torch.nn.Parameter(torch.ones(1, dtype=self.Dtype, device=self.Device) * 0.5)
