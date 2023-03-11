@@ -21,24 +21,25 @@ class MassNet(nn.Module):
     def __init__(self, input_dim, hidden_dim, output_dim, num_layers=1, act=nn.Tanh):
         super(MassNet, self).__init__()
         hidden_bock = nn.Sequential(
-            nn.Linear(input_dim, input_dim * 3),
-            nn.Tanh()
+            MLP(input_dim=input_dim, hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers,
+                           act=nn.Tanh)
         )
-        self.hidden_layer = nn.ModuleList([hidden_bock for _ in range(6)])
+        self.hidden_layer = nn.ModuleList([hidden_bock for _ in range(5)])
 
-        self.net = MLP(input_dim=input_dim , hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers,
-                       act=nn.Tanh)
+        # self.net = MLP(input_dim=input_dim , hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers,
+        #                act=nn.Tanh)
 
     def forward(self, x):
         input_list = []
-        scale_list = [x, 2 * x, 3 * x, 4 * x, 5 * x, 6 * x]
-        # for idx in range(len(self.hidden_layer)):
-        #     input = scale_list[idx]
-        #     output = self.hidden_layer[idx](input)
-        #     input_list.append(output)
-        # x = torch.cat(input_list, dim=-1)
-        out = self.net(x)
-        return out
+        scale_list = [x, 2 * x, 4 * x, 8 * x, 16 * x, 32 * x]
+        sol = 0.
+        for idx in range(len(self.hidden_layer)):
+            input = scale_list[idx]
+            sol += self.hidden_layer[idx](input)
+            # input_list.append(output)
+            # x = torch.cat(input_list, dim=-1)
+            # out = self.net(x)
+        return sol
 
 
 class PotentialEnergyCell(nn.Module):
@@ -131,6 +132,7 @@ class SCLNN_pend2(LossNN):
         L = torch.matmul(phiq_Minv, phi_q.permute(0, 2, 1))
         R = torch.matmul(phiq_Minv, F.unsqueeze(-1)) + torch.matmul(phi_qq, v.unsqueeze(-1))  # (2, 1)
         lam = torch.matmul(matrix_inv(L), R)
+        # lam = torch.linalg.solve(L,R)
 
         # 求解 a ----------------------------------------------------------------
         a_R = F.unsqueeze(-1) - torch.matmul(phi_q.permute(0, 2, 1), lam)  # (4, 1)
