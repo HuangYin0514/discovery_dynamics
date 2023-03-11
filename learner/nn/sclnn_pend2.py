@@ -47,11 +47,11 @@ class PotentialEnergyCell(nn.Module):
         super(PotentialEnergyCell, self).__init__()
 
         hidden_bock = nn.Sequential(
-            MLP(input_dim=input_dim, hidden_dim=hidden_dim, output_dim=input_dim, num_layers=num_layers,
-                act=nn.Tanh)
+            nn.Linear(input_dim, input_dim * 3),
+            nn.Tanh()
         )
         self.hidden_layer = nn.ModuleList([hidden_bock for _ in range(6)])
-        self.net = MLP(input_dim=input_dim * 6, hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers,
+        self.net = MLP(input_dim=input_dim * 3 * 6, hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers,
                        act=act)
 
     def forward(self, x):
