@@ -22,16 +22,24 @@ class MassNet(nn.Module):
         super(MassNet, self).__init__()
         hidden_bock = nn.Sequential(
             MLP(input_dim=input_dim, hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers,
-                act=nn.Tanh)
+                           act=nn.Tanh)
         )
         self.hidden_layer = nn.ModuleList([hidden_bock for _ in range(5)])
 
-        self.net = MLP(input_dim=input_dim, hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers,
-                       act=nn.Tanh)
+        # self.net = MLP(input_dim=input_dim , hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers,
+        #                act=nn.Tanh)
 
     def forward(self, x):
-        y = self.net(x)
-        return y
+        input_list = []
+        scale_list = [x, 2 * x, 4 * x, 8 * x, 16 * x, 32 * x]
+        sol = 0.
+        for idx in range(len(self.hidden_layer)):
+            input = scale_list[idx]
+            sol += self.hidden_layer[idx](input)
+            # input_list.append(output)
+            # x = torch.cat(input_list, dim=-1)
+            # out = self.net(x)
+        return sol
 
 
 class PotentialEnergyCell(nn.Module):
