@@ -13,7 +13,6 @@ sys.path.append(PARENT_DIR)
 
 import learner as ln
 
-
 parser = argparse.ArgumentParser(description=None)
 # For general settings
 parser.add_argument('--taskname', default='gen_data', type=str, help='Task name')
@@ -66,6 +65,7 @@ def run():
         'device': device
     }
     gen_dataset(**arguments)
+
 
 def main():
     run()

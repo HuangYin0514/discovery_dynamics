@@ -7,7 +7,6 @@
 """
 from matplotlib import pyplot as plt
 
-
 plt.rcParams["font.family"] = "serif"
 # plt.rcParams["font.serif"]  = "Times New Roman"
 plt.rcParams["mathtext.fontset"] = "dejavuserif"
@@ -29,4 +28,4 @@ ARROW_WIDTH = 6e-3
 LINE_WIDTH = 2
 RK4 = ''
 
-result_dir='./result'
+result_dir = './result'

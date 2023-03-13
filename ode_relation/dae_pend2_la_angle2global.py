@@ -73,6 +73,8 @@ def equations(t, coords):
     vdot = Minv @ vdot_R  # (4, 1)
 
     return np.concatenate([dx.reshape(-1, 1), vdot], axis=0).reshape(-1)
+
+
 #
 #
 # def angle2cartesian(angles):

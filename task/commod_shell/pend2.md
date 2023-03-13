@@ -1,6 +1,7 @@
 # pend2 shell
 
 ## Pend2_analytical
+
 ```
 %run  ./task/train.py \
     --taskname pend_2_task_analytical \
@@ -26,6 +27,7 @@
 ```
 
 ## Baseline_pend2
+
 ```
 %run  ./task/train.py \
     --taskname pend_2_task_Baseline \
@@ -52,6 +54,7 @@
 ```
 
 ## HNN_pend2
+
 ```
 # the best choose is 1e-2 and l2_loss
 %run  ./task/train.py \
@@ -78,6 +81,7 @@
 ```
 
 ## MechanicsNN_pend2
+
 ```
 %run  ./task/train.py \
     --taskname pend_2_task_MechanicsNN_pend2 \
@@ -103,6 +107,7 @@
 ```
 
 ## ModLaNet_pend2
+
 ```
 %run  ./task/train.py \
     --taskname pend_2_task_ModLaNet_pend2 \
@@ -129,6 +134,7 @@
 ```
 
 ## LNN_pend2
+
 ```
 %run  ./task/train.py \
     --taskname pend_2_task_LNN_pend2 \
@@ -157,6 +163,7 @@
 ```
 
 ## HnnModScale_pend2
+
 ```
 %run  ./task/train.py \
     --taskname pend_2_task_HnnModScale_pend2 \

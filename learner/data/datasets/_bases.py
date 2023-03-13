@@ -67,7 +67,7 @@ class BaseDataset(abc.ABC):
             return torch.float64
 
     def get_dynamics_data_info(self, data):
-        _, num_train_traj,states, min_t, max_t, len_t = data[0]
+        _, num_train_traj, states, min_t, max_t, len_t = data[0]
         return num_train_traj, len_t, min_t, max_t, states
 
     @abc.abstractmethod
@@ -119,9 +119,8 @@ class DynamicsDataset(Dataset):
         self.dataset = dataset
         self.transform = transform
 
-        data_path,num_train_traj, states, min_t, max_t, len_t = self.dataset[0]
+        data_path, num_train_traj, states, min_t, max_t, len_t = self.dataset[0]
         self.readed_data = read_data(data_path)
-
 
     def __len__(self):
         return len(self.readed_data['x0'])

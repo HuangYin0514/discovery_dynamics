@@ -27,6 +27,7 @@ def position_err_fn(x, y):
     err = torch.stack(err_list)
     return err
 
+
 def processData(error_fun, gt_data, baseline_data, HNN_data, HnnModScale_data):
     # error_fun=position_err_fn
     # format
@@ -78,4 +79,3 @@ def plot_position_error(*args, **kwargs):
                 textcoords='offset points')
 
     fig.savefig('{}/pend2-pos-err.png'.format(result_dir))
-

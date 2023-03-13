@@ -22,7 +22,7 @@ class MassNet(nn.Module):
         super(MassNet, self).__init__()
         hidden_bock = nn.Sequential(
             MLP(input_dim=input_dim, hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers,
-                           act=nn.Tanh)
+                act=nn.Tanh)
         )
         self.hidden_layer = nn.ModuleList([hidden_bock for _ in range(5)])
 

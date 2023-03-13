@@ -21,8 +21,6 @@ m2 = 500.0
 g = 10
 
 
-
-
 def equations(t, coords):
     dx1, dx2, dy1, dy2, x1, x2, y1, y2 = coords
 

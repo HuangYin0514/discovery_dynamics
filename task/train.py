@@ -76,7 +76,7 @@ def run():
         'data_name': args.data_name,
         'obj': args.obj,
         'dim': args.dim,
-        'dataset_path': './outputs/data/dataset_'+args.data_name,
+        'dataset_path': './outputs/data/dataset_' + args.data_name,
         'num_workers': args.num_workers,
         'dtype': args.dtype,
         'device': device

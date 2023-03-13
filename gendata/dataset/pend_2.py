@@ -7,7 +7,6 @@
 """
 import numpy as np
 import torch
-from scipy.integrate import solve_ivp
 from torch import nn
 
 from gendata.dataset._base_body_dataset import BaseBodyDataset
@@ -152,7 +151,6 @@ class Pendulum2(BaseBodyDataset, nn.Module):
             x0_list.append(y0)
         x0 = np.stack(x0_list)
         return torch.tensor(x0, dtype=self.Dtype, device=self.Device)
-
 
     def ode_solve_traj(self, x0, t):
         x0 = x0.to(self.Device)

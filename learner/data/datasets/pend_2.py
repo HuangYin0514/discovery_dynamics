@@ -6,11 +6,9 @@
 @desc:
 """
 import glob
-import os
 import os.path as osp
 
 from learner.data.datasets._bases import BaseDynamicsDataset
-from learner.utils import download_file_from_google_drive
 
 
 class Pendulum2(BaseDynamicsDataset):
@@ -27,14 +25,12 @@ class Pendulum2(BaseDynamicsDataset):
 
     dataset_dir = ''
 
-    def __init__(self, root='',download_data=False, **kwargs):
+    def __init__(self, root='', download_data=False, **kwargs):
         super(Pendulum2, self).__init__()
         self.dataset_dir = osp.join(root, self.dataset_dir)
         self.train_dir = osp.join(self.dataset_dir, 'train')
         self.val_dir = osp.join(self.dataset_dir, 'val')
         self.test_dir = osp.join(self.dataset_dir, 'test')
-
-
 
         self._check_before_run()
 
@@ -77,6 +73,6 @@ class Pendulum2(BaseDynamicsDataset):
             max_t = float(dataset_info[4])
             len_t = int(dataset_info[5])
 
-            dataset.append((data_path, num_train_traj,states, min_t, max_t, len_t))
+            dataset.append((data_path, num_train_traj, states, min_t, max_t, len_t))
 
         return dataset

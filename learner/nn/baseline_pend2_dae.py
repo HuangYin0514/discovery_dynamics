@@ -9,7 +9,6 @@
 
 """
 
-import torch
 from torch import nn
 
 from ._base_module import LossNN

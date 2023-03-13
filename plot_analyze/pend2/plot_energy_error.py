@@ -73,7 +73,7 @@ def plot_energy_error(*args, **kwargs):
     ax.tick_params(axis="x", direction='in')  # , length=8)
     # ax.set_ylim(top=1e0)
     ax.set_xlim([-1, 32])
-    ax.set_yticks([0.01,0.1, 1,10,100])
+    ax.set_yticks([0.01, 0.1, 1, 10, 100])
     ax.annotate('$t$', xy=(0.98, -0.025), ha='left', va='top', xycoords='axes fraction')
     # ax.annotate('MSE', xy=(-0.07, 1.05), xytext=(-15, 2), ha='left', va='top', xycoords='axes fraction',
     #             textcoords='offset points')

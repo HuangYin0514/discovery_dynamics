@@ -58,10 +58,10 @@ def equations(t, coords):
 coords = np.array([0, 0, 0, 0, l1, 0, l1 + l2, 0, 1, 1])
 t0 = 0.
 t_end = 10.
-dt=0.005
+dt = 0.005
 _time_step = int((t_end - t0) / dt)
 t = np.linspace(t0, t_end, _time_step)
-sol = solve_ivp(equations, t_span=[0, t_end], t_eval=t, y0=coords,method='RK23')
+sol = solve_ivp(equations, t_span=[0, t_end], t_eval=t, y0=coords, method='RK23')
 
 x1 = sol.y[4]
 y1 = sol.y[5]

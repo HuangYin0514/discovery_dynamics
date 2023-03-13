@@ -12,9 +12,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 from fig_env_set import result_dir
-from plot_analyze.pend2.plot_energy_error import plot_energy_error
 from plot_analyze.pend2.plot_trajectory import plot_pend_trajectory
-from plot_position_error import plot_position_error
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 PARENT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -57,7 +55,7 @@ def main(path='./data'):
     HnnModScale_q, _ = np.split(HnnModScale_sample, 2, axis=-1)
     ModLaNet_q, _ = np.split(ModLaNet_sample, 2, axis=-1)
 
-    plot_pend_trajectory(true_q, HnnModScale_q, baseline_q, HNN_q,ModLaNet_q)
+    plot_pend_trajectory(true_q, HnnModScale_q, baseline_q, HNN_q, ModLaNet_q)
 
     # plot position error --------------------------------
     error_fun = ln.metrics.accuracy.position_MSE_err_fn

@@ -1,6 +1,7 @@
 # body3 shell
 
 ## Baseline_body3
+
 ```
 %run  ./task/train.py \
     --taskname body_3_task_Baseline \
@@ -29,6 +30,7 @@
 ```
 
 ## LNN_body3
+
 ```
 %run  ./task/train.py \
     --taskname body_3_task_LNN \
@@ -57,6 +59,7 @@
 ```
 
 ## MechanicsNN_body3
+
 ```
 %run  ./task/train.py \
     --taskname body_3_task_MechanicsNN \
@@ -85,6 +88,7 @@
 ```
 
 ## HNN_body3
+
 ```
 %run  ./task/train.py \
     --taskname body_3_task_hnn \
@@ -113,6 +117,7 @@
 ```
 
 ## ModLaNet_body3
+
 ```
 %run  ./task/train.py \
     --taskname body_3_task_ModLaNet \
@@ -141,6 +146,7 @@
 ```
 
 ## HnnModScale_body3
+
 ```
 %run  ./task/train.py \
     --taskname body_3_task_HnnModScale_body3 \

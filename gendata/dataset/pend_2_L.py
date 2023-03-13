@@ -14,7 +14,7 @@ from learner.integrator import ODESolver
 from learner.utils import dfx
 
 
-class Pendulum2_L( BaseBodyDataset,nn.Module):
+class Pendulum2_L(BaseBodyDataset, nn.Module):
     """
     Pendulum with 2 bodies
     Reference:
@@ -138,7 +138,6 @@ class Pendulum2_L( BaseBodyDataset,nn.Module):
             x0_list.append(y0)
         x0 = np.stack(x0_list)
         return torch.tensor(x0, dtype=self.Dtype, device=self.Device)
-
 
     def ode_solve_traj(self, x0, t):
         x0 = x0.to(self.Device)

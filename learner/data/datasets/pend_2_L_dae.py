@@ -14,7 +14,6 @@ from learner.data.datasets._bases import BaseDynamicsDataset
 class Pendulum2_L_dae(BaseDynamicsDataset):
     dataset_dir = ''
 
-
     def __init__(self, root='', download_data=False, **kwargs):
         super(Pendulum2_L_dae, self).__init__()
         self.dataset_dir = osp.join(root, self.dataset_dir)

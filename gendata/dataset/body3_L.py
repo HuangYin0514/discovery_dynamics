@@ -12,7 +12,7 @@ from torch import nn
 from learner.utils import dfx
 
 
-class Body3_L( nn.Module):
+class Body3_L(nn.Module):
 
     def __init__(self, train_num, test_num, obj, dim, m=None, l=None, **kwargs):
         super(Body3_L, self).__init__()

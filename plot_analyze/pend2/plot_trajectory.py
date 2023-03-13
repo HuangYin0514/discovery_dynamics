@@ -38,7 +38,6 @@ def plot_pend_trajectory(true_q, HnnModScale_q, baseline_q, HNN_q, ModLaNet_q):
     HNN_pos = polar2xy(HNN_q)
     ModLaNet_pos = polar2xy(ModLaNet_q)
 
-
     fig = plt.figure(figsize=(16, 4), dpi=DPI)
 
     tpad = 4

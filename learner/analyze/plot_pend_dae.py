@@ -8,7 +8,6 @@
 
 
 def Pendulum2_L_dae_trajectory(ax, truth_pos, net_pos, title_label, *args, **kwargs):
-
     time = min(50, len(truth_pos) - 1)
 
     ax.set_xlabel('$x$ ($m$)')

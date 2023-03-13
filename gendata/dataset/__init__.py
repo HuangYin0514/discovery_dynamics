@@ -12,7 +12,7 @@ from .pend_2_L_dae import Pendulum2_L_dae
 __dataset_factory = {
     'Pendulum2': Pendulum2,
     'Pendulum2_L': Pendulum2_L,
-    'Pendulum2_L_dae':Pendulum2_L_dae
+    'Pendulum2_L_dae': Pendulum2_L_dae
 }
 
 
