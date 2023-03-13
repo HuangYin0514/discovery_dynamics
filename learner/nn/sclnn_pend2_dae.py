@@ -109,6 +109,7 @@ class SCLNN_pend2_dae(LossNN):
         for i in range(self.obj):
             V += self.co1 * M[i, i * self.dim, i * self.dim] * self.Potential1(x[:, i * self.dim: (i + 1) * self.dim])
 
+
         for i in range(self.obj):
             for j in range(i):
                 x_ij = torch.cat(
