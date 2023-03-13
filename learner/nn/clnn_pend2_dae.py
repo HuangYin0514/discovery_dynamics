@@ -90,7 +90,6 @@ class CLNN_pend2_dae(LossNN):
         mass1 = torch.exp(-self.mass1)
         mass2 = torch.exp(-self.mass2)
         Minv = torch.cat([mass1, mass1, mass2, mass2], dim=0)
-        # Minv = torch.tensor([mass1, mass1, mass2, mass2], dtype=self.Dtype, device=self.Device)
         Minv = torch.diag(Minv)
         Minv = Minv.repeat(bs, 1, 1)
         return Minv
