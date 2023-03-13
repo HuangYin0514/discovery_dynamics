@@ -21,8 +21,10 @@ def get_dataloader(data_name, dataset_path, num_workers=0, **kwargs):
     '''dataset'''
     train_set = DynamicsDataset(dataset.train, train_transforms)
     len_train_set = len(train_set)
-    val_set = DynamicsDataset(dataset.test, val_transforms)
+    val_set = DynamicsDataset(dataset.val, val_transforms)
     len_val_set = len(val_set)
+    test_set = DynamicsDataset(dataset.test, val_transforms)
+    len_test_set = len(test_set)
 
     '''dataloader'''
     train_loader = torch.utils.data.DataLoader(
@@ -35,7 +37,7 @@ def get_dataloader(data_name, dataset_path, num_workers=0, **kwargs):
     )
 
     test_loader = torch.utils.data.DataLoader(
-        val_set, batch_size=len_val_set, shuffle=False,
+        test_set, batch_size=len_test_set, shuffle=False,
         num_workers=num_workers, collate_fn=test_collate_fn
     )
 
