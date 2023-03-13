@@ -13,8 +13,8 @@ from scipy.integrate import solve_ivp
 # constants
 l1 = 10.0
 l2 = 10.0
-m1 = 10.0
-m2 = 10.0
+m1 = 1.0
+m2 = 500.0
 g = 10.0
 
 
