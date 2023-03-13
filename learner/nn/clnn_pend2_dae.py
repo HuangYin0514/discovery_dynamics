@@ -5,7 +5,6 @@
 @time: 2023/3/10 5:14 PM
 @desc:
 """
-import numpy as np
 import torch
 from torch import nn, Tensor
 
@@ -90,7 +89,7 @@ class CLNN_pend2_dae(LossNN):
         bs, states = q.shape
         mass1 = torch.exp(-self.mass1)
         mass2 = torch.exp(-self.mass2)
-        Minv = torch.cat([mass1, mass1, mass2, mass2],dim=0)
+        Minv = torch.cat([mass1, mass1, mass2, mass2], dim=0)
         # Minv = torch.tensor([mass1, mass1, mass2, mass2], dtype=self.Dtype, device=self.Device)
         Minv = torch.diag(Minv)
         Minv = Minv.repeat(bs, 1, 1)
