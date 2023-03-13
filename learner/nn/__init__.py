@@ -40,7 +40,7 @@ __model_factory = {
     'Analytical_body3': Analytical_body3,
     'Analytical_pend2_dae': Analytical_pend2_dae,
     'CLNN_pend2_dae': CLNN_pend2_dae,
-    'SCLNN_pend2': SCLNN_pend2_dae
+    'SCLNN_pend2_dae': SCLNN_pend2_dae
 
 }
 
