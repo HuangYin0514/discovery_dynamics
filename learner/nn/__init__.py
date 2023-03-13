@@ -9,7 +9,7 @@ from .analytical_pend2_dae import Analytical_pend2_dae
 from .baseline_body3 import Baseline_body3
 from .baseline_pend2 import Baseline_pend2
 from .baseline_pend2_dae import Baseline_pend2_dae
-from .clnn_pend2 import CLNN_pend2
+from .clnn_pend2_dae import CLNN_pend2_dae
 from .hnn_body3 import HNN_body3
 from .hnn_pend2 import HNN_pend2
 from .hnnmodscale_body3 import HnnModScale_body3
@@ -20,7 +20,7 @@ from .mechanicsNN_body3 import MechanicsNN_body3
 from .mechanicsNN_pend2 import MechanicsNN_pend2
 from .modlanet_body3 import ModLaNet_body3
 from .modlanet_pend2 import ModLaNet_pend2
-from .sclnn_pend2 import SCLNN_pend2
+from .sclnn_pend2_dae import SCLNN_pend2_dae
 
 __model_factory = {
     'HNN_pend2': HNN_pend2,
@@ -39,8 +39,8 @@ __model_factory = {
     'Analytical_pend2': Analytical_pend2,
     'Analytical_body3': Analytical_body3,
     'Analytical_pend2_dae': Analytical_pend2_dae,
-    'CLNN_pend2':CLNN_pend2,
-    'SCLNN_pend2':SCLNN_pend2
+    'CLNN_pend2_dae': CLNN_pend2_dae,
+    'SCLNN_pend2': SCLNN_pend2_dae
 
 }
 

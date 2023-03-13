@@ -61,13 +61,13 @@ class PotentialEnergyCell(nn.Module):
         return out
 
 
-class SCLNN_pend2(LossNN):
+class SCLNN_pend2_dae(LossNN):
     """
     Mechanics neural networks.
     """
 
     def __init__(self, obj, dim, num_layers=None, hidden_dim=None):
-        super(SCLNN_pend2, self).__init__()
+        super(SCLNN_pend2_dae, self).__init__()
 
         q_dim = int(obj * dim)
         p_dim = int(obj * dim)
@@ -164,5 +164,5 @@ class SCLNN_pend2(LossNN):
         return phi  # (bs ,2)
 
     def integrate(self, X0, t):
-        out = ODESolver(self, X0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
+        out = ODESolver(self, X0, t, method='dopri5').permute(1, 0, 2)  # (T, D) dopri5 rk4
         return out

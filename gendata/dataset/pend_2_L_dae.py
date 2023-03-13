@@ -22,7 +22,6 @@ from learner.utils.common_utils import enable_grad, matrix_inv
 
 
 class Pendulum2_L_dae(BaseBodyDataset, nn.Module):
-
     train_url = 'https://drive.google.com/file/d/102tpedCo52CJJmY07zHPua1xypTgUVzc/view?usp=share_link'
     val_url = 'https://drive.google.com/file/d/11w4QHGgmKM48wpGrQramof7Goco5JPea/view?usp=share_link'
     test_url = 'https://drive.google.com/file/d/1ubfENwVDe43P_kSwxjQRknAlUSPZvvhb/view?usp=share_link'
@@ -69,7 +68,7 @@ class Pendulum2_L_dae(BaseBodyDataset, nn.Module):
         phi_q = torch.zeros(phi.shape[0], phi.shape[1], x.shape[1], dtype=self.Dtype, device=self.Device)  # (bs, 2, 4)
         for i in range(phi.shape[1]):
             phi_q[:, i] = dfx(phi[:, i], x)
-        phi_qq = torch.zeros(phi.shape[0], phi.shape[1], x.shape[1], dtype=self.Dtype, device=self.Device) # (bs, 2, 4)
+        phi_qq = torch.zeros(phi.shape[0], phi.shape[1], x.shape[1], dtype=self.Dtype, device=self.Device)  # (bs, 2, 4)
         for i in range(phi.shape[1]):
             phi_qq[:, i] = dfx(phi_q[:, i].unsqueeze(-2) @ v.unsqueeze(-1), x)
 
@@ -184,7 +183,7 @@ class Pendulum2_L_dae(BaseBodyDataset, nn.Module):
         # the double pendulum task. Therefore, use dopri5 to generate training data.
         if len(t) == len(self.test_t):
             # test stages
-            x = ODESolver(self, x0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
+            x = ODESolver(self, x0, t, method='dopri5').permute(1, 0, 2)  # (T, D) dopri5 rk4
         else:
             # train stages
             x = ODESolver(self, x0, t, method='dopri5').permute(1, 0, 2)  # (T, D) dopri5 rk4
