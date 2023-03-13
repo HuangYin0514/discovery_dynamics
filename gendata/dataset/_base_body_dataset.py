@@ -33,7 +33,7 @@ class BaseBodyDataset(BaseDynamicsDataset):
         for i in range(num):
             ax1.plot(E[i].cpu().detach().numpy())
 
-            visualize = True
+            visualize = False  # True False
             if visualize == True:
                 X_plot = X[i].cpu().detach().numpy()
                 x1 = X_plot[:, 0]
