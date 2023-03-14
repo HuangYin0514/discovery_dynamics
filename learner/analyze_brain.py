@@ -116,7 +116,7 @@ class AnalyzeBrain:
 
         # plot results ----------------------------------------------------------------
         save_path = osp.join('./outputs/', self.taskname, 'fig-analyze.pdf')
-        fig, ax = plt.subplots(8, 1, figsize=(6, 24), dpi=100)
+        fig, ax = plt.subplots(9, 1, figsize=(6, 24), dpi=100)
 
         plot_trajectory(self.data_name, ax[0], true_q, pred_q, 'Trajectory')
 
@@ -129,6 +129,8 @@ class AnalyzeBrain:
 
         plot_field(ax[6], t, true_q, true_p, 'True Field')
         plot_field(ax[7], t, pred_q, pred_p, 'Prediction Field')
+
+        # plot_field(ax[8], t, pred_q, pred_p, 'Prediction Field')
 
         plt.tight_layout()
         fig.savefig(save_path, bbox_inches='tight')
