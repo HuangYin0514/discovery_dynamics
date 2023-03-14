@@ -35,7 +35,7 @@ parser.add_argument('--test_num', default=0, type=int, help='the number of test 
 parser.add_argument('--num_workers', default=0, type=int, help='how many subprocesses to use for data loading. ')
 
 # net
-parser.add_argument('--net_name', default='Analytical_pend2_dae', type=str, help='Select model to train')
+parser.add_argument('--net_name', default='SCLNN_pend2_dae', type=str, help='Select model to train')
 parser.add_argument('--net_url', default='', type=str, help='Download net from Internet')
 
 # For other settings
