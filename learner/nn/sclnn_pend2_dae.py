@@ -107,7 +107,7 @@ class SCLNN_pend2_dae(LossNN):
         M = matrix_inv(Minv)
         V = 0.
         for i in range(self.obj):
-            V += self.co1 * M[i, i * self.dim, i * self.dim] * self.Potential1(x[:, i * self.dim: (i + 1) * self.dim])
+            V += self.co1 * M[:, i * self.dim, i * self.dim] * self.Potential1(x[:, i * self.dim: (i + 1) * self.dim])
 
 
         for i in range(self.obj):
@@ -120,7 +120,7 @@ class SCLNN_pend2_dae(LossNN):
                     [x[:, j * self.dim: (j + 1) * self.dim],
                      x[:, i * self.dim: (i + 1) * self.dim]],
                     dim=1)
-                V += self.co2 * 0.5 * M[0, i * self.dim, i * self.dim] * (self.Potential2(x_ij) + self.Potential2(x_ji))
+                V += self.co2 * 0.5 * M[:, i * self.dim, i * self.dim] * (self.Potential2(x_ij) + self.Potential2(x_ji))
 
         # 约束 -------------------------------------------------------------------------------
         phi = self.phi_fun(x)
