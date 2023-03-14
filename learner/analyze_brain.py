@@ -116,7 +116,7 @@ class AnalyzeBrain:
 
         # plot results ----------------------------------------------------------------
         save_path = osp.join('./outputs/', self.taskname, 'fig-analyze.pdf')
-        fig, ax = plt.subplots(9, 1, figsize=(6, 24), dpi=100)
+        fig, ax = plt.subplots(8, 1, figsize=(6, 24), dpi=100)
 
         plot_trajectory(self.data_name, ax[0], true_q, pred_q, 'Trajectory')
 
