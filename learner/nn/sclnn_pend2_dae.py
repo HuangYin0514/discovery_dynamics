@@ -95,6 +95,9 @@ class SCLNN_pend2_dae(LossNN):
         self.co1 = torch.nn.Parameter(torch.ones(1, dtype=self.Dtype, device=self.Device) * 0.5)
         self.co2 = torch.nn.Parameter(torch.ones(1, dtype=self.Dtype, device=self.Device) * 0.5)
 
+        self.mass1 = torch.nn.Parameter(.1 * torch.randn(1, ))
+        self.mass2 = torch.nn.Parameter(.1 * torch.randn(1, ))
+
     @enable_grad
     def forward(self, t, coords):
         coords = coords.clone().detach().requires_grad_(True)
@@ -149,12 +152,11 @@ class SCLNN_pend2_dae(LossNN):
 
     def Minv(self, q):
         bs, states = q.shape
-
-        I = torch.ones(bs, 2, dtype=self.Dtype, device=self.Device)
-        Minv = self.mass_net(I)
-        Minv = torch.exp(-Minv)
-        Minv = torch.cat([Minv[:, 0:1], Minv[:, 0:1], Minv[:, 1:2], Minv[:, 1:2]], dim=-1)
-        Minv = torch.diag_embed(Minv)
+        mass1 = torch.exp(-self.mass1)
+        mass2 = torch.exp(-self.mass2)
+        Minv = torch.cat([mass1, mass1, mass2, mass2], dim=0)
+        Minv = torch.diag(Minv)
+        Minv = Minv.repeat(bs, 1, 1)
         return Minv
 
     def phi_fun(self, x):
