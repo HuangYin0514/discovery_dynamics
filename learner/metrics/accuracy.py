@@ -17,7 +17,7 @@ def position_MSE_err_fn(x, y):
         x_position = x_[..., :dof]
         y_position = y_[..., :dof]
 
-        error_norm = (x_position - y_position).norm() / len(x_position)
+        error_norm = (x_position - y_position).norm()
         err_list.append(error_norm)
 
     position_err = torch.stack(err_list)
@@ -31,7 +31,7 @@ def penergy_MSE_err_fn(x, y, energy_function):
         eng_y = energy_function(y_).reshape(-1, 1)
         # eng_y = eng_y[0].repeat(len(eng_y)) # 与真实的eng对比
 
-        rel_err = (eng_x - eng_y).norm() / len(eng_x)
+        rel_err = (eng_x - eng_y).norm()
         print(eng_x.shape, eng_y.shape)
         err_list.append(rel_err)
 
