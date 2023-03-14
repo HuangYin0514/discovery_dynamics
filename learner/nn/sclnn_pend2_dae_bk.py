@@ -84,11 +84,19 @@ class SCLNN_pend2_dae(LossNN):
                                 output_dim=self.obj,
                                 num_layers=1, act=nn.Tanh)
 
+        self.Potential1 = PotentialEnergyCell(input_dim=self.dim,
+                                              hidden_dim=20,
+                                              output_dim=1,
+                                              num_layers=1, act=Identity)
+        self.Potential2 = PotentialEnergyCell(input_dim=self.dim * 2,
+                                              hidden_dim=20,
+                                              output_dim=1,
+                                              num_layers=1, act=Identity)
+        self.co1 = torch.nn.Parameter(torch.ones(1, dtype=self.Dtype, device=self.Device) * 0.5)
+        self.co2 = torch.nn.Parameter(torch.ones(1, dtype=self.Dtype, device=self.Device) * 0.5)
+
         self.mass1 = torch.nn.Parameter(.1 * torch.randn(1, ))
         self.mass2 = torch.nn.Parameter(.1 * torch.randn(1, ))
-
-        self.potential_net = MLP(input_dim=obj * dim, hidden_dim=256, output_dim=1, num_layers=3,
-                                 act=nn.Tanh)
 
     @enable_grad
     def forward(self, t, coords):
@@ -100,7 +108,23 @@ class SCLNN_pend2_dae(LossNN):
         Minv = self.Minv(x)
 
         M = matrix_inv(Minv)
-        V = self.potential_net(x)
+        V = 0.
+        for i in range(self.obj):
+            V += self.co1 * M[:, i * self.dim, i * self.dim].reshape(-1, 1) * self.Potential1(
+                x[:, i * self.dim: (i + 1) * self.dim])
+
+        for i in range(self.obj):
+            for j in range(i):
+                x_ij = torch.cat(
+                    [x[:, i * self.dim: (i + 1) * self.dim],
+                     x[:, j * self.dim: (j + 1) * self.dim]],
+                    dim=1)
+                x_ji = torch.cat(
+                    [x[:, j * self.dim: (j + 1) * self.dim],
+                     x[:, i * self.dim: (i + 1) * self.dim]],
+                    dim=1)
+                V += self.co2 * 0.5 * M[:, i * self.dim, i * self.dim].reshape(-1, 1) * (
+                            self.Potential2(x_ij) + self.Potential2(x_ji))
 
         # 约束 -------------------------------------------------------------------------------
         phi = self.phi_fun(x)
