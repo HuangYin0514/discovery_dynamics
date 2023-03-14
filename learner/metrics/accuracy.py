@@ -84,8 +84,6 @@ def accuracy_fn(output_traj, target_traj, energy_function):
     pos_err = position_MSE_err_fn(output_traj, target_traj)
     eng_err = penergy_MSE_err_fn(output_traj, target_traj, energy_function)
 
-    print(pos_err)
-    print(eng_err)
     # pos_err = position_BE_err_fn(output_traj, target_traj)
     # eng_err = energy_BE_err_fn(output_traj, target_traj, energy_function)
     return pos_err, eng_err
