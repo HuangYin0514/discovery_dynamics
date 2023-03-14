@@ -13,7 +13,7 @@ from .torchdiffeq import odeint_adjoint as odeint
 # from .torchdiffeq import odeint
 
 
-def ODESolver(func, y0, t, method='dopri5', rtol=1e-7, atol=1e-9, **kwargs):
+def ODESolver(func, y0, t, method='dopri5', rtol=1e-4, atol=1e-9, **kwargs):
     '''
     y0  # (bs, D)
     t   # (T,)
