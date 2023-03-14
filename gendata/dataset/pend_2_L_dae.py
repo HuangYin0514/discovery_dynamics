@@ -22,9 +22,9 @@ from learner.utils.common_utils import enable_grad, matrix_inv
 
 
 class Pendulum2_L_dae(BaseBodyDataset, nn.Module):
-    train_url = 'https://drive.google.com/file/d/1psoqdfnmtQJselOdSjCj6CVHi0wMVyoi/view?usp=share_link'
-    val_url = 'https://drive.google.com/file/d/1hOEAXtDiVKHb_MJwqRan8eE6r3eOxJgl/view?usp=share_link'
-    test_url = 'https://drive.google.com/file/d/1sjWsYnTIHK7VSK76afjvhaspv1XHXp4v/view?usp=share_link'
+    train_url = 'https://drive.google.com/file/d/1S60qr_KRM94GlqNvRIxy_fb8Mo_Vw5X4/view?usp=share_link'
+    val_url = 'https://drive.google.com/file/d/1QvSjjn0BwP1e9Twl7RGUHe6Q7WAXMbaH/view?usp=share_link'
+    test_url = 'https://drive.google.com/file/d/1m5oDBtjNJF-fBa4AHAKSjFVkv2f3_Rlx/view?usp=share_link'
 
     def __init__(self, obj, dim, m=None, l=None, **kwargs):
         super(Pendulum2_L_dae, self).__init__()
