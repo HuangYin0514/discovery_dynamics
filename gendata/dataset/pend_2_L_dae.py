@@ -42,12 +42,12 @@ class Pendulum2_L_dae(BaseBodyDataset, nn.Module):
 
         t0 = 0.
 
-        t_end = 6.0
+        t_end = 1.0
         dt = 0.01
         _time_step = int((t_end - t0) / dt)
         self.t = torch.linspace(t0, t_end, _time_step)
 
-        t_end = 10.0
+        t_end = 2.0
         dt = 0.01
         _time_step = int((t_end - t0) / dt)
         self.test_t = torch.linspace(t0, t_end, _time_step)
@@ -183,8 +183,8 @@ class Pendulum2_L_dae(BaseBodyDataset, nn.Module):
         # the double pendulum task. Therefore, use dopri5 to generate training data.
         if len(t) == len(self.test_t):
             # test stages
-            x = ODESolver(self, x0, t, method='dopri5').permute(1, 0, 2)  # (T, D) dopri5 rk4
+            x = ODESolver(self, x0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
         else:
             # train stages
-            x = ODESolver(self, x0, t, method='dopri5').permute(1, 0, 2)  # (T, D) dopri5 rk4
+            x = ODESolver(self, x0, t, method='rk4').permute(1, 0, 2)  # (T, D) dopri5 rk4
         return x
