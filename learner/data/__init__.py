@@ -26,7 +26,6 @@ def get_dataloader(data_name, dataset_path, num_workers=0, **kwargs):
     test_set = DynamicsDataset(dataset.test, val_transforms)
     len_test_set = len(test_set)
 
-    print(len_train_set, len_val_set, len_test_set)
     '''dataloader'''
     train_loader = torch.utils.data.DataLoader(
         train_set, batch_size=len_train_set, shuffle=True,
