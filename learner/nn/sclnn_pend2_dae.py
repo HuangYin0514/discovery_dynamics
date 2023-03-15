@@ -2,63 +2,16 @@
 """
 @author: Yin Huang
 @contact: hy1071324110@gmail.com
-@time: 2023/3/11 2:24 AM
+@time: 2023/3/10 5:14 PM
 @desc:
 """
-# encoding: utf-8
-
 import torch
-from torch import nn
+from torch import nn, Tensor
 
 from learner.integrator import ODESolver
 from learner.nn import LossNN
 from learner.nn.mlp import MLP
-from learner.nn.utils_nn import Identity
 from learner.utils.common_utils import matrix_inv, enable_grad, dfx
-
-
-class MassNet(nn.Module):
-    def __init__(self, input_dim, hidden_dim, output_dim, num_layers=1, act=nn.Tanh):
-        super(MassNet, self).__init__()
-        # hidden_bock = nn.Sequential(
-        #     MLP(input_dim=input_dim, hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers,
-        #         act=nn.Tanh)
-        # )
-        # self.hidden_layer = nn.ModuleList([hidden_bock for _ in range(5)])
-
-        self.net = MLP(input_dim=input_dim, hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers,
-                       act=nn.Tanh)
-
-    def forward(self, x):
-        y = self.net(x)
-        return y
-
-
-class PotentialEnergyCell(nn.Module):
-    def __init__(self, input_dim, hidden_dim, output_dim, num_layers=1, act=nn.Tanh):
-        super(PotentialEnergyCell, self).__init__()
-
-        hidden_bock = nn.Sequential(
-            nn.Linear(input_dim, input_dim),
-        )
-        self.hidden_layer = nn.ModuleList([hidden_bock for _ in range(5)])
-        self.net = nn.Sequential(
-            nn.Linear(input_dim * 6, input_dim * 3),
-            nn.Linear(input_dim * 3, output_dim),
-        )
-
-    def forward(self, x):
-        input_list = []
-        scale_list = [1 * x, 2 * x, 3 * x, 4 * x, 5 * x]
-        for idx in range(len(self.hidden_layer)):
-            input = scale_list[idx]
-            output = self.hidden_layer[idx](input)
-            # output = input
-            input_list.append(output)
-        input_list.append(x)
-        y = torch.cat(input_list, dim=-1)
-        out = self.net(y)
-        return out
 
 
 class SCLNN_pend2_dae(LossNN):
@@ -76,19 +29,11 @@ class SCLNN_pend2_dae(LossNN):
         self.dim = dim
         self.dof = int(obj * dim)
 
-        # self.potential_net = MLP(input_dim=obj * dim, hidden_dim=256, output_dim=1, num_layers=3,
-        #                          act=nn.Tanh)
-
-        self.mass_net = MassNet(input_dim=self.obj,
-                                hidden_dim=10,
-                                output_dim=self.obj,
-                                num_layers=1, act=nn.Tanh)
+        self.potential_net = MLP(input_dim=obj * dim, hidden_dim=256, output_dim=1, num_layers=3,
+                                 act=nn.Tanh)
 
         self.mass1 = torch.nn.Parameter(.1 * torch.randn(1, ))
         self.mass2 = torch.nn.Parameter(.1 * torch.randn(1, ))
-
-        self.potential_net = MLP(input_dim=obj * dim, hidden_dim=256, output_dim=1, num_layers=3,
-                                 act=nn.Tanh)
 
     @enable_grad
     def forward(self, t, coords):
@@ -98,8 +43,6 @@ class SCLNN_pend2_dae(LossNN):
 
         # 拟合 ------------------------------------------------------------------------------
         Minv = self.Minv(x)
-
-        M = matrix_inv(Minv)
         V = self.potential_net(x)
 
         # 约束 -------------------------------------------------------------------------------
@@ -120,7 +63,6 @@ class SCLNN_pend2_dae(LossNN):
         L = torch.matmul(phiq_Minv, phi_q.permute(0, 2, 1))
         R = torch.matmul(phiq_Minv, F.unsqueeze(-1)) + torch.matmul(phi_qq, v.unsqueeze(-1))  # (2, 1)
         lam = torch.matmul(matrix_inv(L), R)
-        # lam = torch.linalg.solve(L,R)
 
         # 求解 a ----------------------------------------------------------------
         a_R = F.unsqueeze(-1) - torch.matmul(phi_q.permute(0, 2, 1), lam)  # (4, 1)
